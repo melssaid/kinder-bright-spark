@@ -2,13 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Smile, AlertCircle } from "lucide-react";
 import { Child } from "@/data/mockData";
+import { useI18n } from "@/i18n";
 
 const moodEmoji: Record<string, string> = {
-  happy: "😊",
-  focused: "🎯",
-  frustrated: "😤",
-  calm: "😌",
-  anxious: "😰",
+  happy: "😊", focused: "🎯", frustrated: "😤", calm: "😌", anxious: "😰",
 };
 
 const moodColor: Record<string, string> = {
@@ -20,6 +17,7 @@ const moodColor: Record<string, string> = {
 };
 
 export function DailyMoodScale({ child }: { child: Child }) {
+  const { t } = useI18n();
   const hasShift = child.moodEntries.some(e => e.mood === "frustrated" || e.mood === "anxious");
 
   return (
@@ -27,10 +25,10 @@ export function DailyMoodScale({ child }: { child: Child }) {
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
           <Smile className="h-4 w-4 text-primary" />
-          Daily Mood Scale
+          {t("mood.title")}
           {hasShift && (
-            <Badge variant="destructive" className="text-[10px] px-1.5 py-0 ml-auto">
-              <AlertCircle className="h-3 w-3 mr-1" /> Shift Detected
+            <Badge variant="destructive" className="text-[10px] px-1.5 py-0 ms-auto">
+              <AlertCircle className="h-3 w-3 me-1" /> {t("mood.shiftDetected")}
             </Badge>
           )}
         </CardTitle>
@@ -41,7 +39,7 @@ export function DailyMoodScale({ child }: { child: Child }) {
             <div key={i} className={`flex items-center gap-3 p-2 rounded-lg border ${moodColor[entry.mood]}`}>
               <span className="text-xl">{moodEmoji[entry.mood]}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium capitalize">{entry.mood}</p>
+                <p className="text-xs font-medium">{t(`mood.${entry.mood}`)}</p>
                 <p className="text-xs text-muted-foreground truncate">{entry.note}</p>
               </div>
               <span className="text-[10px] text-muted-foreground whitespace-nowrap">{entry.time}</span>

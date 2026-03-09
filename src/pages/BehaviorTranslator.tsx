@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, ArrowRight, FileText, CheckCircle } from "lucide-react";
 import { children, Child } from "@/data/mockData";
+import { useI18n } from "@/i18n";
 
 const BehaviorTranslator = () => {
   const [selectedChild, setSelectedChild] = useState<Child>(children[0]);
   const [teacherText, setTeacherText] = useState(selectedChild.teacherNotes);
   const [translated, setTranslated] = useState(false);
+  const { t } = useI18n();
 
   const handleChildChange = (child: Child) => {
     setSelectedChild(child);
@@ -25,9 +27,9 @@ const BehaviorTranslator = () => {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
               <MessageSquare className="h-7 w-7 text-primary" />
-              Behavior Translator
+              {t("behavior.title")}
             </h1>
-            <p className="text-muted-foreground text-sm">Convert teacher notes into empathetic parent messages</p>
+            <p className="text-muted-foreground text-sm">{t("behavior.subtitle")}</p>
           </div>
           <ChildSelector selectedChild={selectedChild} onSelect={handleChildChange} />
         </div>
@@ -37,7 +39,7 @@ const BehaviorTranslator = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <FileText className="h-4 w-4 text-muted-foreground" />
-                Teacher's Raw Notes
+                {t("behavior.teacherNotes")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -45,10 +47,10 @@ const BehaviorTranslator = () => {
                 value={teacherText}
                 onChange={(e) => { setTeacherText(e.target.value); setTranslated(false); }}
                 className="min-h-[200px] text-sm"
-                placeholder="Enter your observations..."
+                placeholder={t("behavior.placeholder")}
               />
               <Button onClick={() => setTranslated(true)} className="mt-3 w-full gap-2">
-                <ArrowRight className="h-4 w-4" /> Translate for Parents
+                <ArrowRight className="h-4 w-4" /> {t("behavior.translate")}
               </Button>
             </CardContent>
           </Card>
@@ -57,7 +59,7 @@ const BehaviorTranslator = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-primary" />
-                Parent-Friendly Message
+                {t("behavior.parentMessage")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -69,7 +71,7 @@ const BehaviorTranslator = () => {
                   <div>
                     <h4 className="text-sm font-semibold flex items-center gap-2 mb-2">
                       <CheckCircle className="h-4 w-4 text-success" />
-                      3-Day Home Action Plan
+                      {t("behavior.actionPlan")}
                     </h4>
                     <div className="space-y-2">
                       {selectedChild.actionPlan.map((action, i) => (
@@ -83,7 +85,7 @@ const BehaviorTranslator = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center h-[200px] text-muted-foreground">
                   <MessageSquare className="h-10 w-10 mb-2 opacity-30" />
-                  <p className="text-sm">Click "Translate" to generate parent message</p>
+                  <p className="text-sm">{t("behavior.clickTranslate")}</p>
                 </div>
               )}
             </CardContent>

@@ -1,13 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, Palette, Calculator, Dumbbell, Users, BookOpen } from "lucide-react";
 import { Child } from "@/data/mockData";
+import { useI18n } from "@/i18n";
 
 const categoryIcon: Record<string, React.ElementType> = {
-  artistic: Palette,
-  logical: Calculator,
-  motor: Dumbbell,
-  social: Users,
-  linguistic: BookOpen,
+  artistic: Palette, logical: Calculator, motor: Dumbbell, social: Users, linguistic: BookOpen,
 };
 
 const categoryColor: Record<string, string> = {
@@ -19,12 +16,14 @@ const categoryColor: Record<string, string> = {
 };
 
 export function EarlyTalentDiscoverer({ child }: { child: Child }) {
+  const { t } = useI18n();
+
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
           <Star className="h-4 w-4 text-primary" />
-          Early Talent Discoverer
+          {t("talent.title")}
         </CardTitle>
       </CardHeader>
       <CardContent>

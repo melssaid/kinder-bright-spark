@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Apple, Utensils, Lightbulb } from "lucide-react";
 import { children, Child } from "@/data/mockData";
+import { useI18n } from "@/i18n";
 
 const NutritionPage = () => {
   const [selectedChild, setSelectedChild] = useState<Child>(children[0]);
+  const { t } = useI18n();
   const totalCalories = selectedChild.nutrition.reduce((s, m) => s + m.calories, 0);
   const totalProtein = selectedChild.nutrition.reduce((s, m) => s + m.protein, 0);
   const totalCarbs = selectedChild.nutrition.reduce((s, m) => s + m.carbs, 0);
@@ -20,19 +22,19 @@ const NutritionPage = () => {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
               <Apple className="h-7 w-7 text-primary" />
-              Smart Nutrition Assistant
+              {t("nutrition.fullTitle")}
             </h1>
-            <p className="text-muted-foreground text-sm">Lunchbox tracker & AI meal suggestions</p>
+            <p className="text-muted-foreground text-sm">{t("nutrition.fullSubtitle")}</p>
           </div>
           <ChildSelector selectedChild={selectedChild} onSelect={setSelectedChild} />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Calories", value: `${totalCalories} kcal`, target: 900, current: totalCalories },
-            { label: "Protein", value: `${totalProtein}g`, target: 40, current: totalProtein },
-            { label: "Carbs", value: `${totalCarbs}g`, target: 120, current: totalCarbs },
-            { label: "Vitamins", value: `${totalVitamins}%`, target: 100, current: totalVitamins },
+            { label: t("nutrition.calories"), value: `${totalCalories} kcal`, target: 900, current: totalCalories },
+            { label: t("nutrition.protein"), value: `${totalProtein}g`, target: 40, current: totalProtein },
+            { label: t("nutrition.carbs"), value: `${totalCarbs}g`, target: 120, current: totalCarbs },
+            { label: t("nutrition.vitamins"), value: `${totalVitamins}%`, target: 100, current: totalVitamins },
           ].map((stat, i) => (
             <Card key={i}>
               <CardContent className="pt-4 pb-3 space-y-2">
@@ -49,7 +51,7 @@ const NutritionPage = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Utensils className="h-4 w-4 text-primary" />
-                Today's Meals
+                {t("nutrition.todayMeals")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -62,15 +64,15 @@ const NutritionPage = () => {
                   <p className="text-xs text-muted-foreground">{meal.items.join(" • ")}</p>
                   <div className="grid grid-cols-3 gap-3 text-xs">
                     <div>
-                      <div className="flex justify-between mb-0.5"><span>Protein</span><span>{meal.protein}g</span></div>
+                      <div className="flex justify-between mb-0.5"><span>{t("nutrition.protein")}</span><span>{meal.protein}g</span></div>
                       <Progress value={meal.protein * 3} className="h-1" />
                     </div>
                     <div>
-                      <div className="flex justify-between mb-0.5"><span>Carbs</span><span>{meal.carbs}g</span></div>
+                      <div className="flex justify-between mb-0.5"><span>{t("nutrition.carbs")}</span><span>{meal.carbs}g</span></div>
                       <Progress value={meal.carbs} className="h-1" />
                     </div>
                     <div>
-                      <div className="flex justify-between mb-0.5"><span>Vitamins</span><span>{meal.vitamins}%</span></div>
+                      <div className="flex justify-between mb-0.5"><span>{t("nutrition.vitamins")}</span><span>{meal.vitamins}%</span></div>
                       <Progress value={meal.vitamins} className="h-1" />
                     </div>
                   </div>
@@ -83,7 +85,7 @@ const NutritionPage = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Lightbulb className="h-4 w-4 text-warning" />
-                AI Suggested Meals
+                {t("nutrition.aiSuggestions")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -93,9 +95,7 @@ const NutritionPage = () => {
                   <span className="text-sm">{meal}</span>
                 </div>
               ))}
-              <p className="text-xs text-muted-foreground italic mt-2">
-                Suggestions are based on nutritional gaps and age-appropriate dietary guidelines.
-              </p>
+              <p className="text-xs text-muted-foreground italic mt-2">{t("nutrition.suggestionsNote")}</p>
             </CardContent>
           </Card>
         </div>

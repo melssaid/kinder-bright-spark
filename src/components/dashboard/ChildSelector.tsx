@@ -1,5 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { children, Child } from "@/data/mockData";
+import { useI18n } from "@/i18n";
 
 interface ChildSelectorProps {
   selectedChild: Child;
@@ -7,6 +8,8 @@ interface ChildSelectorProps {
 }
 
 export function ChildSelector({ selectedChild, onSelect }: ChildSelectorProps) {
+  const { t } = useI18n();
+
   return (
     <div className="flex items-center gap-3">
       <span className="text-3xl">{selectedChild.avatar}</span>
@@ -21,12 +24,12 @@ export function ChildSelector({ selectedChild, onSelect }: ChildSelectorProps) {
           <SelectContent>
             {children.map(child => (
               <SelectItem key={child.id} value={child.id}>
-                {child.avatar} {child.name} (Age {child.age})
+                {child.avatar} {child.name} ({t("dashboard.age")} {child.age})
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground mt-1">Age {selectedChild.age} years</p>
+        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.age")} {selectedChild.age} {t("dashboard.years")}</p>
       </div>
     </div>
   );

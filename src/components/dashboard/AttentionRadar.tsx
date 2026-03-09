@@ -2,8 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Brain, AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { Child } from "@/data/mockData";
+import { useI18n } from "@/i18n";
 
 export function AttentionRadar({ child }: { child: Child }) {
+  const { t } = useI18n();
   const score = child.attentionScore;
   const circumference = 2 * Math.PI * 45;
   const offset = circumference - (score / 100) * circumference;
@@ -14,12 +16,12 @@ export function AttentionRadar({ child }: { child: Child }) {
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
           <Brain className="h-4 w-4 text-primary" />
-          ADHD & Attention Radar
+          {t("attention.title")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-4">
-          <div className="relative">
+          <div className="relative shrink-0">
             <svg width="100" height="100" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="45" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
               <circle cx="50" cy="50" r="45" fill="none" stroke={color} strokeWidth="8"
@@ -48,7 +50,7 @@ export function AttentionRadar({ child }: { child: Child }) {
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-semibold">{rec.title}</span>
                 <Badge variant={rec.priority === "high" ? "destructive" : rec.priority === "medium" ? "secondary" : "outline"} className="text-[10px] px-1.5 py-0">
-                  {rec.priority}
+                  {t(`priority.${rec.priority}`)}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">{rec.description}</p>
