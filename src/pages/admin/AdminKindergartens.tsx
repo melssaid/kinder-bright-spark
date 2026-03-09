@@ -73,7 +73,7 @@ const AdminKindergartens = () => {
                 onKeyDown={(e) => e.key === "Enter" && handleAdd()}
               />
               <Button onClick={handleAdd} disabled={loading || !newName.trim()}>
-                <Plus className="h-4 w-4 mr-1" />
+                <Plus className="h-4 w-4 me-1" />
                 {locale === "ar" ? "إضافة" : "Add"}
               </Button>
             </div>

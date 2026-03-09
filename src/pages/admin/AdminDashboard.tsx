@@ -230,10 +230,10 @@ const AdminDashboard = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-start py-2 px-3 font-semibold">{isAr ? "الروضة" : "Kindergarten"}</th>
-                      <th className="text-center py-2 px-3 font-semibold">{isAr ? "المعلمات" : "Teachers"}</th>
-                      <th className="text-center py-2 px-3 font-semibold">{isAr ? "الطلاب" : "Students"}</th>
-                      <th className="text-center py-2 px-3 font-semibold">{isAr ? "التقييمات" : "Assessments"}</th>
+                       <th className="text-start py-2 px-3 font-semibold rtl:text-right">{isAr ? "الروضة" : "Kindergarten"}</th>
+                       <th className="text-center py-2 px-3 font-semibold">{isAr ? "المعلمات" : "Teachers"}</th>
+                       <th className="text-center py-2 px-3 font-semibold">{isAr ? "الطلاب" : "Students"}</th>
+                       <th className="text-center py-2 px-3 font-semibold">{isAr ? "التقييمات" : "Assessments"}</th>
                     </tr>
                   </thead>
                   <tbody>
