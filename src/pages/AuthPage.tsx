@@ -117,7 +117,7 @@ const AuthPage = () => {
                 <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                {loading && <Loader2 className="h-4 w-4 animate-spin me-2" />}
                 {isSignUp ? t("auth.signup") : t("auth.login")}
               </Button>
             </form>

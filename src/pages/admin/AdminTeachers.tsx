@@ -115,7 +115,7 @@ const AdminTeachers = () => {
               </SelectContent>
             </Select>
             <Button onClick={generateCode} disabled={!selectedKg || generating} className="w-full">
-              <KeyRound className="h-4 w-4 mr-2" />
+              <KeyRound className="h-4 w-4 me-2" />
               {locale === "ar" ? "توليد كود دعوة" : "Generate Invite Code"}
             </Button>
           </CardContent>

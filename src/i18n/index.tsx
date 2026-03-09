@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { surveyTranslations } from "@/data/surveyQuestions";
 
 export type Locale = "en" | "ar";
@@ -115,6 +115,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>("en");
   const t = useCallback((key: string) => translations[key]?.[locale] ?? key, [locale]);
   const dir = locale === "ar" ? "rtl" : "ltr";
+
+  // Sync dir and lang on <html> element for global RTL support
+  useEffect(() => {
+    document.documentElement.dir = dir;
+    document.documentElement.lang = locale;
+  }, [dir, locale]);
 
   return (
     <I18nContext.Provider value={{ locale, setLocale, t, dir }}>

@@ -34,7 +34,7 @@ const AttendancePage = () => {
           />
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-[220px] justify-start text-left font-normal gap-2")}>
+              <Button variant="outline" className={cn("w-[220px] justify-start text-start font-normal gap-2")}>
                 <CalendarIcon className="h-4 w-4" />
                 {format(selectedDate, "PPP", { locale: dateLocale })}
               </Button>

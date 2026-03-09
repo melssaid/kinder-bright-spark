@@ -164,7 +164,7 @@ const Index = () => {
                           </Badge>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         <p className="text-xs text-muted-foreground">{new Date(latest!.date).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}</p>
                       </div>
                     </div>
