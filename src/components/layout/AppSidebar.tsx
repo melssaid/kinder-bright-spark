@@ -2,7 +2,6 @@ import { LayoutDashboard, ClipboardList, History, Users, CalendarCheck, Settings
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useI18n } from "@/i18n";
-const locale = "en"; // will be overridden
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
