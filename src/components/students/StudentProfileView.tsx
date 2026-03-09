@@ -161,7 +161,7 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
         <Card>
           <CardContent className="pt-4 pb-3 text-center">
             <Sparkles className="h-6 w-6 mx-auto text-warning mb-1" />
-            <p className="text-2xl font-bold">{analysis ? Math.round(Object.values(analysis.scores || {}).reduce((a: number, b: any) => a + (typeof b === "number" ? b : 0), 0) / Object.keys(analysis.scores || {}).length) : 0}%</p>
+            <p className="text-2xl font-bold">{analysis ? Math.round((Object.values(analysis.scores || {}) as number[]).reduce((a, b) => a + (typeof b === "number" ? b : 0), 0) / Math.max(Object.keys(analysis.scores || {}).length, 1)) : 0}%</p>
             <p className="text-[10px] text-muted-foreground">{isAr ? "المعدل العام" : "Overall"}</p>
           </CardContent>
         </Card>
