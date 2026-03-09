@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UserPlus, Trash2, AlertCircle, Sparkles } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
-import { DbStudent, addStudent, removeStudent } from "@/lib/database";
+import { DbStudent, addStudent, removeStudent, addSurvey, updateSurveyAnalysis, setAttendance } from "@/lib/database";
+import { generateDemoSurveyAnswers, generateDemoAnalysis, generateDemoAttendanceDates } from "@/lib/demoData";
 import { toast } from "sonner";
 
 interface StudentManagerProps {
@@ -37,12 +38,34 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
   const handleSeedDemo = async () => {
     if (!user || students.length > 0) return;
     setSeeding(true);
-    for (const s of demoStudents) {
-      await addStudent(s, user.id);
+    try {
+      for (const s of demoStudents) {
+        const student = await addStudent(s, user.id);
+        if (!student) continue;
+
+        // Add 2 surveys with AI analysis for each student
+        for (let i = 0; i < 2; i++) {
+          const answers = generateDemoSurveyAnswers();
+          const survey = await addSurvey({ student_id: student.id, teacher_id: user.id, answers });
+          if (survey) {
+            const analysis = generateDemoAnalysis(student.name, answers);
+            await updateSurveyAnalysis(survey.id, analysis);
+          }
+        }
+
+        // Add attendance records
+        const attendanceRecords = generateDemoAttendanceDates();
+        for (const rec of attendanceRecords) {
+          await setAttendance(student.id, rec.date, rec.status, user.id);
+        }
+      }
+      onStudentsChange();
+      toast.success(locale === "ar" ? "تمت إضافة بيانات تجريبية شاملة مع استقصاءات وحضور 🎉" : "Full demo data added with surveys & attendance 🎉");
+    } catch (e) {
+      console.error("Seed error:", e);
+      toast.error(locale === "ar" ? "خطأ في إضافة البيانات" : "Error adding demo data");
     }
-    onStudentsChange();
     setSeeding(false);
-    toast.success(locale === "ar" ? "تمت إضافة بيانات تجريبية 🎉" : "Demo data added 🎉");
   };
 
   const handleAdd = async () => {
@@ -105,7 +128,7 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
             <p className="text-sm text-muted-foreground">{t("students.noStudents")}</p>
             <Button variant="outline" size="sm" onClick={handleSeedDemo} disabled={seeding} className="gap-2">
               <Sparkles className="h-4 w-4" />
-              {seeding ? (locale === "ar" ? "جاري الإضافة..." : "Adding...") : (locale === "ar" ? "✨ إضافة بيانات تجريبية" : "✨ Add Demo Data")}
+              {seeding ? (locale === "ar" ? "جاري الإضافة... ⏳" : "Adding...") : (locale === "ar" ? "✨ إضافة بيانات تجريبية شاملة" : "✨ Add Full Demo Data")}
             </Button>
           </div>
         ) : (
