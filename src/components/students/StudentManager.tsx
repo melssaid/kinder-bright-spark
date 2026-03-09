@@ -23,6 +23,27 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
   const [name, setName] = useState("");
   const [age, setAge] = useState("5");
   const [gender, setGender] = useState<"male" | "female">("male");
+  const [seeding, setSeeding] = useState(false);
+
+  const demoStudents = [
+    { name: locale === "ar" ? "أحمد محمد" : "Ahmad Mohammed", age: 5, gender: "male" },
+    { name: locale === "ar" ? "فاطمة علي" : "Fatima Ali", age: 4, gender: "female" },
+    { name: locale === "ar" ? "يوسف خالد" : "Yousef Khaled", age: 6, gender: "male" },
+    { name: locale === "ar" ? "نورة سعد" : "Noura Saad", age: 5, gender: "female" },
+    { name: locale === "ar" ? "عمر حسن" : "Omar Hassan", age: 4, gender: "male" },
+    { name: locale === "ar" ? "ريم عبدالله" : "Reem Abdullah", age: 5, gender: "female" },
+  ];
+
+  const handleSeedDemo = async () => {
+    if (!user || students.length > 0) return;
+    setSeeding(true);
+    for (const s of demoStudents) {
+      await addStudent(s, user.id);
+    }
+    onStudentsChange();
+    setSeeding(false);
+    toast.success(locale === "ar" ? "تمت إضافة بيانات تجريبية 🎉" : "Demo data added 🎉");
+  };
 
   const handleAdd = async () => {
     if (!name.trim() || !user) return;
