@@ -64,42 +64,50 @@ const Index = () => {
         />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-4 pb-3 flex items-center gap-3">
-              <Users className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-2xl font-bold">{students.length}</p>
-                <p className="text-xs text-muted-foreground">{t("students.title")}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3 flex items-center gap-3">
-              <ClipboardList className="h-8 w-8 text-info" />
-              <div>
-                <p className="text-2xl font-bold">{surveys.length}</p>
-                <p className="text-xs text-muted-foreground">{locale === "ar" ? "استقصاء" : "Surveys"}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3 flex items-center gap-3">
-              <Brain className="h-8 w-8 text-success" />
-              <div>
-                <p className="text-2xl font-bold">{analyzedSurveys.length}</p>
-                <p className="text-xs text-muted-foreground">{locale === "ar" ? "تحليلات" : "Analyses"}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3 flex items-center gap-3">
-              <TrendingUp className="h-8 w-8 text-warning" />
-              <div>
-                <p className="text-2xl font-bold">{latestByStudent.filter(x => x.latest?.analysis?.indicators.type === "gifted").length}</p>
-                <p className="text-xs text-muted-foreground">{locale === "ar" ? "موهوبين" : "Gifted"}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card>
+              <CardContent className="pt-4 pb-3 flex items-center gap-3">
+                <Users className="h-8 w-8 text-primary" />
+                <div>
+                  <p className="text-2xl font-bold">{students.length}</p>
+                  <p className="text-xs text-muted-foreground">{t("students.title")}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <Card>
+              <CardContent className="pt-4 pb-3 flex items-center gap-3">
+                <ClipboardList className="h-8 w-8 text-info" />
+                <div>
+                  <p className="text-2xl font-bold">{surveys.length}</p>
+                  <p className="text-xs text-muted-foreground">{locale === "ar" ? "استقصاء" : "Surveys"}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <Card>
+              <CardContent className="pt-4 pb-3 flex items-center gap-3">
+                <Brain className="h-8 w-8 text-success" />
+                <div>
+                  <p className="text-2xl font-bold">{analyzedSurveys.length}</p>
+                  <p className="text-xs text-muted-foreground">{locale === "ar" ? "تحليلات" : "Analyses"}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+            <Card>
+              <CardContent className="pt-4 pb-3 flex items-center gap-3">
+                <TrendingUp className="h-8 w-8 text-warning" />
+                <div>
+                  <p className="text-2xl font-bold">{latestByStudent.filter(x => x.latest?.analysis?.indicators.type === "gifted").length}</p>
+                  <p className="text-xs text-muted-foreground">{locale === "ar" ? "موهوبين" : "Gifted"}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
         {latestByStudent.length > 0 ? (
