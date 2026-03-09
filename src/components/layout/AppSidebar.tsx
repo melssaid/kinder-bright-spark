@@ -12,7 +12,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const isActive = (path: string) => location.pathname === path;
 
   const items = [
