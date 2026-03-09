@@ -2,13 +2,16 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
+import { useRole } from "@/hooks/useRole";
 import { Button } from "@/components/ui/button";
-import { Globe, LogOut } from "lucide-react";
+import { Globe, LogOut, Building2 } from "lucide-react";
 import { AppTour } from "@/components/onboarding/AppTour";
+import { Badge } from "@/components/ui/badge";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { locale, setLocale, t, dir } = useI18n();
   const { user, signOut } = useAuth();
+  const { kindergartenName, isAdmin } = useRole();
 
   return (
     <SidebarProvider>
@@ -23,6 +26,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <span className="text-lg">🌈</span>
                 <h1 className="text-lg font-bold text-foreground font-[Quicksand] hidden sm:block">{t("app.title")}</h1>
               </div>
+              {kindergartenName && (
+                <Badge variant="outline" className="hidden md:flex items-center gap-1">
+                  <Building2 className="h-3 w-3" />
+                  {kindergartenName}
+                </Badge>
+              )}
+              {isAdmin && (
+                <Badge variant="secondary" className="hidden md:flex">
+                  {locale === "ar" ? "أدمن" : "Admin"}
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-2">
               {user && (

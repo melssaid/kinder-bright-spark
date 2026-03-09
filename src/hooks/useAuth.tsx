@@ -19,10 +19,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Redeem pending invite code after signup
+      if (session?.user) {
+        const pendingCode = localStorage.getItem("pending_invite_code");
+        if (pendingCode) {
+          localStorage.removeItem("pending_invite_code");
+          try {
+            await supabase.rpc("redeem_invite_code", {
+              _code: pendingCode,
+              _user_id: session.user.id,
+            });
+          } catch (err) {
+            console.error("Failed to redeem invite code:", err);
+          }
+        }
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {

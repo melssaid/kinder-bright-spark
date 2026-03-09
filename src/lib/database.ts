@@ -6,6 +6,7 @@ export interface DbStudent {
   name: string;
   age: number;
   gender: "male" | "female";
+  kindergarten_id: string | null;
   created_at: string;
 }
 
