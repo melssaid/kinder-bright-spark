@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserPlus, Trash2, AlertCircle } from "lucide-react";
+import { UserPlus, Trash2, AlertCircle, Sparkles } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { DbStudent, addStudent, removeStudent } from "@/lib/database";
