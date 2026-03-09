@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StudentManager } from "@/components/students/StudentManager";
 import { useI18n } from "@/i18n";
 import { getStudents, DbStudent } from "@/lib/database";
+import { PageHeader } from "@/components/common/PageHeader";
 
 const StudentsPage = () => {
   const { t } = useI18n();
