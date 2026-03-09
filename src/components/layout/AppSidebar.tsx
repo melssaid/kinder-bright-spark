@@ -18,6 +18,7 @@ export function AppSidebar() {
   const items = [
     { title: t("nav.dashboard"), url: "/", icon: LayoutDashboard },
     { title: t("nav.students"), url: "/students", icon: Users },
+    { title: t("nav.attendance"), url: "/attendance", icon: CalendarCheck },
     { title: t("nav.survey"), url: "/survey", icon: ClipboardList },
     { title: t("nav.history"), url: "/history", icon: History },
   ];

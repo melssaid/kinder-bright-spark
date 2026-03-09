@@ -16,6 +16,22 @@ const translations: Translations = {
   "dashboard.title": { en: "Teacher Dashboard", ar: "لوحة المعلم" },
   "dashboard.subtitle": { en: "Track development, behavior, and wellbeing", ar: "تتبع النمو والسلوك والرفاهية" },
   "lang.switch": { en: "العربية", ar: "English" },
+  "nav.attendance": { en: "Attendance", ar: "الحضور والغياب" },
+  "attendance.title": { en: "Attendance", ar: "الحضور والغياب" },
+  "attendance.subtitle": { en: "Track daily student attendance", ar: "تتبع حضور وغياب الطلاب يومياً" },
+  "attendance.daily": { en: "Daily Record", ar: "السجل اليومي" },
+  "attendance.stats": { en: "Statistics", ar: "الإحصائيات" },
+  "attendance.dailyRecord": { en: "Daily Attendance", ar: "الحضور اليومي" },
+  "attendance.student": { en: "Student", ar: "الطالب" },
+  "attendance.status": { en: "Status", ar: "الحالة" },
+  "attendance.markAll": { en: "All Present", ar: "حضور الجميع" },
+  "attendance.noStudents": { en: "Add students first from the Students page", ar: "أضف طلاباً أولاً من صفحة الطلاب" },
+  "attendance.totalStudents": { en: "Total Students", ar: "إجمالي الطلاب" },
+  "attendance.avgRate": { en: "Avg. Attendance", ar: "متوسط الحضور" },
+  "attendance.totalRecords": { en: "Total Records", ar: "إجمالي السجلات" },
+  "attendance.lowAttendance": { en: "Low Attendance", ar: "حضور منخفض" },
+  "attendance.chartTitle": { en: "Attendance Rate by Student", ar: "نسبة الحضور حسب الطالب" },
+  "attendance.studentDetails": { en: "Student Details", ar: "تفاصيل الطلاب" },
 };
 
 // Merge survey translations
