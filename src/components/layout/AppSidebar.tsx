@@ -21,6 +21,7 @@ export function AppSidebar() {
     { title: t("nav.attendance"), url: "/attendance", icon: CalendarCheck, tourId: "attendance" },
     { title: t("nav.survey"), url: "/survey", icon: ClipboardList, tourId: "survey" },
     { title: t("nav.history"), url: "/history", icon: History, tourId: "history" },
+    { title: locale === "ar" ? "الإعدادات" : "Settings", url: "/settings", icon: Settings, tourId: "settings" },
   ];
 
   return (
