@@ -4,6 +4,7 @@ import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Globe, LogOut } from "lucide-react";
+import { AppTour } from "@/components/onboarding/AppTour";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { locale, setLocale, t, dir } = useI18n();
