@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHeader } from "@/components/common/PageHeader";
 
 const AttendancePage = () => {
   const { t, locale } = useI18n();
@@ -26,10 +27,11 @@ const AttendancePage = () => {
     <DashboardLayout>
       <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold">{t("attendance.title")}</h1>
-            <p className="text-muted-foreground text-sm">{t("attendance.subtitle")}</p>
-          </div>
+          <PageHeader 
+            title={t("attendance.title")}
+            description={t("attendance.subtitle")}
+            tooltip={locale === "ar" ? "حاضر 🟢 | غائب 🔴 | متأخر 🟡 | معذور 🔵" : "Present 🟢 | Absent 🔴 | Late 🟡 | Excused 🔵"}
+          />
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className={cn("w-[220px] justify-start text-left font-normal gap-2")}>

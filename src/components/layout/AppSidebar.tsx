@@ -16,11 +16,11 @@ export function AppSidebar() {
   const isActive = (path: string) => location.pathname === path;
 
   const items = [
-    { title: t("nav.dashboard"), url: "/", icon: LayoutDashboard },
-    { title: t("nav.students"), url: "/students", icon: Users },
-    { title: t("nav.attendance"), url: "/attendance", icon: CalendarCheck },
-    { title: t("nav.survey"), url: "/survey", icon: ClipboardList },
-    { title: t("nav.history"), url: "/history", icon: History },
+    { title: t("nav.dashboard"), url: "/", icon: LayoutDashboard, tourId: "dashboard" },
+    { title: t("nav.students"), url: "/students", icon: Users, tourId: "students" },
+    { title: t("nav.attendance"), url: "/attendance", icon: CalendarCheck, tourId: "attendance" },
+    { title: t("nav.survey"), url: "/survey", icon: ClipboardList, tourId: "survey" },
+    { title: t("nav.history"), url: "/history", icon: History, tourId: "history" },
   ];
 
   return (
@@ -43,7 +43,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map(item => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} data-tour={item.tourId}>
                     <NavLink to={item.url} end={item.url === "/"} className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}

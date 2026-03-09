@@ -7,6 +7,9 @@ import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Responsi
 import { Users, ClipboardList, TrendingUp, Brain } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { getStudents, getSurveys, DbStudent, DbSurvey } from "@/lib/database";
+import { PageHeader } from "@/components/common/PageHeader";
+import { EmptyState } from "@/components/common/EmptyState";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const { t, locale } = useI18n();
@@ -54,48 +57,57 @@ const Index = () => {
   return (
     <DashboardLayout>
       <div className="p-4 md:p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">{t("dashboard.title")}</h1>
-          <p className="text-muted-foreground text-sm">{t("dashboard.subtitle")}</p>
-        </div>
+        <PageHeader 
+          title={t("dashboard.title")} 
+          description={t("dashboard.subtitle")}
+          tooltip={locale === "ar" ? "ملخص شامل لإحصاءات الفصل وتقدم الطلاب" : "Comprehensive overview of class statistics and student progress"}
+        />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-4 pb-3 flex items-center gap-3">
-              <Users className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-2xl font-bold">{students.length}</p>
-                <p className="text-xs text-muted-foreground">{t("students.title")}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3 flex items-center gap-3">
-              <ClipboardList className="h-8 w-8 text-info" />
-              <div>
-                <p className="text-2xl font-bold">{surveys.length}</p>
-                <p className="text-xs text-muted-foreground">{locale === "ar" ? "استقصاء" : "Surveys"}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3 flex items-center gap-3">
-              <Brain className="h-8 w-8 text-success" />
-              <div>
-                <p className="text-2xl font-bold">{analyzedSurveys.length}</p>
-                <p className="text-xs text-muted-foreground">{locale === "ar" ? "تحليلات" : "Analyses"}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 pb-3 flex items-center gap-3">
-              <TrendingUp className="h-8 w-8 text-warning" />
-              <div>
-                <p className="text-2xl font-bold">{latestByStudent.filter(x => x.latest?.analysis?.indicators.type === "gifted").length}</p>
-                <p className="text-xs text-muted-foreground">{locale === "ar" ? "موهوبين" : "Gifted"}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card>
+              <CardContent className="pt-4 pb-3 flex items-center gap-3">
+                <Users className="h-8 w-8 text-primary" />
+                <div>
+                  <p className="text-2xl font-bold">{students.length}</p>
+                  <p className="text-xs text-muted-foreground">{t("students.title")}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <Card>
+              <CardContent className="pt-4 pb-3 flex items-center gap-3">
+                <ClipboardList className="h-8 w-8 text-info" />
+                <div>
+                  <p className="text-2xl font-bold">{surveys.length}</p>
+                  <p className="text-xs text-muted-foreground">{locale === "ar" ? "استقصاء" : "Surveys"}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <Card>
+              <CardContent className="pt-4 pb-3 flex items-center gap-3">
+                <Brain className="h-8 w-8 text-success" />
+                <div>
+                  <p className="text-2xl font-bold">{analyzedSurveys.length}</p>
+                  <p className="text-xs text-muted-foreground">{locale === "ar" ? "تحليلات" : "Analyses"}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+            <Card>
+              <CardContent className="pt-4 pb-3 flex items-center gap-3">
+                <TrendingUp className="h-8 w-8 text-warning" />
+                <div>
+                  <p className="text-2xl font-bold">{latestByStudent.filter(x => x.latest?.analysis?.indicators.type === "gifted").length}</p>
+                  <p className="text-xs text-muted-foreground">{locale === "ar" ? "موهوبين" : "Gifted"}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
         {latestByStudent.length > 0 ? (
@@ -162,12 +174,11 @@ const Index = () => {
             </Card>
           </div>
         ) : (
-          <Card>
-            <CardContent className="py-12 text-center space-y-2">
-              <ClipboardList className="h-12 w-12 text-muted-foreground/30 mx-auto" />
-              <p className="text-muted-foreground">{locale === "ar" ? "ابدأ بإضافة طلاب وملء الاستقصاءات لعرض البيانات هنا" : "Start by adding students and filling surveys to see data here"}</p>
-            </CardContent>
-          </Card>
+          <EmptyState 
+            icon={ClipboardList}
+            title={t("empty.history.title")}
+            description={t("empty.history.description")}
+          />
         )}
       </div>
     </DashboardLayout>
