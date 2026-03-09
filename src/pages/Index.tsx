@@ -174,12 +174,11 @@ const Index = () => {
             </Card>
           </div>
         ) : (
-          <Card>
-            <CardContent className="py-12 text-center space-y-2">
-              <ClipboardList className="h-12 w-12 text-muted-foreground/30 mx-auto" />
-              <p className="text-muted-foreground">{locale === "ar" ? "ابدأ بإضافة طلاب وملء الاستقصاءات لعرض البيانات هنا" : "Start by adding students and filling surveys to see data here"}</p>
-            </CardContent>
-          </Card>
+          <EmptyState 
+            icon={ClipboardList}
+            title={t("empty.history.title")}
+            description={t("empty.history.description")}
+          />
         )}
       </div>
     </DashboardLayout>

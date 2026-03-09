@@ -16,10 +16,11 @@ const StudentsPage = () => {
   return (
     <DashboardLayout>
       <div className="p-4 md:p-6 space-y-6 max-w-2xl mx-auto">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">{t("students.title")}</h1>
-          <p className="text-muted-foreground text-sm">{t("auth.cloudNotice")}</p>
-        </div>
+        <PageHeader 
+          title={t("students.title")} 
+          description={t("auth.cloudNotice")}
+          tooltip={locale === "ar" ? "يمكنك إضافة حتى 30 طالباً وإدارة معلوماتهم الأساسية" : "You can add up to 30 students and manage their basic information"}
+        />
         <StudentManager students={students} onStudentsChange={refreshStudents} selectedStudent={selectedStudent} onSelectStudent={setSelectedStudent} />
       </div>
     </DashboardLayout>

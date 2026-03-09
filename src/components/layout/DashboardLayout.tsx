@@ -12,6 +12,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
+      <AppTour />
       <div className="min-h-screen flex w-full" dir={dir}>
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
