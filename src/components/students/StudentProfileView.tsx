@@ -41,55 +41,55 @@ const GRADIENT_PAIRS = [
 ];
 
 const categoryMeta: Record<string, { emoji: string; titleAr: string; titleEn: string; descAr: string; descEn: string }> = {
+  cognitive: {
+    emoji: "🧠", titleAr: "التطور المعرفي", titleEn: "Cognitive Development",
+    descAr: "يقيّم قدرات التصنيف والعد وحل المشكلات والتفكير المنطقي المناسبة للعمر",
+    descEn: "Assesses sorting, counting, problem-solving, and age-appropriate logical thinking",
+  },
+  language: {
+    emoji: "💬", titleAr: "اللغة والتواصل", titleEn: "Language & Communication",
+    descAr: "يتابع قدرات الكلام والتعبير والفهم اللغوي ومقارنتها بالمعايير العمرية",
+    descEn: "Tracks speech, expression, comprehension and compares to age-appropriate milestones",
+  },
+  social_emotional: {
+    emoji: "❤️", titleAr: "التطور الاجتماعي العاطفي", titleEn: "Social-Emotional",
+    descAr: "يقيّم التعاون مع الأقران والتعاطف وإدارة المشاعر والانفصال عن مقدم الرعاية",
+    descEn: "Evaluates peer cooperation, empathy, emotion management, and caregiver separation",
+  },
+  gross_motor: {
+    emoji: "🏃", titleAr: "المهارات الحركية الكبرى", titleEn: "Gross Motor Skills",
+    descAr: "يتابع الجري والقفز والتسلق والتوازن والتنسيق الجسدي العام",
+    descEn: "Tracks running, jumping, climbing, balance, and overall physical coordination",
+  },
+  fine_motor: {
+    emoji: "✂️", titleAr: "المهارات الحركية الدقيقة", titleEn: "Fine Motor Skills",
+    descAr: "يقيّم مسك القلم والقص والرسم والتنسيق بين العين واليد",
+    descEn: "Assesses pencil grip, cutting, drawing, and hand-eye coordination",
+  },
+  self_care: {
+    emoji: "🧽", titleAr: "الرعاية الذاتية", titleEn: "Self-Care & Independence",
+    descAr: "يتابع استقلالية الطفل في الأكل والنظافة واستخدام الحمام وارتداء الملابس",
+    descEn: "Tracks independence in eating, hygiene, toileting, and dressing",
+  },
   attention: {
-    emoji: "🎯", titleAr: "رادار الانتباه وفرط الحركة", titleEn: "ADHD & Attention Radar",
-    descAr: "يحلل نمط تركيز الطفل واستجابته للأنشطة ويقيّم احتمالية تشتت الانتباه مع توصيات مبكرة للمعلمة والأهل",
-    descEn: "Analyzes focus patterns and activity responses, assessing attention deficit probability with early recommendations",
+    emoji: "🎯", titleAr: "الانتباه والتركيز", titleEn: "Attention & Focus",
+    descAr: "يقيّم مدة التركيز والقدرة على إكمال المهام ومقاومة التشتت",
+    descEn: "Assesses focus duration, task completion, and resistance to distraction",
   },
-  mood: {
-    emoji: "😊", titleAr: "مقياس المزاج اليومي", titleEn: "Daily Mood Meter",
-    descAr: "يعتمد على تعابير الطفل وسرعة تفاعله مع الأنشطة الجماعية ويقدم درجة مزاج يومية وتنبيهات عند تغيرات حادة",
-    descEn: "Based on expressions and interaction speed, provides daily mood score with alerts for sharp changes",
-  },
-  social: {
-    emoji: "👫", titleAr: "محلل التفاعل الاجتماعي", titleEn: "Social Interaction Analyzer",
-    descAr: "يراقب من يلعب مع من ومدة التفاعل ومن يُهمّش غالباً ويولد خريطة علاقات تساعد المعلمة على دمج الأطفال المنعزلين",
-    descEn: "Monitors play patterns, interaction duration, and identifies isolated children with social mapping",
-  },
-  learning: {
-    emoji: "📚", titleAr: "بروفايل الشخصية التعليمية", titleEn: "Learning Profile",
-    descAr: "يصنف الطفل إلى أنماط تعلم (حسي حركي، بصري، سمعي، اجتماعي) ويقترح للمعلمة طرق الشرح المناسبة",
-    descEn: "Classifies learning styles and suggests appropriate teaching methods for each child",
-  },
-  emotional: {
-    emoji: "❤️", titleAr: "مدرب المهارات العاطفية", titleEn: "Emotional Skills Coach",
-    descAr: "يقيّم استجابات الطفل لسيناريوهات المشاعر ويقترح أنشطة خاصة لتعزيز الذكاء العاطفي",
-    descEn: "Evaluates emotional responses and suggests activities to boost emotional intelligence",
-  },
-  speech: {
-    emoji: "💬", titleAr: "مستشار اللغة والنطق", titleEn: "Speech & Language Advisor",
-    descAr: "يحلل مخارج الحروف وعدد الكلمات وطول الجملة ويقارنها بعمره ويعطي توصيات لتمارين منزلية",
-    descEn: "Analyzes pronunciation, vocabulary size compared to age with home exercise recommendations",
-  },
-  motor: {
-    emoji: "🏃", titleAr: "التطور النمائي الحركي", titleEn: "Motor Development",
-    descAr: "يجمع سلوك الطفل الحركي اليومي وينتج ملف نمو حيّ مع مؤشرات للتأخر أو التميز الحركي",
-    descEn: "Tracks daily motor behavior producing a live growth profile with delay/excellence indicators",
-  },
-  talent: {
-    emoji: "⭐", titleAr: "مكتشف الموهبة المبكرة", titleEn: "Early Talent Discovery",
-    descAr: "يحلل أنماط أداء الطفل في الرسم والبناء والألعاب اللغوية ليكشف مؤشرات مبكرة لمواهب فنية أو رياضية",
-    descEn: "Analyzes performance patterns to detect early artistic, athletic, or logical talents",
+  creativity: {
+    emoji: "🎨", titleAr: "الإبداع والتعبير", titleEn: "Creativity & Expression",
+    descAr: "يتابع اللعب التخيلي والرسم والاستجابة للموسيقى والتفكير الإبداعي",
+    descEn: "Tracks imaginative play, art, music response, and creative problem-solving",
   },
   behavior: {
-    emoji: "💌", titleAr: "مترجم السلوك للأهل", titleEn: "Parent Behavior Translator",
-    descAr: "يحوّل ملاحظات المعلمة إلى رسالة مفهومة لولي الأمر تشرح السلوك بلطف وتقدم خطة منزلية",
-    descEn: "Converts teacher notes into parent-friendly messages with gentle explanations and home plans",
+    emoji: "📋", titleAr: "السلوك وضبط النفس", titleEn: "Behavior & Self-Regulation",
+    descAr: "يقيّم الالتزام بالقواعد والاستجابة للتوجيه والانتقال بين الأنشطة وحل النزاعات",
+    descEn: "Evaluates rule-following, guidance response, transitions, and conflict resolution",
   },
-  nutrition: {
-    emoji: "🍎", titleAr: "مساعد التغذية الذكي", titleEn: "Smart Nutrition Assistant",
-    descAr: "يتابع تغذية الطفل ويقارنها باحتياجه العمري ويقترح صناديق غذاء مخصصة وتحفيزات صحية",
-    descEn: "Tracks nutrition vs age needs, suggests customized lunchboxes and healthy motivations",
+  daily_mood: {
+    emoji: "😊", titleAr: "الرفاهية اليومية", titleEn: "Daily Wellbeing",
+    descAr: "يتابع المزاج ومستوى الطاقة والتغذية والترطيب اليومي للطفل",
+    descEn: "Tracks mood, energy level, nutrition, and daily hydration",
   },
 };
 

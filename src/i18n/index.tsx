@@ -6,15 +6,15 @@ export type Locale = "en" | "ar";
 type Translations = Record<string, Record<Locale, string>>;
 
 const translations: Translations = {
-  "app.title": { en: "KinderTrack", ar: "كيندرتراك" },
-  "app.subtitle": { en: "Development Dashboard", ar: "لوحة متابعة النمو" },
+  "app.title": { en: "Kinder BH", ar: "كيندر BH" },
+  "app.subtitle": { en: "Child Development Tracker", ar: "متابعة تطور الأطفال" },
   "nav.dashboard": { en: "Dashboard", ar: "لوحة التحكم" },
-  "nav.survey": { en: "New Survey", ar: "استقصاء جديد" },
-  "nav.history": { en: "History & Reports", ar: "السجل والتقارير" },
+  "nav.survey": { en: "Assessment", ar: "التقييم" },
+  "nav.history": { en: "Reports", ar: "التقارير" },
   "nav.students": { en: "Students", ar: "الطلاب" },
   "nav.navigation": { en: "Navigation", ar: "التنقل" },
-  "dashboard.title": { en: "Teacher Dashboard", ar: "لوحة المعلم" },
-  "dashboard.subtitle": { en: "Track development, behavior, and wellbeing", ar: "تتبع النمو والسلوك والرفاهية" },
+  "dashboard.title": { en: "Dashboard", ar: "لوحة التحكم" },
+  "dashboard.subtitle": { en: "Track development across all domains", ar: "تتبع التطور عبر جميع المجالات" },
   "lang.switch": { en: "العربية", ar: "English" },
   "nav.attendance": { en: "Attendance", ar: "الحضور والغياب" },
   "attendance.title": { en: "Attendance", ar: "الحضور والغياب" },
@@ -33,33 +33,33 @@ const translations: Translations = {
   "attendance.chartTitle": { en: "Attendance Rate by Student", ar: "نسبة الحضور حسب الطالب" },
   "attendance.studentDetails": { en: "Student Details", ar: "تفاصيل الطلاب" },
   
-  // Tour translations
+  // Tour
   "tour.welcome": { 
-    en: "Welcome to KinderTrack! Let me show you around the app 🌈", 
-    ar: "مرحباً بك في كيندرتراك! دعني أريك جولة سريعة في التطبيق 🌈" 
+    en: "Welcome to Kinder BH! Let me show you around 🌈", 
+    ar: "مرحباً بك في كيندر BH! دعني أريك جولة سريعة 🌈" 
   },
   "tour.students": { 
-    en: "Here you can add and manage your students (up to 30 students)", 
-    ar: "هنا يمكنك إضافة وإدارة طلابك (حتى 30 طالباً)" 
+    en: "Add and manage your students (up to 30)", 
+    ar: "إضافة وإدارة طلابك (حتى 30 طالباً)" 
   },
   "tour.survey": { 
-    en: "Fill behavioral surveys to track student development using AI analysis", 
-    ar: "املأ الاستقصاءات السلوكية لتتبع تطور الطلاب بتحليل الذكاء الاصطناعي" 
+    en: "Assess child development across 10 key domains using evidence-based measures", 
+    ar: "تقييم تطور الطفل عبر 10 مجالات رئيسية باستخدام مقاييس مبنية على الأدلة" 
   },
   "tour.attendance": { 
     en: "Track daily attendance with present, absent, late, and excused statuses", 
     ar: "سجّل الحضور اليومي بحالات حاضر، غائب، متأخر، ومعذور" 
   },
   "tour.history": { 
-    en: "View detailed analysis reports and track student progress over time", 
-    ar: "اطّلع على تقارير التحليل التفصيلية وتتبع تقدم الطلاب عبر الزمن" 
+    en: "View AI-powered development reports and track progress over time", 
+    ar: "اطّلع على تقارير التطور المدعومة بالذكاء الاصطناعي وتتبع التقدم" 
   },
   "tour.dashboard": { 
-    en: "Your main dashboard shows class statistics and recent activity", 
-    ar: "لوحة التحكم الرئيسية تعرض إحصاءات الفصل والنشاط الأخير" 
+    en: "Your main dashboard shows class-wide statistics and alerts", 
+    ar: "لوحة التحكم الرئيسية تعرض إحصاءات الفصل والتنبيهات" 
   },
   
-  // Empty state translations
+  // Empty states
   "empty.students.title": { en: "No Students Yet", ar: "لا يوجد طلاب بعد" },
   "empty.students.description": { 
     en: "Start by adding your first student to begin tracking their development", 
@@ -69,14 +69,14 @@ const translations: Translations = {
   
   "empty.surveys.title": { en: "Select a Student", ar: "اختر طالباً" },
   "empty.surveys.description": { 
-    en: "Choose a student from the list above to fill their behavioral survey", 
-    ar: "اختر طالباً من القائمة أعلاه لملء استقصاءه السلوكي" 
+    en: "Choose a student to begin their developmental assessment", 
+    ar: "اختر طالباً لبدء تقييمه التطوري" 
   },
   
-  "empty.history.title": { en: "No Analysis Available", ar: "لا توجد تحليلات" },
+  "empty.history.title": { en: "No Reports Available", ar: "لا توجد تقارير" },
   "empty.history.description": { 
-    en: "Complete surveys to see AI-powered analysis and development reports", 
-    ar: "أكمل الاستقصاءات لرؤية التحليلات المدعومة بالذكاء الاصطناعي" 
+    en: "Complete assessments to see AI-powered development reports", 
+    ar: "أكمل التقييمات لرؤية تقارير التطور المدعومة بالذكاء الاصطناعي" 
   },
   
   // Auth
@@ -88,9 +88,9 @@ const translations: Translations = {
   "auth.fullNamePlaceholder": { en: "e.g. Sarah Ahmad", ar: "مثال: سارة أحمد" },
   "auth.schoolName": { en: "School Name (optional)", ar: "اسم المدرسة (اختياري)" },
   "auth.schoolNamePlaceholder": { en: "e.g. Al-Noor Kindergarten", ar: "مثال: روضة النور" },
-  "auth.subtitle": { en: "Child Development Tracking System", ar: "نظام تتبع نمو الأطفال" },
+  "auth.subtitle": { en: "Child Development Tracking System", ar: "نظام متابعة تطور الأطفال" },
   "auth.hasAccount": { en: "Already have an account? Sign in", ar: "لديك حساب؟ سجل دخولك" },
-  "auth.noAccount": { en: "Don't have an account? Sign up", ar: "ليس لديك حساب؟ أنشئ واحداً" },
+  "auth.noAccount": { en: "Have an invite code? Sign up", ar: "لديك كود دعوة؟ أنشئ حساباً" },
   "auth.signupSuccess": { en: "Account created! Welcome.", ar: "تم إنشاء الحساب! أهلاً بك." },
   "auth.error": { en: "Authentication error", ar: "خطأ في المصادقة" },
   "auth.cloudNotice": { en: "☁️ Data is securely stored in the cloud", ar: "☁️ البيانات مخزنة بأمان في السحابة" },

@@ -51,12 +51,12 @@ const StudentsPage = () => {
                       🎓
                     </motion.div>
                     <h1 className="text-3xl font-extrabold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                      {isAr ? "مرحباً بك في كيندرتراك!" : "Welcome to KinderTrack!"}
+                      {isAr ? "مرحباً بك في كيندر BH!" : "Welcome to Kinder BH!"}
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-md mx-auto leading-relaxed">
                       {isAr
-                        ? "نظام ذكي لتتبع نمو الأطفال في الروضة — استقصاءات سلوكية، تحليل بالذكاء الاصطناعي، وتقارير شاملة للأهل والمعلمات"
-                        : "Smart system for tracking child development — behavioral surveys, AI analysis, and comprehensive reports for parents & teachers"}
+                        ? "نظام متابعة تطور الأطفال في الروضة — تقييمات تطورية، تحليل بالذكاء الاصطناعي، وتقارير شاملة للأهل والمعلمات"
+                        : "Child development tracking — developmental assessments, AI analysis, and comprehensive reports for parents & teachers"}
                     </p>
                     <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
                       {[
