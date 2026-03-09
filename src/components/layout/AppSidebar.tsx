@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, History, Users } from "lucide-react";
+import { LayoutDashboard, ClipboardList, History, Users, CalendarCheck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useI18n } from "@/i18n";
