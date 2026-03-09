@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, History, Users } from "lucide-react";
+import { LayoutDashboard, ClipboardList, History, Users, CalendarCheck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useI18n } from "@/i18n";
@@ -18,6 +18,7 @@ export function AppSidebar() {
   const items = [
     { title: t("nav.dashboard"), url: "/", icon: LayoutDashboard },
     { title: t("nav.students"), url: "/students", icon: Users },
+    { title: t("nav.attendance"), url: "/attendance", icon: CalendarCheck },
     { title: t("nav.survey"), url: "/survey", icon: ClipboardList },
     { title: t("nav.history"), url: "/history", icon: History },
   ];
