@@ -97,7 +97,7 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
     .reverse()
     .map((s, i) => ({
       date: new Date(s.date).toLocaleDateString(isAr ? "ar-SA" : "en-US", { month: "short", day: "numeric" }),
-      score: Object.values((s.analysis as any)?.scores || {}).reduce((a: number, b: any) => a + (typeof b === "number" ? b : 0), 0) / 7,
+      score: ((Object.values((s.analysis as any)?.scores || {}) as number[]).reduce((a, b) => a + (typeof b === "number" ? b : 0), 0)) / 7,
     }));
 
   if (loading) {
