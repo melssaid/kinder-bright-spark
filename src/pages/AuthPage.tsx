@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
-import { Loader2, Globe } from "lucide-react";
+import { Loader2, Globe, KeyRound } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const AuthPage = () => {
   const { signIn, signUp } = useAuth();
@@ -16,19 +17,43 @@ const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [schoolName, setSchoolName] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
-    if (isSignUp && !fullName) return;
+    if (isSignUp && (!fullName || !inviteCode)) {
+      toast.error(locale === "ar" ? "يرجى إدخال جميع الحقول وكود الدعوة" : "Please fill all fields including invite code");
+      return;
+    }
 
     setLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password, fullName, schoolName);
+        // First validate invite code exists and is unused
+        const { data: codeData, error: codeError } = await supabase
+          .from("invitation_codes")
+          .select("id, kindergarten_id, is_used")
+          .eq("code", inviteCode.toUpperCase().trim())
+          .single();
+
+        if (codeError || !codeData) {
+          throw new Error(locale === "ar" ? "كود الدعوة غير صالح" : "Invalid invitation code");
+        }
+        if (codeData.is_used) {
+          throw new Error(locale === "ar" ? "كود الدعوة مستخدم بالفعل" : "Invitation code already used");
+        }
+
+        // Sign up the user
+        const { error } = await signUp(email, password, fullName, "");
         if (error) throw error;
-        toast.success(t("auth.signupSuccess"));
+
+        // After signup, redeem the invite code via the DB function
+        // We need to wait for the auth state to settle then redeem
+        // Store invite code in localStorage to redeem after auth settles
+        localStorage.setItem("pending_invite_code", inviteCode.toUpperCase().trim());
+        
+        toast.success(locale === "ar" ? "تم إنشاء الحساب! جارٍ الربط بالروضة..." : "Account created! Linking to kindergarten...");
       } else {
         const { error } = await signIn(email, password);
         if (error) throw error;
@@ -66,8 +91,20 @@ const AuthPage = () => {
                     <Input value={fullName} onChange={e => setFullName(e.target.value)} placeholder={t("auth.fullNamePlaceholder")} required />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t("auth.schoolName")}</Label>
-                    <Input value={schoolName} onChange={e => setSchoolName(e.target.value)} placeholder={t("auth.schoolNamePlaceholder")} />
+                    <Label className="flex items-center gap-2">
+                      <KeyRound className="h-4 w-4" />
+                      {locale === "ar" ? "كود الدعوة" : "Invitation Code"}
+                    </Label>
+                    <Input
+                      value={inviteCode}
+                      onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                      placeholder={locale === "ar" ? "أدخل الكود من الإدارة..." : "Enter code from admin..."}
+                      required
+                      className="font-mono tracking-wider text-center text-lg"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {locale === "ar" ? "احصلي على كود الدعوة من إدارة الروضة" : "Get your invite code from the kindergarten admin"}
+                    </p>
                   </div>
                 </>
               )}
