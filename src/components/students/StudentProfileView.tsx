@@ -63,9 +63,11 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
     const catQuestions = cat.questions;
     const answers = latestSurvey?.answers || {};
     const answered = catQuestions.filter(q => answers[q.id] !== undefined);
-    const avg = answered.length > 0
-      ? Math.round((answered.reduce((s, q) => s + (typeof answers[q.id] === "number" ? (answers[q.id] as number) : 3), 0) / answered.length) * 20)
-      : 0;
+    const sum = answered.reduce((s, q) => {
+      const v = answers[q.id];
+      return s + (typeof v === "number" ? v : 3);
+    }, 0);
+    const avg = answered.length > 0 ? Math.round((sum / answered.length) * 20) : 0;
     const meta = categoryMeta[cat.id] || { emoji: "📊", descAr: "", descEn: "" };
     return {
       id: cat.id,
