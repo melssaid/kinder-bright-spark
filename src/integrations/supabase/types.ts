@@ -14,7 +14,121 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendance: {
+        Row: {
+          date: string
+          id: string
+          status: string
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          date: string
+          id?: string
+          status: string
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          date?: string
+          id?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string
+          id: string
+          school_name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name: string
+          id: string
+          school_name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          school_name?: string | null
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          age: number
+          created_at: string | null
+          gender: string
+          id: string
+          name: string
+          teacher_id: string
+        }
+        Insert: {
+          age: number
+          created_at?: string | null
+          gender: string
+          id?: string
+          name: string
+          teacher_id: string
+        }
+        Update: {
+          age?: number
+          created_at?: string | null
+          gender?: string
+          id?: string
+          name?: string
+          teacher_id?: string
+        }
+        Relationships: []
+      }
+      surveys: {
+        Row: {
+          analysis: Json | null
+          answers: Json
+          date: string | null
+          id: string
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          analysis?: Json | null
+          answers?: Json
+          date?: string | null
+          id?: string
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          analysis?: Json | null
+          answers?: Json
+          date?: string | null
+          id?: string
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surveys_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
