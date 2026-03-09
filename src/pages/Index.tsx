@@ -57,10 +57,11 @@ const Index = () => {
   return (
     <DashboardLayout>
       <div className="p-4 md:p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">{t("dashboard.title")}</h1>
-          <p className="text-muted-foreground text-sm">{t("dashboard.subtitle")}</p>
-        </div>
+        <PageHeader 
+          title={t("dashboard.title")} 
+          description={t("dashboard.subtitle")}
+          tooltip={locale === "ar" ? "ملخص شامل لإحصاءات الفصل وتقدم الطلاب" : "Comprehensive overview of class statistics and student progress"}
+        />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
