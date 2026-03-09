@@ -8,11 +8,12 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line, PieChart, Pie, Cell
 } from "recharts";
-import { Brain, TrendingUp, Heart, MessageSquare, Zap, Star, ClipboardList, Calendar, ArrowLeft, Sparkles } from "lucide-react";
+import { Brain, TrendingUp, Heart, MessageSquare, Zap, Star, ClipboardList, Calendar, ArrowLeft, Sparkles, PlayCircle } from "lucide-react";
 import { useI18n } from "@/i18n";
-import { DbStudent, DbSurvey, DbAttendance, getStudentSurveys, getStudentAttendance, getAttendanceStats } from "@/lib/database";
+import { DbStudent, DbSurvey, getStudentSurveys, getAttendanceStats } from "@/lib/database";
 import { surveyCategories } from "@/data/surveyQuestions";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 interface StudentProfileViewProps {
   student: DbStudent;
@@ -21,25 +22,106 @@ interface StudentProfileViewProps {
 
 const COLORS = [
   "hsl(var(--primary))", "hsl(var(--success))", "hsl(var(--warning))",
-  "hsl(var(--info))", "hsl(var(--destructive))", "hsl(258, 58%, 70%)", "hsl(152, 60%, 60%)"
+  "hsl(var(--info))", "hsl(var(--destructive))", "hsl(258, 58%, 70%)", "hsl(152, 60%, 60%)",
+  "hsl(30, 80%, 60%)", "hsl(200, 70%, 55%)", "hsl(340, 65%, 60%)"
 ];
 
-const categoryMeta: Record<string, { emoji: string; descAr: string; descEn: string }> = {
-  attention: { emoji: "🧠", descAr: "قدرة الطفل على التركيز والانتباه أثناء الأنشطة", descEn: "Child's ability to focus and pay attention during activities" },
-  mood: { emoji: "😊", descAr: "الحالة المزاجية العامة والتعبير عن المشاعر", descEn: "General mood and emotional expression" },
-  social: { emoji: "👫", descAr: "التفاعل مع الأقران والمشاركة في الأنشطة الجماعية", descEn: "Interaction with peers and participation in group activities" },
-  learning: { emoji: "📚", descAr: "أسلوب التعلم المفضل والفضول المعرفي", descEn: "Preferred learning style and intellectual curiosity" },
-  emotional: { emoji: "❤️", descAr: "القدرة على إدارة المشاعر والتعاطف مع الآخرين", descEn: "Ability to manage emotions and empathize with others" },
-  speech: { emoji: "💬", descAr: "وضوح النطق وتكوين الجمل والمفردات", descEn: "Speech clarity, sentence formation, and vocabulary" },
-  motor: { emoji: "🏃", descAr: "المهارات الحركية الدقيقة والكبرى", descEn: "Fine and gross motor skills development" },
-  talent: { emoji: "⭐", descAr: "المواهب الخاصة والقدرات الاستثنائية", descEn: "Special talents and exceptional abilities" },
-  behavior: { emoji: "📋", descAr: "الالتزام بالقواعد وضبط النفس", descEn: "Rule following and self-control" },
-  nutrition: { emoji: "🍎", descAr: "التغذية الصحية ومستوى الطاقة", descEn: "Healthy nutrition and energy levels" },
+const categoryMeta: Record<string, { emoji: string; titleAr: string; titleEn: string; descAr: string; descEn: string }> = {
+  attention: {
+    emoji: "🎯",
+    titleAr: "رادار الانتباه وفرط الحركة",
+    titleEn: "ADHD & Attention Radar",
+    descAr: "يحلل نمط تركيز الطفل واستجابته للأنشطة ويقيّم احتمالية تشتت الانتباه مع توصيات مبكرة للمعلمة والأهل",
+    descEn: "Analyzes focus patterns and activity responses, assessing attention deficit probability with early recommendations",
+  },
+  mood: {
+    emoji: "😊",
+    titleAr: "مقياس المزاج اليومي",
+    titleEn: "Daily Mood Meter",
+    descAr: "يعتمد على تعابير الطفل وسرعة تفاعله مع الأنشطة الجماعية ويقدم درجة مزاج يومية وتنبيهات عند تغيرات حادة قد تشير لضغط نفسي",
+    descEn: "Based on expressions and interaction speed, provides daily mood score with alerts for sharp changes indicating stress",
+  },
+  social: {
+    emoji: "👫",
+    titleAr: "محلل التفاعل الاجتماعي",
+    titleEn: "Social Interaction Analyzer",
+    descAr: "يراقب من يلعب مع من ومدة التفاعل ومن يُهمّش غالباً ويولد خريطة علاقات تساعد المعلمة على دمج الأطفال المنعزلين",
+    descEn: "Monitors play patterns, interaction duration, and identifies isolated children with social mapping for integration",
+  },
+  learning: {
+    emoji: "📚",
+    titleAr: "بروفايل الشخصية التعليمية",
+    titleEn: "Learning Profile",
+    descAr: "يصنف الطفل إلى أنماط تعلم (حسي حركي، بصري، سمعي، اجتماعي) ويقترح للمعلمة طرق الشرح المناسبة لكل طفل",
+    descEn: "Classifies learning styles (kinesthetic, visual, auditory, social) and suggests appropriate teaching methods",
+  },
+  emotional: {
+    emoji: "❤️",
+    titleAr: "مدرب المهارات العاطفية",
+    titleEn: "Emotional Skills Coach",
+    descAr: "يقيّم استجابات الطفل لسيناريوهات المشاعر (غضب، حزن، مشاركة) ويقترح أنشطة خاصة لتعزيز الذكاء العاطفي",
+    descEn: "Evaluates emotional responses (anger, sadness, sharing) and suggests activities to boost emotional intelligence",
+  },
+  speech: {
+    emoji: "💬",
+    titleAr: "مستشار اللغة والنطق",
+    titleEn: "Speech & Language Advisor",
+    descAr: "يحلل مخارج الحروف وعدد الكلمات وطول الجملة ويقارنها بعمره ويعطي توصيات لتمارين منزلية أو علاج نطق",
+    descEn: "Analyzes pronunciation, vocabulary size, sentence length compared to age with home exercise recommendations",
+  },
+  motor: {
+    emoji: "🏃",
+    titleAr: "التطور النمائي الحركي",
+    titleEn: "Motor Development",
+    descAr: "يجمع سلوك الطفل الحركي اليومي (لعب، جري، رسم) وينتج ملف نمو حيّ مع مؤشرات للتأخر أو التميز الحركي",
+    descEn: "Tracks daily motor behavior (play, running, drawing) producing a live growth profile with delay/excellence indicators",
+  },
+  talent: {
+    emoji: "⭐",
+    titleAr: "مكتشف الموهبة المبكرة",
+    titleEn: "Early Talent Discovery",
+    descAr: "يحلل أنماط أداء الطفل في الرسم والبناء والألعاب اللغوية ليكشف مؤشرات مبكرة لمواهب فنية أو رياضية أو منطقية",
+    descEn: "Analyzes performance in drawing, building, language games to detect early artistic, athletic, or logical talents",
+  },
+  behavior: {
+    emoji: "💌",
+    titleAr: "مترجم السلوك للأهل",
+    titleEn: "Parent Behavior Translator",
+    descAr: "يحوّل ملاحظات المعلمة إلى رسالة مفهومة لولي الأمر تشرح السلوك بلطف وتقدم خطة منزلية للتعامل معه",
+    descEn: "Converts teacher notes into parent-friendly messages with gentle explanations and home action plans",
+  },
+  nutrition: {
+    emoji: "🍎",
+    titleAr: "مساعد التغذية الذكي",
+    titleEn: "Smart Nutrition Assistant",
+    descAr: "يتابع تغذية الطفل ويقارنها باحتياجه العمري ويقترح صناديق غذاء مخصصة وتحفيزات لتجربة أطعمة جديدة",
+    descEn: "Tracks nutrition vs age needs, suggests customized lunchboxes and motivations for trying new healthy foods",
+  },
 };
+
+function getScoreColor(score: number): string {
+  if (score >= 80) return "text-success";
+  if (score >= 50) return "text-warning";
+  return "text-destructive";
+}
+
+function getScoreBg(score: number): string {
+  if (score >= 80) return "bg-success/10 border-success/30";
+  if (score >= 50) return "bg-warning/10 border-warning/30";
+  return "bg-destructive/10 border-destructive/30";
+}
+
+function getScoreTip(score: number, isAr: boolean): string {
+  if (score >= 80) return isAr ? "✅ أداء ممتاز — استمري في التعزيز" : "✅ Excellent — keep reinforcing";
+  if (score >= 60) return isAr ? "👍 جيد — مع بعض التحسينات البسيطة" : "👍 Good — with minor improvements";
+  if (score >= 50) return isAr ? "⚠️ يحتاج انتباه — خصصي أنشطة إضافية" : "⚠️ Needs attention — add extra activities";
+  return isAr ? "🔴 يحتاج دعم عاجل — تواصلي مع المختص" : "🔴 Needs urgent support — consult a specialist";
+}
 
 export function StudentProfileView({ student, onBack }: StudentProfileViewProps) {
   const { locale } = useI18n();
   const isAr = locale === "ar";
+  const navigate = useNavigate();
   const [surveys, setSurveys] = useState<DbSurvey[]>([]);
   const [attendanceStats, setAttendanceStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -58,7 +140,6 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
   const latestSurvey = surveys.find(s => s.analysis);
   const analysis = latestSurvey?.analysis as any;
 
-  // Build category scores from latest survey answers
   const categoryScores = surveyCategories.map(cat => {
     const catQuestions = cat.questions;
     const answers = latestSurvey?.answers || {};
@@ -68,19 +149,20 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
       return s + (typeof v === "number" ? v : 3);
     }, 0);
     const avg = answered.length > 0 ? Math.round((sum / answered.length) * 20) : 0;
-    const meta = categoryMeta[cat.id] || { emoji: "📊", descAr: "", descEn: "" };
+    const meta = categoryMeta[cat.id];
     return {
       id: cat.id,
-      name: isAr ? (meta.descAr.split(" ").slice(0, 3).join(" ")) : cat.titleKey.split(".")[1],
-      fullName: isAr ? surveyCategories.find(c => c.id === cat.id)?.titleKey : cat.titleKey,
-      emoji: meta.emoji,
-      desc: isAr ? meta.descAr : meta.descEn,
+      emoji: meta?.emoji || "📊",
+      titleAr: meta?.titleAr || cat.id,
+      titleEn: meta?.titleEn || cat.id,
+      descAr: meta?.descAr || "",
+      descEn: meta?.descEn || "",
       score: analysis?.scores?.[cat.id] ?? avg,
     };
   });
 
   const radarData = categoryScores.filter(c => c.score > 0).map(c => ({
-    subject: `${c.emoji} ${isAr ? c.name : c.id.charAt(0).toUpperCase() + c.id.slice(1)}`,
+    subject: `${c.emoji} ${isAr ? c.titleAr.split(" ")[0] : c.titleEn.split(" ")[0]}`,
     value: c.score,
   }));
 
@@ -95,9 +177,9 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
     .filter(s => s.analysis)
     .slice(0, 10)
     .reverse()
-    .map((s, i) => ({
+    .map((s) => ({
       date: new Date(s.date).toLocaleDateString(isAr ? "ar-SA" : "en-US", { month: "short", day: "numeric" }),
-      score: ((Object.values((s.analysis as any)?.scores || {}) as number[]).reduce((a, b) => a + (typeof b === "number" ? b : 0), 0)) / 7,
+      score: Math.round(((Object.values((s.analysis as any)?.scores || {}) as number[]).reduce((a, b) => a + (typeof b === "number" ? b : 0), 0)) / Math.max(Object.keys((s.analysis as any)?.scores || {}).length, 1)),
     }));
 
   if (loading) {
@@ -121,7 +203,7 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
           </div>
           <div>
             <h2 className="text-xl font-bold">{student.name}</h2>
-            <div className="flex items-center gap-2 mt-0.5">
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               <Badge variant="secondary" className="text-xs">{isAr ? `العمر: ${student.age}` : `Age: ${student.age}`}</Badge>
               <Badge variant="outline" className="text-xs">{student.gender === "male" ? (isAr ? "ذكر" : "Male") : (isAr ? "أنثى" : "Female")}</Badge>
               {analysis?.indicators?.type && (
@@ -133,6 +215,10 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
             </div>
           </div>
         </div>
+        <Button size="sm" className="gap-2" onClick={() => navigate("/survey")}>
+          <PlayCircle className="h-4 w-4" />
+          {isAr ? "تقييم جديد" : "New Assessment"}
+        </Button>
       </div>
 
       {/* Quick Stats */}
@@ -167,15 +253,86 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
         </Card>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="categories" className="space-y-4">
         <TabsList className="w-full grid grid-cols-4">
-          <TabsTrigger value="overview">{isAr ? "📊 نظرة عامة" : "📊 Overview"}</TabsTrigger>
           <TabsTrigger value="categories">{isAr ? "📋 البنود" : "📋 Categories"}</TabsTrigger>
+          <TabsTrigger value="overview">{isAr ? "📊 الرسوم" : "📊 Charts"}</TabsTrigger>
           <TabsTrigger value="analysis">{isAr ? "🧠 التحليل" : "🧠 Analysis"}</TabsTrigger>
           <TabsTrigger value="attendance">{isAr ? "📅 الحضور" : "📅 Attendance"}</TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab */}
+        {/* Categories Tab — Primary View */}
+        <TabsContent value="categories" className="space-y-3">
+          {categoryScores.length > 0 && categoryScores.some(c => c.score > 0) ? (
+            categoryScores.map((cat, idx) => (
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05 }}
+              >
+                <Card className={`overflow-hidden border ${getScoreBg(cat.score)}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="text-4xl mt-1">{cat.emoji}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className="font-bold text-sm">
+                            {isAr ? cat.titleAr : cat.titleEn}
+                          </h3>
+                          <Badge
+                            variant={cat.score >= 80 ? "default" : cat.score >= 50 ? "secondary" : "destructive"}
+                            className="text-xs font-bold"
+                          >
+                            {cat.score}%
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
+                          {isAr ? cat.descAr : cat.descEn}
+                        </p>
+                        <Progress value={cat.score} className="h-2.5 mb-2" />
+                        <p className={`text-xs font-medium ${getScoreColor(cat.score)}`}>
+                          {getScoreTip(cat.score, isAr)}
+                        </p>
+
+                        {/* Show questions & answers */}
+                        {latestSurvey && (
+                          <div className="mt-3 pt-2 border-t border-border/50 space-y-1.5">
+                            {surveyCategories.find(c => c.id === cat.id)?.questions.map(q => {
+                              const answer = latestSurvey.answers?.[q.id];
+                              return (
+                                <div key={q.id} className="flex items-center justify-between text-[11px]">
+                                  <span className="text-muted-foreground truncate max-w-[70%]">{isAr ? q.textAr : q.textEn}</span>
+                                  <span className="font-semibold">
+                                    {answer !== undefined ? (typeof answer === "number" ? `${answer}/5` : String(answer)) : "—"}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+                <h3 className="font-semibold mb-1">{isAr ? "لا توجد بيانات بعد" : "No data yet"}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{isAr ? "أكملي تقييماً لعرض البنود" : "Complete an assessment to view categories"}</p>
+                <Button size="sm" onClick={() => navigate("/survey")} className="gap-2">
+                  <PlayCircle className="h-4 w-4" />
+                  {isAr ? "ابدأ التقييم" : "Start Assessment"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Charts Tab */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {radarData.length > 0 && (
@@ -207,7 +364,7 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
                     <TrendingUp className="h-4 w-4 text-success" />
                     {isAr ? "تطور الدرجات عبر الزمن" : "Score Progress Over Time"}
                   </CardTitle>
-                  <CardDescription className="text-xs">{isAr ? "متابعة تقدم الطالب عبر التقييمات" : "Track student progress across assessments"}</CardDescription>
+                  <CardDescription className="text-xs">{isAr ? "متابعة تقدم الطالب" : "Track student progress"}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={280}>
@@ -229,14 +386,13 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">{isAr ? "📊 درجات البنود" : "📊 Category Scores"}</CardTitle>
-                <CardDescription className="text-xs">{isAr ? "مقارنة الدرجات في جميع مجالات التقييم" : "Compare scores across all assessment areas"}</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
+                <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={categoryScores.filter(c => c.score > 0)} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10 }} />
-                    <YAxis type="category" dataKey={c => `${c.emoji} ${c.id}`} tick={{ fontSize: 11 }} width={100} />
+                    <YAxis type="category" dataKey={c => `${c.emoji} ${isAr ? c.titleAr.split(" ")[0] : c.titleEn.split(" ")[0]}`} tick={{ fontSize: 11 }} width={110} />
                     <Tooltip />
                     <Bar dataKey="score" radius={[0, 6, 6, 0]}>
                       {categoryScores.filter(c => c.score > 0).map((_, i) => (
@@ -248,50 +404,6 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
               </CardContent>
             </Card>
           )}
-        </TabsContent>
-
-        {/* Categories Tab */}
-        <TabsContent value="categories" className="space-y-3">
-          {surveyCategories.map(cat => {
-            const meta = categoryMeta[cat.id];
-            const score = categoryScores.find(c => c.id === cat.id)?.score || 0;
-            return (
-              <motion.div key={cat.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
-                <Card className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="text-3xl">{meta?.emoji || "📊"}</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-semibold text-sm">
-                            {isAr ? (surveyCategories.find(c => c.id === cat.id)?.icon + " ") : ""}{cat.titleKey.split(".")[1].charAt(0).toUpperCase() + cat.titleKey.split(".")[1].slice(1)}
-                          </h3>
-                          <Badge variant={score >= 80 ? "default" : score >= 50 ? "secondary" : "destructive"} className="text-xs">
-                            {score}%
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground mb-2">{meta ? (isAr ? meta.descAr : meta.descEn) : ""}</p>
-                        <Progress value={score} className="h-2" />
-                        <div className="mt-2 space-y-1">
-                          {cat.questions.map(q => {
-                            const answer = latestSurvey?.answers?.[q.id];
-                            return (
-                              <div key={q.id} className="flex items-center justify-between text-[11px]">
-                                <span className="text-muted-foreground truncate max-w-[70%]">{isAr ? q.textAr : q.textEn}</span>
-                                <span className="font-medium">
-                                  {answer !== undefined ? (typeof answer === "number" ? `${answer}/5` : String(answer)) : (isAr ? "—" : "—")}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
         </TabsContent>
 
         {/* Analysis Tab */}
@@ -307,7 +419,19 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm leading-relaxed">{isAr ? analysis.summary.ar || analysis.summary : analysis.summary.en || analysis.summary}</p>
+                    <p className="text-sm leading-relaxed">{typeof analysis.summary === "string" ? analysis.summary : (isAr ? analysis.summary.ar : analysis.summary.en)}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {analysis.indicators?.details && (
+                <Card className="border-primary/30 bg-primary/5">
+                  <CardContent className="p-4 flex items-start gap-3">
+                    <span className="text-3xl">{analysis.indicators.type === "gifted" ? "🌟" : analysis.indicators.type === "delayed" ? "⚠️" : "✅"}</span>
+                    <div>
+                      <h4 className="font-bold text-sm mb-1">{isAr ? "🔍 المؤشرات المبكرة" : "🔍 Early Indicators"}</h4>
+                      <p className="text-sm text-muted-foreground">{typeof analysis.indicators.details === "string" ? analysis.indicators.details : (isAr ? analysis.indicators.details.ar : analysis.indicators.details.en)}</p>
+                    </div>
                   </CardContent>
                 </Card>
               )}
@@ -361,7 +485,7 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center gap-2">
                       <MessageSquare className="h-4 w-4 text-info" />
-                      {isAr ? "📝 توصيات المعلمة" : "📝 Teacher Recommendations"}
+                      {isAr ? "📝 توصيات المعلمة" : "📝 Recommendations"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -369,6 +493,27 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
                       {(Array.isArray(analysis.recommendations) ? analysis.recommendations : (isAr ? analysis.recommendations.ar : analysis.recommendations.en) || []).map((s: string, i: number) => (
                         <li key={i} className="text-sm flex items-start gap-2">
                           <span className="text-info mt-0.5">💡</span>
+                          <span>{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
+              {analysis.actionPlan && (
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <ClipboardList className="h-4 w-4 text-primary" />
+                      {isAr ? "📅 خطة 3 أيام" : "📅 3-Day Action Plan"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {(Array.isArray(analysis.actionPlan) ? analysis.actionPlan : (isAr ? analysis.actionPlan.ar : analysis.actionPlan.en) || []).map((s: string, i: number) => (
+                        <li key={i} className="text-sm flex items-start gap-2">
+                          <Badge variant="outline" className="text-[10px] shrink-0 mt-0.5">{i + 1}</Badge>
                           <span>{s}</span>
                         </li>
                       ))}
@@ -398,7 +543,11 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
               <CardContent className="py-12 text-center">
                 <Brain className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
                 <h3 className="font-semibold mb-1">{isAr ? "لا توجد تحليلات بعد" : "No analysis yet"}</h3>
-                <p className="text-sm text-muted-foreground">{isAr ? "أكملي استقصاءً لهذا الطالب للحصول على تحليل مفصل بالذكاء الاصطناعي" : "Complete a survey for this student to get an AI-powered analysis"}</p>
+                <p className="text-sm text-muted-foreground mb-4">{isAr ? "أكملي استقصاءً للحصول على تحليل بالذكاء الاصطناعي" : "Complete a survey for AI analysis"}</p>
+                <Button size="sm" onClick={() => navigate("/survey")} className="gap-2">
+                  <PlayCircle className="h-4 w-4" />
+                  {isAr ? "ابدأ التقييم" : "Start Assessment"}
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -410,7 +559,6 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">{isAr ? "📊 إحصائيات الحضور" : "📊 Attendance Stats"}</CardTitle>
-                <CardDescription className="text-xs">{isAr ? "ملخص سجل الحضور والغياب" : "Summary of attendance records"}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
@@ -474,7 +622,6 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
               <ClipboardList className="h-4 w-4 text-info" />
               {isAr ? "📜 سجل الاستقصاءات" : "📜 Survey History"}
             </CardTitle>
-            <CardDescription className="text-xs">{isAr ? "جميع التقييمات السابقة لهذا الطالب" : "All previous assessments for this student"}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
