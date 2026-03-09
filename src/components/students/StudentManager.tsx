@@ -6,29 +6,31 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserPlus, Trash2, AlertCircle } from "lucide-react";
 import { useI18n } from "@/i18n";
-import { Student, addStudent, removeStudent, getStudents } from "@/lib/storage";
+import { useAuth } from "@/hooks/useAuth";
+import { DbStudent, addStudent, removeStudent } from "@/lib/database";
 import { toast } from "sonner";
 
 interface StudentManagerProps {
-  students: Student[];
+  students: DbStudent[];
   onStudentsChange: () => void;
-  selectedStudent: Student | null;
-  onSelectStudent: (student: Student | null) => void;
+  selectedStudent: DbStudent | null;
+  onSelectStudent: (student: DbStudent | null) => void;
 }
 
 export function StudentManager({ students, onStudentsChange, selectedStudent, onSelectStudent }: StudentManagerProps) {
   const { t, locale } = useI18n();
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [age, setAge] = useState("5");
   const [gender, setGender] = useState<"male" | "female">("male");
 
-  const handleAdd = () => {
-    if (!name.trim()) return;
+  const handleAdd = async () => {
+    if (!name.trim() || !user) return;
     if (students.length >= 30) {
       toast.error(t("students.max"));
       return;
     }
-    const student = addStudent({ name: name.trim(), age: parseInt(age), gender });
+    const student = await addStudent({ name: name.trim(), age: parseInt(age), gender }, user.id);
     if (student) {
       setName("");
       onStudentsChange();
@@ -36,8 +38,8 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
     }
   };
 
-  const handleRemove = (id: string) => {
-    removeStudent(id);
+  const handleRemove = async (id: string) => {
+    await removeStudent(id);
     if (selectedStudent?.id === id) onSelectStudent(null);
     onStudentsChange();
   };

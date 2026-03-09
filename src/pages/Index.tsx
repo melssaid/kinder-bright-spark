@@ -6,25 +6,24 @@ import { Progress } from "@/components/ui/progress";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { Users, ClipboardList, TrendingUp, Brain } from "lucide-react";
 import { useI18n } from "@/i18n";
-import { getStudents, getSurveys, Student, SurveyResponse } from "@/lib/storage";
+import { getStudents, getSurveys, DbStudent, DbSurvey } from "@/lib/database";
 
 const Index = () => {
   const { t, locale } = useI18n();
-  const [students, setStudents] = useState<Student[]>([]);
-  const [surveys, setSurveys] = useState<SurveyResponse[]>([]);
+  const [students, setStudents] = useState<DbStudent[]>([]);
+  const [surveys, setSurveys] = useState<DbSurvey[]>([]);
 
   useEffect(() => {
-    setStudents(getStudents());
-    setSurveys(getSurveys());
+    getStudents().then(setStudents);
+    getSurveys().then(setSurveys);
   }, []);
 
   const analyzedSurveys = surveys.filter(s => s.analysis);
   const latestByStudent = students.map(st => {
-    const studentSurveys = analyzedSurveys.filter(s => s.studentId === st.id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const studentSurveys = analyzedSurveys.filter(s => s.student_id === st.id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     return { student: st, latest: studentSurveys[0] || null };
   }).filter(x => x.latest);
 
-  // Aggregate scores
   const avgScores = latestByStudent.length > 0 ? {
     attention: Math.round(latestByStudent.reduce((s, x) => s + (x.latest?.analysis?.scores.attention || 0), 0) / latestByStudent.length),
     social: Math.round(latestByStudent.reduce((s, x) => s + (x.latest?.analysis?.scores.social || 0), 0) / latestByStudent.length),
@@ -60,7 +59,6 @@ const Index = () => {
           <p className="text-muted-foreground text-sm">{t("dashboard.subtitle")}</p>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-4 pb-3 flex items-center gap-3">
@@ -102,7 +100,6 @@ const Index = () => {
 
         {latestByStudent.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Average radar */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">{locale === "ar" ? "متوسط درجات الفصل" : "Class Average Scores"}</CardTitle>
@@ -119,7 +116,6 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Student comparison */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">{locale === "ar" ? "مقارنة الطلاب" : "Student Comparison"}</CardTitle>
@@ -139,7 +135,6 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Student overview list */}
             <Card className="lg:col-span-2">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">{locale === "ar" ? "نظرة عامة على الطلاب" : "Student Overview"}</CardTitle>
@@ -174,11 +169,6 @@ const Index = () => {
             </CardContent>
           </Card>
         )}
-
-        {/* Storage notice */}
-        <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-xs text-center text-muted-foreground">
-          {t("storage.notice")}
-        </div>
       </div>
     </DashboardLayout>
   );

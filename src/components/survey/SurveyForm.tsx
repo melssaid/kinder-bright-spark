@@ -7,18 +7,21 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Loader2, Send, CheckCircle } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { useAuth } from "@/hooks/useAuth";
 import { surveyCategories } from "@/data/surveyQuestions";
-import { Student, addSurvey, updateSurveyAnalysis, AnalysisResult } from "@/lib/storage";
+import { DbStudent } from "@/lib/database";
+import { addSurvey, updateSurveyAnalysis } from "@/lib/database";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface SurveyFormProps {
-  student: Student;
+  student: DbStudent;
   onComplete: () => void;
 }
 
 export function SurveyForm({ student, onComplete }: SurveyFormProps) {
   const { t, locale } = useI18n();
+  const { user } = useAuth();
   const [currentCategory, setCurrentCategory] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
   const [analyzing, setAnalyzing] = useState(false);
@@ -37,35 +40,28 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
   };
 
   const handleNext = () => {
-    if (isLastCategory) {
-      handleSubmit();
-    } else {
-      setCurrentCategory(prev => prev + 1);
-    }
+    if (isLastCategory) handleSubmit();
+    else setCurrentCategory(prev => prev + 1);
   };
 
   const handleSubmit = async () => {
+    if (!user) return;
     setAnalyzing(true);
-    const survey = addSurvey({
-      studentId: student.id,
-      date: new Date().toISOString(),
-      answers,
-    });
+    const survey = await addSurvey({ student_id: student.id, teacher_id: user.id, answers });
+    if (!survey) { setAnalyzing(false); toast.error("Error saving survey"); return; }
 
     try {
       const { data, error } = await supabase.functions.invoke("analyze-behavior", {
         body: { studentName: student.name, studentAge: student.age, surveyData: answers, locale },
       });
-
       if (error) throw error;
       if (data?.error) {
-        if (data.error.includes("Rate limit")) toast.error(locale === "ar" ? "تم تجاوز حد الطلبات، حاول لاحقاً" : "Rate limit exceeded, try again later");
+        if (data.error.includes("Rate limit")) toast.error(locale === "ar" ? "تم تجاوز حد الطلبات" : "Rate limit exceeded");
         else if (data.error.includes("Payment")) toast.error(locale === "ar" ? "يرجى إضافة رصيد" : "Please add credits");
         else throw new Error(data.error);
       }
-
       if (data?.analysis) {
-        updateSurveyAnalysis(survey.id, data.analysis as AnalysisResult);
+        await updateSurveyAnalysis(survey.id, data.analysis);
       }
       setCompleted(true);
       toast.success(locale === "ar" ? "تم التحليل بنجاح!" : "Analysis complete!");
@@ -102,7 +98,6 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
 
   return (
     <div className="space-y-4">
-      {/* Progress bar */}
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{answeredQuestions}/{totalQuestions}</span>
@@ -111,18 +106,11 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Category tabs */}
       <div className="flex gap-1 overflow-x-auto pb-2">
         {surveyCategories.map((cat, i) => {
           const catAnswered = cat.questions.every(q => answers[q.id] !== undefined);
           return (
-            <Button
-              key={cat.id}
-              variant={i === currentCategory ? "default" : catAnswered ? "secondary" : "outline"}
-              size="sm"
-              className="shrink-0 text-xs gap-1"
-              onClick={() => setCurrentCategory(i)}
-            >
+            <Button key={cat.id} variant={i === currentCategory ? "default" : catAnswered ? "secondary" : "outline"} size="sm" className="shrink-0 text-xs gap-1" onClick={() => setCurrentCategory(i)}>
               <span>{cat.icon}</span>
               {t(cat.titleKey)}
               {catAnswered && <CheckCircle className="h-3 w-3" />}
@@ -131,7 +119,6 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
         })}
       </div>
 
-      {/* Questions */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
@@ -144,17 +131,10 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
           {category.questions.map(question => (
             <div key={question.id} className="space-y-3">
               <p className="text-sm font-medium">{locale === "ar" ? question.textAr : question.textEn}</p>
-
               {question.type === "scale" ? (
                 <div className="flex gap-2 flex-wrap">
                   {[1, 2, 3, 4, 5].map(val => (
-                    <Button
-                      key={val}
-                      variant={answers[question.id] === val ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleAnswer(question.id, val)}
-                      className="flex-1 min-w-[60px]"
-                    >
+                    <Button key={val} variant={answers[question.id] === val ? "default" : "outline"} size="sm" onClick={() => handleAnswer(question.id, val)} className="flex-1 min-w-[60px]">
                       <div className="text-center">
                         <div className="text-xs">{val}</div>
                         <div className="text-[9px]">{t(`survey.scale.${val}`)}</div>
@@ -168,9 +148,7 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
                     {question.options?.map(opt => (
                       <div key={opt.value} className="flex items-center gap-1.5">
                         <RadioGroupItem value={String(opt.value)} id={`${question.id}-${opt.value}`} />
-                        <Label htmlFor={`${question.id}-${opt.value}`} className="text-sm cursor-pointer">
-                          {locale === "ar" ? opt.ar : opt.en}
-                        </Label>
+                        <Label htmlFor={`${question.id}-${opt.value}`} className="text-sm cursor-pointer">{locale === "ar" ? opt.ar : opt.en}</Label>
                       </div>
                     ))}
                   </div>
@@ -181,17 +159,12 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
         </CardContent>
       </Card>
 
-      {/* Navigation */}
       <div className="flex justify-between">
         <Button variant="outline" onClick={() => setCurrentCategory(prev => prev - 1)} disabled={currentCategory === 0}>
           {locale === "ar" ? "السابق" : "Previous"}
         </Button>
         <Button onClick={handleNext} disabled={!canProceed} className="gap-2">
-          {isLastCategory ? (
-            <><Send className="h-4 w-4" /> {t("survey.submit")}</>
-          ) : (
-            locale === "ar" ? "التالي" : "Next"
-          )}
+          {isLastCategory ? (<><Send className="h-4 w-4" /> {t("survey.submit")}</>) : (locale === "ar" ? "التالي" : "Next")}
         </Button>
       </div>
     </div>

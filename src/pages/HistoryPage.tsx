@@ -6,25 +6,30 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AnalysisView } from "@/components/analysis/AnalysisView";
 import { useI18n } from "@/i18n";
-import { getStudents, getSurveys, Student, SurveyResponse, getStudentSurveys } from "@/lib/storage";
+import { getStudents, getStudentSurveys, DbStudent, DbSurvey } from "@/lib/database";
 import { History, ChevronLeft } from "lucide-react";
 
 const HistoryPage = () => {
   const { t, locale } = useI18n();
-  const [students, setStudents] = useState<Student[]>([]);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [selectedSurvey, setSelectedSurvey] = useState<SurveyResponse | null>(null);
-  const [studentSurveys, setStudentSurveys] = useState<SurveyResponse[]>([]);
+  const [students, setStudents] = useState<DbStudent[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<DbStudent | null>(null);
+  const [selectedSurvey, setSelectedSurvey] = useState<DbSurvey | null>(null);
+  const [studentSurveys, setStudentSurveys] = useState<DbSurvey[]>([]);
 
-  useEffect(() => { setStudents(getStudents()); }, []);
+  useEffect(() => { getStudents().then(setStudents); }, []);
 
   useEffect(() => {
     if (selectedStudent) {
-      const surveys = getStudentSurveys(selectedStudent.id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setStudentSurveys(surveys);
-      setSelectedSurvey(null);
+      getStudentSurveys(selectedStudent.id).then(surveys => {
+        setStudentSurveys(surveys);
+        setSelectedSurvey(null);
+      });
     }
   }, [selectedStudent]);
+
+  // Adapt for AnalysisView which expects old shape
+  const adaptStudent = (s: DbStudent) => ({ id: s.id, name: s.name, age: s.age, gender: s.gender as "male" | "female", createdAt: s.created_at });
+  const adaptSurvey = (s: DbSurvey) => ({ id: s.id, studentId: s.student_id, date: s.date, answers: s.answers, analysis: s.analysis });
 
   return (
     <DashboardLayout>
@@ -57,7 +62,7 @@ const HistoryPage = () => {
             <Button variant="outline" size="sm" onClick={() => setSelectedSurvey(null)} className="gap-2">
               <ChevronLeft className="h-4 w-4" /> {locale === "ar" ? "العودة للقائمة" : "Back to list"}
             </Button>
-            <AnalysisView student={selectedStudent} survey={selectedSurvey} />
+            <AnalysisView student={adaptStudent(selectedStudent)} survey={adaptSurvey(selectedSurvey)} />
           </div>
         ) : selectedStudent ? (
           studentSurveys.length === 0 ? (
