@@ -11,6 +11,7 @@ import SurveyPage from "./pages/SurveyPage";
 import HistoryPage from "./pages/HistoryPage";
 import AttendancePage from "./pages/AttendancePage";
 import AuthPage from "./pages/AuthPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
