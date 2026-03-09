@@ -5,9 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { I18nProvider } from "@/i18n";
 import Index from "./pages/Index";
-import EmotionalSkillsCoach from "./pages/EmotionalSkillsCoach";
-import BehaviorTranslator from "./pages/BehaviorTranslator";
-import NutritionPage from "./pages/NutritionPage";
+import StudentsPage from "./pages/StudentsPage";
+import SurveyPage from "./pages/SurveyPage";
+import HistoryPage from "./pages/HistoryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,9 +21,9 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/emotional-coach" element={<EmotionalSkillsCoach />} />
-            <Route path="/behavior-translator" element={<BehaviorTranslator />} />
-            <Route path="/nutrition" element={<NutritionPage />} />
+            <Route path="/students" element={<StudentsPage />} />
+            <Route path="/survey" element={<SurveyPage />} />
+            <Route path="/history" element={<HistoryPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
