@@ -10,17 +10,19 @@ import { SpeechLanguageCard } from "@/components/dashboard/SpeechLanguageCard";
 import { EarlyTalentDiscoverer } from "@/components/dashboard/EarlyTalentDiscoverer";
 import { NutritionAssistant } from "@/components/dashboard/NutritionAssistant";
 import { children, Child } from "@/data/mockData";
+import { useI18n } from "@/i18n";
 
 const Index = () => {
   const [selectedChild, setSelectedChild] = useState<Child>(children[0]);
+  const { t } = useI18n();
 
   return (
     <DashboardLayout>
       <div className="p-4 md:p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Teacher Dashboard</h1>
-            <p className="text-muted-foreground text-sm">Track development, behavior, and wellbeing</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t("dashboard.title")}</h1>
+            <p className="text-muted-foreground text-sm">{t("dashboard.subtitle")}</p>
           </div>
           <ChildSelector selectedChild={selectedChild} onSelect={setSelectedChild} />
         </div>
