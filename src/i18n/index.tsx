@@ -116,6 +116,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const t = useCallback((key: string) => translations[key]?.[locale] ?? key, [locale]);
   const dir = locale === "ar" ? "rtl" : "ltr";
 
+  // Sync dir and lang on <html> element for global RTL support
+  useEffect(() => {
+    document.documentElement.dir = dir;
+    document.documentElement.lang = locale;
+  }, [dir, locale]);
+
   return (
     <I18nContext.Provider value={{ locale, setLocale, t, dir }}>
       {children}
