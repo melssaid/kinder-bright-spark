@@ -32,6 +32,21 @@ const translations: Translations = {
   "attendance.lowAttendance": { en: "Low Attendance", ar: "حضور منخفض" },
   "attendance.chartTitle": { en: "Attendance Rate by Student", ar: "نسبة الحضور حسب الطالب" },
   "attendance.studentDetails": { en: "Student Details", ar: "تفاصيل الطلاب" },
+  // Auth
+  "auth.login": { en: "Sign In", ar: "تسجيل الدخول" },
+  "auth.signup": { en: "Create Account", ar: "إنشاء حساب" },
+  "auth.email": { en: "Email", ar: "البريد الإلكتروني" },
+  "auth.password": { en: "Password", ar: "كلمة المرور" },
+  "auth.fullName": { en: "Full Name", ar: "الاسم الكامل" },
+  "auth.fullNamePlaceholder": { en: "e.g. Sarah Ahmad", ar: "مثال: سارة أحمد" },
+  "auth.schoolName": { en: "School Name (optional)", ar: "اسم المدرسة (اختياري)" },
+  "auth.schoolNamePlaceholder": { en: "e.g. Al-Noor Kindergarten", ar: "مثال: روضة النور" },
+  "auth.subtitle": { en: "Child Development Tracking System", ar: "نظام تتبع نمو الأطفال" },
+  "auth.hasAccount": { en: "Already have an account? Sign in", ar: "لديك حساب؟ سجل دخولك" },
+  "auth.noAccount": { en: "Don't have an account? Sign up", ar: "ليس لديك حساب؟ أنشئ واحداً" },
+  "auth.signupSuccess": { en: "Account created! Welcome.", ar: "تم إنشاء الحساب! أهلاً بك." },
+  "auth.error": { en: "Authentication error", ar: "خطأ في المصادقة" },
+  "auth.cloudNotice": { en: "☁️ Data is securely stored in the cloud", ar: "☁️ البيانات مخزنة بأمان في السحابة" },
 };
 
 // Merge survey translations

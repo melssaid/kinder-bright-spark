@@ -4,17 +4,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SurveyForm } from "@/components/survey/SurveyForm";
 import { useI18n } from "@/i18n";
-import { getStudents, Student } from "@/lib/storage";
+import { getStudents, DbStudent } from "@/lib/database";
 import { useNavigate } from "react-router-dom";
 import { ClipboardList, Users } from "lucide-react";
 
 const SurveyPage = () => {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
-  const [students, setStudents] = useState<Student[]>([]);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [students, setStudents] = useState<DbStudent[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<DbStudent | null>(null);
 
-  useEffect(() => { setStudents(getStudents()); }, []);
+  useEffect(() => { getStudents().then(setStudents); }, []);
 
   return (
     <DashboardLayout>

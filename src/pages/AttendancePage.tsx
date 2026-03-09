@@ -1,9 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { AttendanceTable } from "@/components/attendance/AttendanceTable";
 import { AttendanceStats } from "@/components/attendance/AttendanceStats";
 import { useI18n } from "@/i18n";
-import { getStudents } from "@/lib/storage";
+import { getStudents, DbStudent } from "@/lib/database";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,10 @@ const AttendancePage = () => {
   const { t, locale } = useI18n();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [refreshKey, setRefreshKey] = useState(0);
-  const students = useMemo(() => getStudents(), []);
+  const [students, setStudents] = useState<DbStudent[]>([]);
   const dateLocale = locale === "ar" ? ar : enUS;
+
+  useEffect(() => { getStudents().then(setStudents); }, []);
 
   return (
     <DashboardLayout>
@@ -36,13 +38,7 @@ const AttendancePage = () => {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(d) => d && setSelectedDate(d)}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-              />
+              <Calendar mode="single" selected={selectedDate} onSelect={(d) => d && setSelectedDate(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
             </PopoverContent>
           </Popover>
         </div>
@@ -52,16 +48,9 @@ const AttendancePage = () => {
             <TabsTrigger value="daily">{t("attendance.daily")}</TabsTrigger>
             <TabsTrigger value="stats">{t("attendance.stats")}</TabsTrigger>
           </TabsList>
-
           <TabsContent value="daily">
-            <AttendanceTable
-              students={students}
-              date={selectedDate}
-              refreshKey={refreshKey}
-              onRefresh={() => setRefreshKey(k => k + 1)}
-            />
+            <AttendanceTable students={students} date={selectedDate} refreshKey={refreshKey} onRefresh={() => setRefreshKey(k => k + 1)} />
           </TabsContent>
-
           <TabsContent value="stats">
             <AttendanceStats students={students} />
           </TabsContent>
