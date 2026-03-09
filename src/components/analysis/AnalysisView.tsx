@@ -91,7 +91,7 @@ export function AnalysisView({ student, survey }: AnalysisViewProps) {
       <div ref={reportRef} className="space-y-4 bg-background p-2">
         {/* Header */}
         <div className="text-center pb-2 border-b">
-          <h2 className="text-xl font-bold">🌈 KinderTrack</h2>
+          <h2 className="text-xl font-bold">🌈 Kinder BH</h2>
           <p className="text-sm text-muted-foreground">{student.name} — {new Date(survey.date).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}</p>
         </div>
 
