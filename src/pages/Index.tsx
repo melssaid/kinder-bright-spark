@@ -7,6 +7,9 @@ import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Responsi
 import { Users, ClipboardList, TrendingUp, Brain } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { getStudents, getSurveys, DbStudent, DbSurvey } from "@/lib/database";
+import { PageHeader } from "@/components/common/PageHeader";
+import { EmptyState } from "@/components/common/EmptyState";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const { t, locale } = useI18n();
