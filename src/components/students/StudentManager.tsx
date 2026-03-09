@@ -101,7 +101,13 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
         </div>
 
         {students.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">{t("students.noStudents")}</p>
+          <div className="text-center py-6 space-y-3">
+            <p className="text-sm text-muted-foreground">{t("students.noStudents")}</p>
+            <Button variant="outline" size="sm" onClick={handleSeedDemo} disabled={seeding} className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              {seeding ? (locale === "ar" ? "جاري الإضافة..." : "Adding...") : (locale === "ar" ? "✨ إضافة بيانات تجريبية" : "✨ Add Demo Data")}
+            </Button>
+          </div>
         ) : (
           <div className="space-y-1 max-h-[300px] overflow-auto">
             {students.map(student => (
