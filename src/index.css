@@ -115,10 +115,19 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Poppins', 'Tajawal', sans-serif;
+  }
+
+  [dir="rtl"] body, [lang="ar"] body {
+    font-family: 'Tajawal', 'Poppins', sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Quicksand', sans-serif;
+    font-family: 'Poppins', 'Tajawal', sans-serif;
+    font-weight: 700;
+  }
+
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+    font-family: 'Tajawal', 'Poppins', sans-serif;
   }
 }
