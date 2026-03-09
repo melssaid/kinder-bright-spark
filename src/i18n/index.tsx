@@ -32,6 +32,53 @@ const translations: Translations = {
   "attendance.lowAttendance": { en: "Low Attendance", ar: "حضور منخفض" },
   "attendance.chartTitle": { en: "Attendance Rate by Student", ar: "نسبة الحضور حسب الطالب" },
   "attendance.studentDetails": { en: "Student Details", ar: "تفاصيل الطلاب" },
+  
+  // Tour translations
+  "tour.welcome": { 
+    en: "Welcome to KinderTrack! Let me show you around the app 🌈", 
+    ar: "مرحباً بك في كيندرتراك! دعني أريك جولة سريعة في التطبيق 🌈" 
+  },
+  "tour.students": { 
+    en: "Here you can add and manage your students (up to 30 students)", 
+    ar: "هنا يمكنك إضافة وإدارة طلابك (حتى 30 طالباً)" 
+  },
+  "tour.survey": { 
+    en: "Fill behavioral surveys to track student development using AI analysis", 
+    ar: "املأ الاستقصاءات السلوكية لتتبع تطور الطلاب بتحليل الذكاء الاصطناعي" 
+  },
+  "tour.attendance": { 
+    en: "Track daily attendance with present, absent, late, and excused statuses", 
+    ar: "سجّل الحضور اليومي بحالات حاضر، غائب، متأخر، ومعذور" 
+  },
+  "tour.history": { 
+    en: "View detailed analysis reports and track student progress over time", 
+    ar: "اطّلع على تقارير التحليل التفصيلية وتتبع تقدم الطلاب عبر الزمن" 
+  },
+  "tour.dashboard": { 
+    en: "Your main dashboard shows class statistics and recent activity", 
+    ar: "لوحة التحكم الرئيسية تعرض إحصاءات الفصل والنشاط الأخير" 
+  },
+  
+  // Empty state translations
+  "empty.students.title": { en: "No Students Yet", ar: "لا يوجد طلاب بعد" },
+  "empty.students.description": { 
+    en: "Start by adding your first student to begin tracking their development", 
+    ar: "ابدأ بإضافة أول طالب لك لتتبع تطوره" 
+  },
+  "empty.students.action": { en: "Add Your First Student", ar: "أضف أول طالب" },
+  
+  "empty.surveys.title": { en: "Select a Student", ar: "اختر طالباً" },
+  "empty.surveys.description": { 
+    en: "Choose a student from the list above to fill their behavioral survey", 
+    ar: "اختر طالباً من القائمة أعلاه لملء استقصاءه السلوكي" 
+  },
+  
+  "empty.history.title": { en: "No Analysis Available", ar: "لا توجد تحليلات" },
+  "empty.history.description": { 
+    en: "Complete surveys to see AI-powered analysis and development reports", 
+    ar: "أكمل الاستقصاءات لرؤية التحليلات المدعومة بالذكاء الاصطناعي" 
+  },
+  
   // Auth
   "auth.login": { en: "Sign In", ar: "تسجيل الدخول" },
   "auth.signup": { en: "Create Account", ar: "إنشاء حساب" },
@@ -47,6 +94,7 @@ const translations: Translations = {
   "auth.signupSuccess": { en: "Account created! Welcome.", ar: "تم إنشاء الحساب! أهلاً بك." },
   "auth.error": { en: "Authentication error", ar: "خطأ في المصادقة" },
   "auth.cloudNotice": { en: "☁️ Data is securely stored in the cloud", ar: "☁️ البيانات مخزنة بأمان في السحابة" },
+  "storage.notice": { en: "☁️ Cloud-synced data", ar: "☁️ بيانات مزامنة سحابياً" },
 };
 
 // Merge survey translations

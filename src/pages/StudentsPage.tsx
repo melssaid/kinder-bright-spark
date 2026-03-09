@@ -6,7 +6,7 @@ import { getStudents, DbStudent } from "@/lib/database";
 import { PageHeader } from "@/components/common/PageHeader";
 
 const StudentsPage = () => {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [students, setStudents] = useState<DbStudent[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<DbStudent | null>(null);
 
