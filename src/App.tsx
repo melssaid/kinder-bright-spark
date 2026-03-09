@@ -39,6 +39,7 @@ const AppRoutes = () => (
       <Route path="/survey" element={<ProtectedRoute><SurveyPage /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
       <Route path="/attendance" element={<ProtectedRoute><AttendancePage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>
