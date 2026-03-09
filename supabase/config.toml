@@ -1,1 +1,4 @@
 project_id = "npcahrdcnsodbsdsykpj"
+
+[functions.analyze-behavior]
+verify_jwt = false
