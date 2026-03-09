@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, History, Users, CalendarCheck } from "lucide-react";
+import { LayoutDashboard, ClipboardList, History, Users, CalendarCheck, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useI18n } from "@/i18n";
@@ -12,7 +12,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const isActive = (path: string) => location.pathname === path;
 
   const items = [
@@ -21,6 +21,7 @@ export function AppSidebar() {
     { title: t("nav.attendance"), url: "/attendance", icon: CalendarCheck, tourId: "attendance" },
     { title: t("nav.survey"), url: "/survey", icon: ClipboardList, tourId: "survey" },
     { title: t("nav.history"), url: "/history", icon: History, tourId: "history" },
+    { title: locale === "ar" ? "الإعدادات" : "Settings", url: "/settings", icon: Settings, tourId: "settings" },
   ];
 
   return (

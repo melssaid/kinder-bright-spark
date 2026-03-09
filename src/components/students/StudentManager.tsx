@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserPlus, Trash2, AlertCircle } from "lucide-react";
+import { UserPlus, Trash2, AlertCircle, Sparkles } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { DbStudent, addStudent, removeStudent } from "@/lib/database";
@@ -23,6 +23,27 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
   const [name, setName] = useState("");
   const [age, setAge] = useState("5");
   const [gender, setGender] = useState<"male" | "female">("male");
+  const [seeding, setSeeding] = useState(false);
+
+  const demoStudents = [
+    { name: locale === "ar" ? "أحمد محمد" : "Ahmad Mohammed", age: 5, gender: "male" },
+    { name: locale === "ar" ? "فاطمة علي" : "Fatima Ali", age: 4, gender: "female" },
+    { name: locale === "ar" ? "يوسف خالد" : "Yousef Khaled", age: 6, gender: "male" },
+    { name: locale === "ar" ? "نورة سعد" : "Noura Saad", age: 5, gender: "female" },
+    { name: locale === "ar" ? "عمر حسن" : "Omar Hassan", age: 4, gender: "male" },
+    { name: locale === "ar" ? "ريم عبدالله" : "Reem Abdullah", age: 5, gender: "female" },
+  ];
+
+  const handleSeedDemo = async () => {
+    if (!user || students.length > 0) return;
+    setSeeding(true);
+    for (const s of demoStudents) {
+      await addStudent(s, user.id);
+    }
+    onStudentsChange();
+    setSeeding(false);
+    toast.success(locale === "ar" ? "تمت إضافة بيانات تجريبية 🎉" : "Demo data added 🎉");
+  };
 
   const handleAdd = async () => {
     if (!name.trim() || !user) return;
@@ -80,7 +101,13 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
         </div>
 
         {students.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">{t("students.noStudents")}</p>
+          <div className="text-center py-6 space-y-3">
+            <p className="text-sm text-muted-foreground">{t("students.noStudents")}</p>
+            <Button variant="outline" size="sm" onClick={handleSeedDemo} disabled={seeding} className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              {seeding ? (locale === "ar" ? "جاري الإضافة..." : "Adding...") : (locale === "ar" ? "✨ إضافة بيانات تجريبية" : "✨ Add Demo Data")}
+            </Button>
+          </div>
         ) : (
           <div className="space-y-1 max-h-[300px] overflow-auto">
             {students.map(student => (
