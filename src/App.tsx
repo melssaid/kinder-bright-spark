@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminKindergartens from "./pages/admin/AdminKindergartens";
 import AdminTeachers from "./pages/admin/AdminTeachers";
 import KgAdminDashboard from "./pages/kg-admin/KgAdminDashboard";
+import KgAdminTeachers from "./pages/kg-admin/KgAdminTeachers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -67,6 +68,7 @@ const AppRoutes = () => (
       <Route path="/admin/kindergartens" element={<AdminRoute><AdminKindergartens /></AdminRoute>} />
       <Route path="/admin/teachers" element={<AdminRoute><AdminTeachers /></AdminRoute>} />
       <Route path="/kg-admin" element={<KgAdminRoute><KgAdminDashboard /></KgAdminRoute>} />
+      <Route path="/kg-admin/teachers" element={<KgAdminRoute><KgAdminTeachers /></KgAdminRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>

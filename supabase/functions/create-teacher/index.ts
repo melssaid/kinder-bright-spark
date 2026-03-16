@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -17,7 +17,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify caller is admin
+    // Verify caller identity
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -25,19 +25,41 @@ serve(async (req) => {
     if (!caller) throw new Error("Unauthorized");
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-    const { data: roleData } = await adminClient
+
+    // Check caller roles
+    const { data: roles } = await adminClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", caller.id)
-      .eq("role", "admin")
-      .single();
+      .eq("user_id", caller.id);
 
-    if (!roleData) throw new Error("Only admins can create accounts");
+    const roleList = (roles || []).map((r: any) => r.role);
+    const isAdmin = roleList.includes("admin");
+    const isKgAdmin = roleList.includes("kg_admin");
+
+    if (!isAdmin && !isKgAdmin) throw new Error("Only admins and KG directors can create accounts");
 
     const { email, password, fullName, kindergartenId, role = "teacher" } = await req.json();
 
     if (!email || !password || !fullName || !kindergartenId) {
       throw new Error("Missing required fields: email, password, fullName, kindergartenId");
+    }
+
+    // KG admin can only create teachers in their own kindergarten
+    if (isKgAdmin && !isAdmin) {
+      const { data: profile } = await adminClient
+        .from("profiles")
+        .select("kindergarten_id")
+        .eq("id", caller.id)
+        .single();
+
+      if (profile?.kindergarten_id !== kindergartenId) {
+        throw new Error("You can only create accounts in your own kindergarten");
+      }
+
+      // KG admin can only create teacher role, not kg_admin
+      if (role !== "teacher") {
+        throw new Error("KG directors can only create teacher accounts");
+      }
     }
 
     // Validate role
