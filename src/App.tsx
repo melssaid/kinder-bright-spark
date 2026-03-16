@@ -68,6 +68,7 @@ const AppRoutes = () => (
       <Route path="/admin/kindergartens" element={<AdminRoute><AdminKindergartens /></AdminRoute>} />
       <Route path="/admin/teachers" element={<AdminRoute><AdminTeachers /></AdminRoute>} />
       <Route path="/kg-admin" element={<KgAdminRoute><KgAdminDashboard /></KgAdminRoute>} />
+      <Route path="/kg-admin/teachers" element={<KgAdminRoute><KgAdminTeachers /></KgAdminRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>
