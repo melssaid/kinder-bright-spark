@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 export function TopNavbar() {
   const { locale, setLocale, t, dir } = useI18n();
   const { user, signOut } = useAuth();
-  const { kindergartenName, isAdmin } = useRole();
+  const { kindergartenName, isAdmin, isKgAdmin } = useRole();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
