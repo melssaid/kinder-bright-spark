@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminKindergartens from "./pages/admin/AdminKindergartens";
 import AdminTeachers from "./pages/admin/AdminTeachers";
 import KgAdminDashboard from "./pages/kg-admin/KgAdminDashboard";
+import KgAdminTeachers from "./pages/kg-admin/KgAdminTeachers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
