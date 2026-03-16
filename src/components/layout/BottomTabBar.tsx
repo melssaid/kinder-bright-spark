@@ -14,7 +14,8 @@ export function BottomTabBar() {
     { to: "/students", icon: Users, label: locale === "ar" ? "الطلاب" : "Students" },
     { to: "/survey", icon: ClipboardList, label: locale === "ar" ? "تقييم" : "Survey" },
     { to: "/attendance", icon: CalendarCheck, label: locale === "ar" ? "حضور" : "Attend" },
-    ...(isAdmin ? [{ to: "/admin", icon: Shield, label: locale === "ar" ? "أدمن" : "Admin" }] : [
+    ...(isAdmin ? [{ to: "/admin", icon: Shield, label: locale === "ar" ? "أدمن" : "Admin" }] : 
+        isKgAdmin ? [{ to: "/kg-admin", icon: Building2, label: locale === "ar" ? "روضتي" : "My KG" }] : [
       { to: "/history", icon: History, label: locale === "ar" ? "السجل" : "History" },
     ]),
   ];

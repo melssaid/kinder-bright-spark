@@ -71,6 +71,23 @@ export function TopNavbar() {
               <span>{link.label}</span>
             </NavLink>
           ))}
+          {isKgAdmin && (
+            <>
+              <div className="w-px h-6 bg-border mx-1" />
+              <NavLink
+                to="/kg-admin"
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                  isActive("/kg-admin")
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
+              >
+                <Building2 className="h-3.5 w-3.5" />
+                <span>{locale === "ar" ? "إدارة الروضة" : "My KG"}</span>
+              </NavLink>
+            </>
+          )}
           {isAdmin && (
             <>
               <div className="w-px h-6 bg-border mx-1" />
