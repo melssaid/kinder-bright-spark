@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, GraduationCap, ClipboardList, CalendarCheck, Brain } from "lucide-react";
+import { Users, GraduationCap, ClipboardList, Brain } from "lucide-react";
+import { KgCharts } from "@/components/kg-admin/KgCharts";
+import { KgInsights } from "@/components/kg-admin/KgInsights";
 
 interface TeacherInfo { id: string; full_name: string; }
 interface StudentInfo { id: string; name: string; age: number; gender: string; teacher_id: string; }
@@ -47,7 +49,7 @@ const KgAdminDashboard = () => {
           <p className="text-sm text-muted-foreground">{isAr ? "نظرة شاملة على الروضة" : "Kindergarten overview"}</p>
         </div>
 
-        {/* Stats */}
+        {/* Summary Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
           {[
             { icon: Users, value: teachers.length, label: isAr ? "معلمات" : "Teachers", color: "text-primary" },
@@ -64,6 +66,12 @@ const KgAdminDashboard = () => {
             </Card>
           ))}
         </div>
+
+        {/* Key Insights */}
+        <KgInsights students={students} surveys={surveys} teachers={teachers} />
+
+        {/* Charts */}
+        <KgCharts students={students} surveys={surveys} teachers={teachers} />
 
         {/* Teachers list */}
         <Card>
