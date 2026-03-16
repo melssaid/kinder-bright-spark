@@ -25,8 +25,8 @@ const AttendancePage = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-4xl mx-auto">
+        <div className="flex flex-col gap-3">
           <PageHeader 
             title={t("attendance.title")}
             description={t("attendance.subtitle")}
@@ -34,21 +34,21 @@ const AttendancePage = () => {
           />
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className={cn("w-[220px] justify-start text-start font-normal gap-2")}>
+              <Button variant="outline" size="sm" className={cn("w-full sm:w-[220px] justify-start text-start font-normal gap-2 text-sm self-start")}>
                 <CalendarIcon className="h-4 w-4" />
                 {format(selectedDate, "PPP", { locale: dateLocale })}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
+            <PopoverContent className="w-auto p-0" align="start">
               <Calendar mode="single" selected={selectedDate} onSelect={(d) => d && setSelectedDate(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
             </PopoverContent>
           </Popover>
         </div>
 
         <Tabs defaultValue="daily" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="daily">{t("attendance.daily")}</TabsTrigger>
-            <TabsTrigger value="stats">{t("attendance.stats")}</TabsTrigger>
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="daily" className="flex-1 sm:flex-none text-sm">{t("attendance.daily")}</TabsTrigger>
+            <TabsTrigger value="stats" className="flex-1 sm:flex-none text-sm">{t("attendance.stats")}</TabsTrigger>
           </TabsList>
           <TabsContent value="daily">
             <AttendanceTable students={students} date={selectedDate} refreshKey={refreshKey} onRefresh={() => setRefreshKey(k => k + 1)} />
