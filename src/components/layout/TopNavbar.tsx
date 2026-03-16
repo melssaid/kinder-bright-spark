@@ -30,7 +30,7 @@ export function TopNavbar() {
   const adminLinks = [
     { to: "/admin", icon: Shield, label: locale === "ar" ? "لوحة الأدمن" : "Admin" },
     { to: "/admin/kindergartens", icon: Building2, label: locale === "ar" ? "الروضات" : "Kindergartens" },
-    { to: "/admin/teachers", icon: KeyRound, label: locale === "ar" ? "الأكواد" : "Codes" },
+    { to: "/admin/teachers", icon: KeyRound, label: locale === "ar" ? "المعلمات" : "Teachers" },
   ];
 
   const isActive = (path: string, end?: boolean) => {
