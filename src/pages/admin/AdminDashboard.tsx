@@ -48,7 +48,6 @@ const AdminDashboard = () => {
         kindergartens: kindergartens.length,
         teachers: teacherRes.count || 0,
         students: studentRes.count || 0,
-        codes: codeRes.count || 0,
         surveys: surveyRes.count || 0,
         attendance: attendanceRes.count || 0,
       });
