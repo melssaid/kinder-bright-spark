@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Users, GraduationCap, KeyRound, ClipboardList, CalendarCheck, TrendingUp } from "lucide-react";
+import { Building2, Users, GraduationCap, ClipboardList, CalendarCheck, TrendingUp } from "lucide-react";
 import { useI18n } from "@/i18n";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
