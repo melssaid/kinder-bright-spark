@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Users, GraduationCap, KeyRound, ClipboardList, CalendarCheck, TrendingUp } from "lucide-react";
+import { Building2, Users, GraduationCap, ClipboardList, CalendarCheck, TrendingUp } from "lucide-react";
 import { useI18n } from "@/i18n";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -26,17 +26,16 @@ const CHART_COLORS = [
 const AdminDashboard = () => {
   const { locale } = useI18n();
   const isAr = locale === "ar";
-  const [stats, setStats] = useState({ kindergartens: 0, teachers: 0, students: 0, codes: 0, surveys: 0, attendance: 0 });
+  const [stats, setStats] = useState({ kindergartens: 0, teachers: 0, students: 0, surveys: 0, attendance: 0 });
   const [kgDetails, setKgDetails] = useState<KgDetail[]>([]);
   const [recentActivity, setRecentActivity] = useState<{ date: string; surveys: number; attendance: number }[]>([]);
 
   useEffect(() => {
     const load = async () => {
-      const [kgRes, teacherRes, studentRes, codeRes, surveyRes, attendanceRes] = await Promise.all([
+      const [kgRes, teacherRes, studentRes, surveyRes, attendanceRes] = await Promise.all([
         supabase.from("kindergartens").select("id, name"),
         supabase.from("user_roles").select("id, user_id", { count: "exact" }).eq("role", "teacher"),
         supabase.from("students").select("id, kindergarten_id", { count: "exact" }),
-        supabase.from("invitation_codes").select("id", { count: "exact", head: true }).eq("is_used", false),
         supabase.from("surveys").select("id, teacher_id, date", { count: "exact" }),
         supabase.from("attendance").select("id, date", { count: "exact" }),
       ]);
@@ -49,7 +48,6 @@ const AdminDashboard = () => {
         kindergartens: kindergartens.length,
         teachers: teacherRes.count || 0,
         students: studentRes.count || 0,
-        codes: codeRes.count || 0,
         surveys: surveyRes.count || 0,
         attendance: attendanceRes.count || 0,
       });
@@ -85,11 +83,10 @@ const AdminDashboard = () => {
 
   const summaryCards = [
     { icon: Building2, label: isAr ? "الروضات" : "Kindergartens", value: stats.kindergartens, color: "text-primary" },
-    { icon: Users, label: isAr ? "المعلمات" : "Teachers", value: stats.teachers, color: "text-success" },
+    { icon: Users, label: isAr ? "المعلمات" : "Teachers", value: stats.teachers, color: "text-[hsl(142,71%,45%)]" },
     { icon: GraduationCap, label: isAr ? "الطلاب" : "Students", value: stats.students, color: "text-accent" },
     { icon: ClipboardList, label: isAr ? "التقييمات" : "Assessments", value: stats.surveys, color: "text-secondary-foreground" },
-    { icon: CalendarCheck, label: isAr ? "الحضور" : "Attendance", value: stats.attendance, color: "text-warning" },
-    { icon: KeyRound, label: isAr ? "أكواد" : "Codes", value: stats.codes, color: "text-muted-foreground" },
+    { icon: CalendarCheck, label: isAr ? "الحضور" : "Attendance", value: stats.attendance, color: "text-[hsl(43,96%,56%)]" },
   ];
 
   const pieData = kgDetails.map((kg) => ({ name: kg.name, value: kg.studentCount })).filter((d) => d.value > 0);
