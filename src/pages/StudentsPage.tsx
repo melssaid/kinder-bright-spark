@@ -33,53 +33,51 @@ const StudentsPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-4xl mx-auto">
         {viewProfile && selectedStudent ? (
           <StudentProfileView student={selectedStudent} onBack={() => setViewProfile(false)} />
         ) : (
           <>
             {showWelcome && students.length === 0 ? (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 sm:space-y-6">
                 <Card className="border-0 shadow-2xl overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10">
-                  <CardContent className="p-8 text-center space-y-6">
+                  <CardContent className="p-5 sm:p-8 text-center space-y-4 sm:space-y-6">
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-                      className="text-7xl"
+                      className="text-5xl sm:text-7xl"
                     >
                       🎓
                     </motion.div>
-                    <h1 className="text-3xl font-extrabold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                       {isAr ? "مرحباً بك في كيندر BH!" : "Welcome to Kinder BH!"}
                     </h1>
-                    <p className="text-muted-foreground text-lg max-w-md mx-auto leading-relaxed">
+                    <p className="text-muted-foreground text-sm sm:text-lg max-w-md mx-auto leading-relaxed">
                       {isAr
-                        ? "نظام متابعة تطور الأطفال في الروضة — تقييمات تطورية، تحليل بالذكاء الاصطناعي، وتقارير شاملة للأهل والمعلمات"
-                        : "Child development tracking — developmental assessments, AI analysis, and comprehensive reports for parents & teachers"}
+                        ? "نظام متابعة تطور الأطفال — تقييمات تطورية، تحليل بالذكاء الاصطناعي، وتقارير شاملة"
+                        : "Child development tracking — assessments, AI analysis, and comprehensive reports"}
                     </p>
-                    <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-4 max-w-lg mx-auto">
                       {[
-                        { icon: <Users className="h-6 w-6" />, label: isAr ? "إدارة الطلاب" : "Manage Students", emoji: "👫" },
-                        { icon: <Brain className="h-6 w-6" />, label: isAr ? "تحليل AI" : "AI Analysis", emoji: "🧠" },
-                        { icon: <BarChart3 className="h-6 w-6" />, label: isAr ? "تقارير شاملة" : "Full Reports", emoji: "📊" },
+                        { label: isAr ? "إدارة الطلاب" : "Students", emoji: "👫" },
+                        { label: isAr ? "تحليل AI" : "AI Analysis", emoji: "🧠" },
+                        { label: isAr ? "تقارير" : "Reports", emoji: "📊" },
                       ].map((f, i) => (
                         <motion.div
                           key={i}
                           initial={{ opacity: 0, y: 15 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.4 + i * 0.1 }}
-                          className="flex flex-col items-center gap-2 p-3 rounded-xl bg-muted/40"
+                          className="flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-3 rounded-xl bg-muted/40"
                         >
-                          <span className="text-2xl">{f.emoji}</span>
-                          <span className="text-xs font-medium text-muted-foreground">{f.label}</span>
+                          <span className="text-xl sm:text-2xl">{f.emoji}</span>
+                          <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">{f.label}</span>
                         </motion.div>
                       ))}
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {isAr
-                        ? "👇 ابدأ بإضافة طلاب يدوياً أو أضف بيانات تجريبية لاستكشاف التطبيق"
-                        : "👇 Start by adding students manually or load demo data to explore"}
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      {isAr ? "👇 ابدأ بإضافة طلاب أو أضف بيانات تجريبية" : "👇 Start by adding students or load demo data"}
                     </p>
                   </CardContent>
                 </Card>
@@ -90,7 +88,7 @@ const StudentsPage = () => {
                 <PageHeader
                   title={t("students.title")}
                   description={t("auth.cloudNotice")}
-                  tooltip={isAr ? "يمكنك إضافة حتى 30 طالباً وإدارة معلوماتهم الأساسية" : "You can add up to 30 students and manage their basic information"}
+                  tooltip={isAr ? "يمكنك إضافة حتى 30 طالباً" : "You can add up to 30 students"}
                 />
                 <StudentManager students={students} onStudentsChange={refreshStudents} selectedStudent={selectedStudent} onSelectStudent={handleSelectStudent} />
               </>

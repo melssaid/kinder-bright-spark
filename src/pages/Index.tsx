@@ -56,71 +56,45 @@ const Index = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-4 md:p-6 space-y-6">
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
         <PageHeader 
           title={t("dashboard.title")} 
           description={t("dashboard.subtitle")}
-          tooltip={locale === "ar" ? "ملخص شامل لإحصاءات الفصل وتقدم الطلاب" : "Comprehensive overview of class statistics and student progress"}
+          tooltip={locale === "ar" ? "ملخص شامل لإحصاءات الفصل" : "Comprehensive class statistics overview"}
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card>
-              <CardContent className="pt-4 pb-3 flex items-center gap-3">
-                <Users className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{students.length}</p>
-                  <p className="text-xs text-muted-foreground">{t("students.title")}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card>
-              <CardContent className="pt-4 pb-3 flex items-center gap-3">
-                <ClipboardList className="h-8 w-8 text-info" />
-                <div>
-                  <p className="text-2xl font-bold">{surveys.length}</p>
-                  <p className="text-xs text-muted-foreground">{locale === "ar" ? "استقصاء" : "Surveys"}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <Card>
-              <CardContent className="pt-4 pb-3 flex items-center gap-3">
-                <Brain className="h-8 w-8 text-success" />
-                <div>
-                  <p className="text-2xl font-bold">{analyzedSurveys.length}</p>
-                  <p className="text-xs text-muted-foreground">{locale === "ar" ? "تحليلات" : "Analyses"}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <Card>
-              <CardContent className="pt-4 pb-3 flex items-center gap-3">
-                <TrendingUp className="h-8 w-8 text-warning" />
-                <div>
-                  <p className="text-2xl font-bold">{latestByStudent.filter(x => x.latest?.analysis?.indicators.type === "gifted").length}</p>
-                  <p className="text-xs text-muted-foreground">{locale === "ar" ? "موهوبين" : "Gifted"}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+          {[
+            { icon: Users, value: students.length, label: t("students.title"), color: "text-primary" },
+            { icon: ClipboardList, value: surveys.length, label: locale === "ar" ? "استقصاء" : "Surveys", color: "text-info" },
+            { icon: Brain, value: analyzedSurveys.length, label: locale === "ar" ? "تحليلات" : "Analyses", color: "text-success" },
+            { icon: TrendingUp, value: latestByStudent.filter(x => x.latest?.analysis?.indicators.type === "gifted").length, label: locale === "ar" ? "موهوبين" : "Gifted", color: "text-warning" },
+          ].map((item, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * (i + 1) }}>
+              <Card>
+                <CardContent className="p-3 sm:pt-4 sm:pb-3 flex items-center gap-2 sm:gap-3">
+                  <item.icon className={`h-6 w-6 sm:h-8 sm:w-8 ${item.color} shrink-0`} />
+                  <div>
+                    <p className="text-xl sm:text-2xl font-bold leading-none">{item.value}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{item.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
         </div>
 
         {latestByStudent.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">{locale === "ar" ? "متوسط درجات الفصل" : "Class Average Scores"}</CardTitle>
+              <CardHeader className="pb-2 px-3 sm:px-6">
+                <CardTitle className="text-sm sm:text-base">{locale === "ar" ? "متوسط درجات الفصل" : "Class Average Scores"}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={280}>
+              <CardContent className="px-1 sm:px-6">
+                <ResponsiveContainer width="100%" height={240}>
                   <RadarChart data={radarData}>
                     <PolarGrid stroke="hsl(var(--border))" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }} />
+                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fill: "hsl(var(--foreground))" }} />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9 }} />
                     <Radar dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.25} strokeWidth={2} />
                   </RadarChart>
@@ -129,14 +103,14 @@ const Index = () => {
             </Card>
 
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">{locale === "ar" ? "مقارنة الطلاب" : "Student Comparison"}</CardTitle>
+              <CardHeader className="pb-2 px-3 sm:px-6">
+                <CardTitle className="text-sm sm:text-base">{locale === "ar" ? "مقارنة الطلاب" : "Student Comparison"}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={280}>
+              <CardContent className="px-1 sm:px-6">
+                <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={studentBarData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                     <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
                     <Tooltip />
                     <Bar dataKey="attention" fill="hsl(var(--chart-focus))" name={locale === "ar" ? "الانتباه" : "Attention"} />
@@ -148,24 +122,22 @@ const Index = () => {
             </Card>
 
             <Card className="lg:col-span-2">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">{locale === "ar" ? "نظرة عامة على الطلاب" : "Student Overview"}</CardTitle>
+              <CardHeader className="pb-2 px-3 sm:px-6">
+                <CardTitle className="text-sm sm:text-base">{locale === "ar" ? "نظرة عامة على الطلاب" : "Student Overview"}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-3 sm:px-6">
                 <div className="space-y-2">
                   {latestByStudent.map(({ student, latest }) => (
-                    <div key={student.id} className="flex items-center gap-3 p-2 rounded-lg border bg-muted/20">
-                      <span className="text-xl">{student.gender === "male" ? "👦" : "👧"}</span>
+                    <div key={student.id} className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg border bg-muted/20">
+                      <span className="text-lg sm:text-xl">{student.gender === "male" ? "👦" : "👧"}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{student.name}</p>
-                        <div className="flex gap-2 mt-1">
-                          <Badge variant={latest?.analysis?.indicators.type === "gifted" ? "default" : latest?.analysis?.indicators.type === "delayed" ? "destructive" : "secondary"} className="text-[10px]">
-                            {t(`indicators.${latest?.analysis?.indicators.type || "typical"}`)}
-                          </Badge>
-                        </div>
+                        <p className="text-xs sm:text-sm font-medium truncate">{student.name}</p>
+                        <Badge variant={latest?.analysis?.indicators.type === "gifted" ? "default" : latest?.analysis?.indicators.type === "delayed" ? "destructive" : "secondary"} className="text-[10px] mt-0.5">
+                          {t(`indicators.${latest?.analysis?.indicators.type || "typical"}`)}
+                        </Badge>
                       </div>
-                      <div className="text-end">
-                        <p className="text-xs text-muted-foreground">{new Date(latest!.date).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}</p>
+                      <div className="text-end shrink-0">
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">{new Date(latest!.date).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}</p>
                       </div>
                     </div>
                   ))}
