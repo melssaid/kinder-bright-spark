@@ -8,6 +8,7 @@ import {
   LayoutDashboard, Users, ClipboardList, History, CalendarCheck, Settings,
   Shield, Building2, KeyRound, Globe, LogOut, Menu, X
 } from "lucide-react";
+import logo from "@/assets/kinder-bh-logo.png";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
