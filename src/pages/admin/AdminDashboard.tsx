@@ -32,11 +32,10 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [kgRes, teacherRes, studentRes, codeRes, surveyRes, attendanceRes] = await Promise.all([
+      const [kgRes, teacherRes, studentRes, surveyRes, attendanceRes] = await Promise.all([
         supabase.from("kindergartens").select("id, name"),
         supabase.from("user_roles").select("id, user_id", { count: "exact" }).eq("role", "teacher"),
         supabase.from("students").select("id, kindergarten_id", { count: "exact" }),
-        supabase.from("invitation_codes").select("id", { count: "exact", head: true }).eq("is_used", false),
         supabase.from("surveys").select("id, teacher_id, date", { count: "exact" }),
         supabase.from("attendance").select("id, date", { count: "exact" }),
       ]);
