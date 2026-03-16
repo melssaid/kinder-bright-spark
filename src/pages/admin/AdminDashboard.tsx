@@ -83,11 +83,10 @@ const AdminDashboard = () => {
 
   const summaryCards = [
     { icon: Building2, label: isAr ? "الروضات" : "Kindergartens", value: stats.kindergartens, color: "text-primary" },
-    { icon: Users, label: isAr ? "المعلمات" : "Teachers", value: stats.teachers, color: "text-success" },
+    { icon: Users, label: isAr ? "المعلمات" : "Teachers", value: stats.teachers, color: "text-[hsl(142,71%,45%)]" },
     { icon: GraduationCap, label: isAr ? "الطلاب" : "Students", value: stats.students, color: "text-accent" },
     { icon: ClipboardList, label: isAr ? "التقييمات" : "Assessments", value: stats.surveys, color: "text-secondary-foreground" },
-    { icon: CalendarCheck, label: isAr ? "الحضور" : "Attendance", value: stats.attendance, color: "text-warning" },
-    { icon: KeyRound, label: isAr ? "أكواد" : "Codes", value: stats.codes, color: "text-muted-foreground" },
+    { icon: CalendarCheck, label: isAr ? "الحضور" : "Attendance", value: stats.attendance, color: "text-[hsl(43,96%,56%)]" },
   ];
 
   const pieData = kgDetails.map((kg) => ({ name: kg.name, value: kg.studentCount })).filter((d) => d.value > 0);
