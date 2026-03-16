@@ -1,12 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useI18n } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
-import { LayoutDashboard, Users, ClipboardList, CalendarCheck, History, Shield } from "lucide-react";
+import { LayoutDashboard, Users, ClipboardList, CalendarCheck, History, Shield, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomTabBar() {
   const { t, locale, dir } = useI18n();
-  const { isAdmin } = useRole();
+  const { isAdmin, isKgAdmin } = useRole();
   const location = useLocation();
 
   const tabs = [
@@ -14,7 +14,8 @@ export function BottomTabBar() {
     { to: "/students", icon: Users, label: locale === "ar" ? "الطلاب" : "Students" },
     { to: "/survey", icon: ClipboardList, label: locale === "ar" ? "تقييم" : "Survey" },
     { to: "/attendance", icon: CalendarCheck, label: locale === "ar" ? "حضور" : "Attend" },
-    ...(isAdmin ? [{ to: "/admin", icon: Shield, label: locale === "ar" ? "أدمن" : "Admin" }] : [
+    ...(isAdmin ? [{ to: "/admin", icon: Shield, label: locale === "ar" ? "أدمن" : "Admin" }] : 
+        isKgAdmin ? [{ to: "/kg-admin", icon: Building2, label: locale === "ar" ? "روضتي" : "My KG" }] : [
       { to: "/history", icon: History, label: locale === "ar" ? "السجل" : "History" },
     ]),
   ];
