@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 export function BottomTabBar() {
   const { t, locale, dir } = useI18n();
-  const { isAdmin } = useRole();
+  const { isAdmin, isKgAdmin } = useRole();
   const location = useLocation();
 
   const tabs = [
