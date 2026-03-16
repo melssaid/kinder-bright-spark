@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-export type AppRole = "admin" | "teacher";
+export type AppRole = "admin" | "teacher" | "kg_admin";
 
 export function useRole() {
   const { user } = useAuth();
@@ -21,17 +21,19 @@ export function useRole() {
     const fetchRole = async () => {
       setLoading(true);
       
-      // Get role
       const { data: roles } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id);
 
       if (roles && roles.length > 0) {
-        setRole(roles[0].role as AppRole);
+        // Priority: admin > kg_admin > teacher
+        const roleList = roles.map(r => r.role);
+        if (roleList.includes("admin")) setRole("admin");
+        else if (roleList.includes("kg_admin")) setRole("kg_admin");
+        else setRole(roleList[0] as AppRole);
       }
 
-      // Get kindergarten info from profile
       const { data: profile } = await supabase
         .from("profiles")
         .select("kindergarten_id")
@@ -56,6 +58,7 @@ export function useRole() {
 
   const isAdmin = role === "admin";
   const isTeacher = role === "teacher";
+  const isKgAdmin = role === "kg_admin";
 
-  return { role, isAdmin, isTeacher, loading, kindergartenId, kindergartenName };
+  return { role, isAdmin, isTeacher, isKgAdmin, loading, kindergartenId, kindergartenName };
 }

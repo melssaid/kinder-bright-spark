@@ -10,7 +10,6 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Verify the caller is an admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Missing authorization header");
 
@@ -18,14 +17,13 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify caller is admin using their token
+    // Verify caller is admin
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: { user: caller } } = await callerClient.auth.getUser();
     if (!caller) throw new Error("Unauthorized");
 
-    // Check admin role
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
     const { data: roleData } = await adminClient
       .from("user_roles")
@@ -34,15 +32,21 @@ serve(async (req) => {
       .eq("role", "admin")
       .single();
 
-    if (!roleData) throw new Error("Only admins can create teacher accounts");
+    if (!roleData) throw new Error("Only admins can create accounts");
 
-    const { email, password, fullName, kindergartenId } = await req.json();
+    const { email, password, fullName, kindergartenId, role = "teacher" } = await req.json();
 
     if (!email || !password || !fullName || !kindergartenId) {
       throw new Error("Missing required fields: email, password, fullName, kindergartenId");
     }
 
-    // Create the user via admin API
+    // Validate role
+    const validRoles = ["teacher", "kg_admin"];
+    if (!validRoles.includes(role)) {
+      throw new Error("Invalid role. Must be 'teacher' or 'kg_admin'");
+    }
+
+    // Create the user
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
       password,
@@ -61,10 +65,10 @@ serve(async (req) => {
       .update({ kindergarten_id: kindergartenId })
       .eq("id", userId);
 
-    // Assign teacher role
+    // Assign role
     await adminClient
       .from("user_roles")
-      .insert({ user_id: userId, role: "teacher" });
+      .insert({ user_id: userId, role });
 
     return new Response(
       JSON.stringify({ success: true, userId }),

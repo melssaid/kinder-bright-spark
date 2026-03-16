@@ -9,9 +9,12 @@ import { useI18n } from "@/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 interface Kindergarten { id: string; name: string; }
 interface TeacherProfile { id: string; full_name: string; kindergarten_id: string | null; }
+
+type CreateRole = "teacher" | "kg_admin";
 
 const AdminTeachers = () => {
   const { locale } = useI18n();
@@ -21,6 +24,7 @@ const AdminTeachers = () => {
   const [teachers, setTeachers] = useState<TeacherProfile[]>([]);
   const [creating, setCreating] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<CreateRole>("teacher");
 
   // Form fields
   const [teacherName, setTeacherName] = useState("");
@@ -53,13 +57,17 @@ const AdminTeachers = () => {
           password: teacherPassword,
           fullName: teacherName.trim(),
           kindergartenId: selectedKg,
+          role: selectedRole,
         },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast.success(isAr ? `تم إنشاء حساب المعلمة: ${teacherName}` : `Teacher account created: ${teacherName}`);
+      const roleLabel = selectedRole === "kg_admin" 
+        ? (isAr ? "مديرة روضة" : "KG Director") 
+        : (isAr ? "معلمة" : "Teacher");
+      toast.success(isAr ? `تم إنشاء حساب ${roleLabel}: ${teacherName}` : `${roleLabel} account created: ${teacherName}`);
       setTeacherName("");
       setTeacherEmail("");
       setTeacherPassword("");
@@ -78,18 +86,40 @@ const AdminTeachers = () => {
     <DashboardLayout>
       <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold">{isAr ? "إدارة المعلمات" : "Manage Teachers"}</h1>
-          <p className="text-sm text-muted-foreground">{isAr ? "إنشاء حسابات المعلمات وربطها بالروضات" : "Create teacher accounts and link them to kindergartens"}</p>
+          <h1 className="text-xl sm:text-2xl font-bold">{isAr ? "إدارة الحسابات" : "Manage Accounts"}</h1>
+          <p className="text-sm text-muted-foreground">{isAr ? "إنشاء حسابات مديرات الروضات والمعلمات" : "Create director and teacher accounts"}</p>
         </div>
 
         <Card>
           <CardHeader className="pb-3 px-3 sm:px-6">
             <CardTitle className="text-sm sm:text-base flex items-center gap-2">
               <UserPlus className="h-4 w-4" />
-              {isAr ? "إنشاء حساب معلمة" : "Create Teacher Account"}
+              {isAr ? "إنشاء حساب جديد" : "Create New Account"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 px-3 sm:px-6">
+            <div className="space-y-2">
+              <Label className="text-xs">{isAr ? "الدور" : "Role"}</Label>
+              <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as CreateRole)}>
+                <SelectTrigger className="text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="teacher">
+                    {isAr ? "👩‍🏫 معلمة" : "👩‍🏫 Teacher"}
+                  </SelectItem>
+                  <SelectItem value="kg_admin">
+                    {isAr ? "👩‍💼 مديرة روضة" : "👩‍💼 KG Director"}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-muted-foreground">
+                {selectedRole === "kg_admin" 
+                  ? (isAr ? "مديرة الروضة ترى جميع معلمات وطلاب روضتها" : "KG Director can view all teachers and students in their kindergarten")
+                  : (isAr ? "المعلمة تدير طلابها فقط" : "Teacher manages their own students only")}
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label className="text-xs">{isAr ? "الروضة" : "Kindergarten"}</Label>
               <Select value={selectedKg} onValueChange={setSelectedKg}>
@@ -105,25 +135,13 @@ const AdminTeachers = () => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs">{isAr ? "اسم المعلمة" : "Teacher Name"}</Label>
-              <Input
-                value={teacherName}
-                onChange={(e) => setTeacherName(e.target.value)}
-                placeholder={isAr ? "الاسم الكامل..." : "Full name..."}
-                className="text-sm"
-              />
+              <Label className="text-xs">{isAr ? "الاسم" : "Full Name"}</Label>
+              <Input value={teacherName} onChange={(e) => setTeacherName(e.target.value)} placeholder={isAr ? "الاسم الكامل..." : "Full name..."} className="text-sm" />
             </div>
 
             <div className="space-y-2">
               <Label className="text-xs">{isAr ? "البريد الإلكتروني" : "Email"}</Label>
-              <Input
-                type="email"
-                value={teacherEmail}
-                onChange={(e) => setTeacherEmail(e.target.value)}
-                placeholder="teacher@school.com"
-                className="text-sm"
-                dir="ltr"
-              />
+              <Input type="email" value={teacherEmail} onChange={(e) => setTeacherEmail(e.target.value)} placeholder="user@school.com" className="text-sm" dir="ltr" />
             </div>
 
             <div className="space-y-2">
@@ -138,19 +156,10 @@ const AdminTeachers = () => {
                   dir="ltr"
                   minLength={6}
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute end-0 top-0 h-full w-10"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
+                <Button type="button" variant="ghost" size="icon" className="absolute end-0 top-0 h-full w-10" onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-              <p className="text-[10px] text-muted-foreground">
-                {isAr ? "أعطِ المعلمة هذه البيانات لتسجيل الدخول" : "Share these credentials with the teacher to log in"}
-              </p>
             </div>
 
             <Button
@@ -169,9 +178,9 @@ const AdminTeachers = () => {
           <CardHeader className="px-3 sm:px-6">
             <CardTitle className="text-sm sm:text-base flex items-center gap-2">
               <Users className="h-4 w-4" />
-              {isAr ? "المعلمات المسجلات" : "Registered Teachers"}
+              {isAr ? "الحسابات المسجلة" : "Registered Accounts"}
               {filteredTeachers.length > 0 && (
-                <span className="text-xs text-muted-foreground">({filteredTeachers.length})</span>
+                <Badge variant="secondary" className="text-[10px]">{filteredTeachers.length}</Badge>
               )}
             </CardTitle>
           </CardHeader>
@@ -180,7 +189,7 @@ const AdminTeachers = () => {
               {filteredTeachers.map((t) => (
                 <div key={t.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg border">
                   <div className="flex items-center gap-2 min-w-0">
-                    <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                     <span className="font-medium text-sm truncate">{t.full_name}</span>
                   </div>
                   <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0">
@@ -189,7 +198,7 @@ const AdminTeachers = () => {
                 </div>
               ))}
               {filteredTeachers.length === 0 && (
-                <p className="text-center text-muted-foreground py-4 text-sm">{isAr ? "لا توجد معلمات بعد" : "No teachers yet"}</p>
+                <p className="text-center text-muted-foreground py-4 text-sm">{isAr ? "لا توجد حسابات بعد" : "No accounts yet"}</p>
               )}
             </div>
           </CardContent>
