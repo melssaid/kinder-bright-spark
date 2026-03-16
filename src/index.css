@@ -135,3 +135,7 @@
   [dir="rtl"] .text-left { text-align: right; }
   [dir="rtl"] .text-right { text-align: left; }
 }
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
