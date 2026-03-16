@@ -26,7 +26,7 @@ const CHART_COLORS = [
 const AdminDashboard = () => {
   const { locale } = useI18n();
   const isAr = locale === "ar";
-  const [stats, setStats] = useState({ kindergartens: 0, teachers: 0, students: 0, codes: 0, surveys: 0, attendance: 0 });
+  const [stats, setStats] = useState({ kindergartens: 0, teachers: 0, students: 0, surveys: 0, attendance: 0 });
   const [kgDetails, setKgDetails] = useState<KgDetail[]>([]);
   const [recentActivity, setRecentActivity] = useState<{ date: string; surveys: number; attendance: number }[]>([]);
 
