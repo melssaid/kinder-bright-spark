@@ -43,8 +43,8 @@ export function TopNavbar() {
       <div className="flex items-center justify-between px-3 sm:px-6 h-14">
         {/* Logo */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xl">🌈</span>
-          <h1 className="text-base sm:text-lg font-bold text-foreground font-[Quicksand]">Kinder BH</h1>
+          <img src={logo} alt="Kinder BH" className="h-8 w-8 sm:h-9 sm:w-9 object-contain" />
+          <h1 className="text-base sm:text-lg font-bold text-foreground font-[Quicksand] hidden sm:block">Kinder BH</h1>
           {kindergartenName && (
             <Badge variant="outline" className="hidden lg:flex items-center gap-1 text-[10px]">
               <Building2 className="h-3 w-3" />
