@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useI18n } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
-import { LayoutDashboard, Users, ClipboardList, CalendarCheck, History, Shield } from "lucide-react";
+import { LayoutDashboard, Users, ClipboardList, CalendarCheck, History, Shield, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomTabBar() {
