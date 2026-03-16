@@ -7,58 +7,24 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
-import { Loader2, Globe, KeyRound } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Loader2, Globe } from "lucide-react";
 
 const AuthPage = () => {
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const { t, locale, setLocale } = useI18n();
-  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
+  const isAr = locale === "ar";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
-    if (isSignUp && (!fullName || !inviteCode)) {
-      toast.error(locale === "ar" ? "يرجى إدخال جميع الحقول وكود الدعوة" : "Please fill all fields including invite code");
-      return;
-    }
 
     setLoading(true);
     try {
-      if (isSignUp) {
-        // First validate invite code exists and is unused
-        const { data: codeData, error: codeError } = await supabase
-          .from("invitation_codes")
-          .select("id, kindergarten_id, is_used")
-          .eq("code", inviteCode.toUpperCase().trim())
-          .single();
-
-        if (codeError || !codeData) {
-          throw new Error(locale === "ar" ? "كود الدعوة غير صالح" : "Invalid invitation code");
-        }
-        if (codeData.is_used) {
-          throw new Error(locale === "ar" ? "كود الدعوة مستخدم بالفعل" : "Invitation code already used");
-        }
-
-        // Sign up the user
-        const { error } = await signUp(email, password, fullName, "");
-        if (error) throw error;
-
-        // After signup, redeem the invite code via the DB function
-        // We need to wait for the auth state to settle then redeem
-        // Store invite code in localStorage to redeem after auth settles
-        localStorage.setItem("pending_invite_code", inviteCode.toUpperCase().trim());
-        
-        toast.success(locale === "ar" ? "تم إنشاء الحساب! جارٍ الربط بالروضة..." : "Account created! Linking to kindergarten...");
-      } else {
-        const { error } = await signIn(email, password);
-        if (error) throw error;
-      }
+      const { error } = await signIn(email, password);
+      if (error) throw error;
     } catch (err: any) {
       toast.error(err.message || t("auth.error"));
     } finally {
@@ -78,7 +44,7 @@ const AuthPage = () => {
         <Card>
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">{isSignUp ? t("auth.signup") : t("auth.login")}</CardTitle>
+              <CardTitle className="text-lg">{t("auth.login")}</CardTitle>
               <Button variant="ghost" size="sm" onClick={() => setLocale(locale === "en" ? "ar" : "en")}>
                 <Globe className="h-4 w-4" />
               </Button>
@@ -86,49 +52,22 @@ const AuthPage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {isSignUp && (
-                <>
-                  <div className="space-y-2">
-                    <Label>{t("auth.fullName")}</Label>
-                    <Input value={fullName} onChange={e => setFullName(e.target.value)} placeholder={t("auth.fullNamePlaceholder")} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <KeyRound className="h-4 w-4" />
-                      {locale === "ar" ? "كود الدعوة" : "Invitation Code"}
-                    </Label>
-                    <Input
-                      value={inviteCode}
-                      onChange={e => setInviteCode(e.target.value.toUpperCase())}
-                      placeholder={locale === "ar" ? "أدخل الكود من الإدارة..." : "Enter code from admin..."}
-                      required
-                      className="font-mono tracking-wider text-center text-lg"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {locale === "ar" ? "احصلي على كود الدعوة من إدارة الروضة" : "Get your invite code from the kindergarten admin"}
-                    </p>
-                  </div>
-                </>
-              )}
               <div className="space-y-2">
                 <Label>{t("auth.email")}</Label>
-                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="teacher@school.com" required />
+                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="teacher@school.com" required dir="ltr" />
               </div>
               <div className="space-y-2">
                 <Label>{t("auth.password")}</Label>
-                <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+                <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} dir="ltr" />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="h-4 w-4 animate-spin me-2" />}
-                {isSignUp ? t("auth.signup") : t("auth.login")}
+                {t("auth.login")}
               </Button>
             </form>
-
-            <div className="mt-4 text-center">
-              <Button variant="link" className="text-sm" onClick={() => setIsSignUp(!isSignUp)}>
-                {isSignUp ? t("auth.hasAccount") : t("auth.noAccount")}
-              </Button>
-            </div>
+            <p className="mt-4 text-center text-xs text-muted-foreground">
+              {isAr ? "تواصل مع إدارة الروضة للحصول على بيانات الدخول" : "Contact your kindergarten admin for login credentials"}
+            </p>
           </CardContent>
         </Card>
       </div>
