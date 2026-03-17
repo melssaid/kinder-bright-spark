@@ -7,7 +7,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
-import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, Trash2, GraduationCap, ChevronRight, FileDown, MessageCircle } from "lucide-react";
+import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, Trash2, GraduationCap, ChevronRight, FileDown, MessageCircle, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
