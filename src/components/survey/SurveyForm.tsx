@@ -145,12 +145,12 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
         <Progress value={progress} className="h-2" />
       </div>
 
-      <div className="flex gap-1 overflow-x-auto pb-2">
+      <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
         {surveyCategories.map((cat, i) => {
           const catAnswered = cat.questions.every(q => answers[q.id] !== undefined);
           return (
-            <Button key={cat.id} variant={i === currentCategory ? "default" : catAnswered ? "secondary" : "outline"} size="sm" className="shrink-0 text-xs gap-1" onClick={() => setCurrentCategory(i)}>
-              <span>{cat.icon}</span>
+            <Button key={cat.id} variant={i === currentCategory ? "default" : catAnswered ? "secondary" : "outline"} size="sm" className="shrink-0 text-xs gap-1 h-10 px-3 snap-center touch-manipulation" onClick={() => setCurrentCategory(i)}>
+              <span className="text-base">{cat.icon}</span>
               {t(cat.titleKey)}
               {catAnswered && <CheckCircle className="h-3 w-3" />}
             </Button>
@@ -158,59 +158,87 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
         })}
       </div>
 
-      <motion.div
-        key={currentCategory}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <span className="text-xl">{category.icon}</span>
-              {t(category.titleKey)}
-              <Badge variant="secondary" className="text-[10px] ms-auto">{currentCategory + 1}/{surveyCategories.length}</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {category.questions.map(question => (
-              <div key={question.id} className="space-y-3">
-                <p className="text-sm font-medium">{locale === "ar" ? question.textAr : question.textEn}</p>
-                {question.type === "scale" ? (
-                  <div className="flex gap-2 flex-wrap">
-                    {[1, 2, 3, 4, 5].map(val => (
-                      <Button key={val} variant={answers[question.id] === val ? "default" : "outline"} size="sm" onClick={() => handleAnswer(question.id, val)} className="flex-1 min-w-[60px]">
-                        <div className="text-center">
-                          <div className="text-xs">{val}</div>
-                          <div className="text-[9px]">{t(`survey.scale.${val}`)}</div>
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-                ) : (
-                  <RadioGroup value={String(answers[question.id] ?? "")} onValueChange={v => handleAnswer(question.id, parseInt(v))}>
-                    <div className="flex flex-wrap gap-2">
-                      {question.options?.map(opt => (
-                        <div key={opt.value} className="flex items-center gap-1.5">
-                          <RadioGroupItem value={String(opt.value)} id={`${question.id}-${opt.value}`} />
-                          <Label htmlFor={`${question.id}-${opt.value}`} className="text-sm cursor-pointer">{locale === "ar" ? opt.ar : opt.en}</Label>
-                        </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentCategory}
+          initial={{ opacity: 0, x: locale === "ar" ? -30 : 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: locale === "ar" ? 30 : -30 }}
+          transition={{ duration: 0.25, ease: "easeInOut" }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.15}
+          onDragEnd={handleSwipe}
+        >
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <span className="text-xl">{category.icon}</span>
+                {t(category.titleKey)}
+                <Badge variant="secondary" className="text-[10px] ms-auto">{currentCategory + 1}/{surveyCategories.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {category.questions.map((question, qi) => (
+                <motion.div
+                  key={question.id}
+                  className="space-y-3"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: qi * 0.05 }}
+                >
+                  <p className="text-sm font-medium leading-relaxed">{locale === "ar" ? question.textAr : question.textEn}</p>
+                  {question.type === "scale" ? (
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {[1, 2, 3, 4, 5].map(val => (
+                        <button
+                          key={val}
+                          onClick={() => handleAnswer(question.id, val)}
+                          className={`flex flex-col items-center justify-center rounded-xl py-3 px-1 min-h-[56px] transition-all duration-200 touch-manipulation active:scale-95 border-2 ${
+                            answers[question.id] === val
+                              ? "bg-primary text-primary-foreground border-primary shadow-md scale-[1.03]"
+                              : "bg-muted/40 text-muted-foreground border-transparent hover:border-primary/30 hover:bg-muted"
+                          }`}
+                        >
+                          <span className="text-base font-bold">{val}</span>
+                          <span className="text-[8px] leading-tight mt-0.5 opacity-80">{t(`survey.scale.${val}`)}</span>
+                        </button>
                       ))}
                     </div>
-                  </RadioGroup>
-                )}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </motion.div>
+                  ) : (
+                    <RadioGroup value={String(answers[question.id] ?? "")} onValueChange={v => handleAnswer(question.id, parseInt(v))}>
+                      <div className="grid grid-cols-2 gap-2">
+                        {question.options?.map(opt => (
+                          <label
+                            key={opt.value}
+                            htmlFor={`${question.id}-${opt.value}`}
+                            className={`flex items-center gap-2 rounded-xl p-3 min-h-[48px] cursor-pointer transition-all duration-200 touch-manipulation active:scale-[0.97] border-2 ${
+                              answers[question.id] === opt.value
+                                ? "bg-primary/10 border-primary text-foreground"
+                                : "bg-muted/30 border-transparent hover:border-primary/20"
+                            }`}
+                          >
+                            <RadioGroupItem value={String(opt.value)} id={`${question.id}-${opt.value}`} />
+                            <span className="text-sm">{locale === "ar" ? opt.ar : opt.en}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </RadioGroup>
+                  )}
+                </motion.div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </AnimatePresence>
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setCurrentCategory(prev => prev - 1)} disabled={currentCategory === 0}>
+      <div className="flex justify-between gap-3 sticky bottom-0 bg-background/95 backdrop-blur-sm py-3 -mx-1 px-1 border-t border-border/50">
+        <Button variant="outline" onClick={() => setCurrentCategory(prev => prev - 1)} disabled={currentCategory === 0} className="h-12 px-5 touch-manipulation gap-1.5">
+          <ChevronLeft className="h-4 w-4" />
           {locale === "ar" ? "السابق" : "Previous"}
         </Button>
-        <Button onClick={handleNext} disabled={!canProceed} className="gap-2">
-          {isLastCategory ? (<><Send className="h-4 w-4" /> {t("survey.submit")}</>) : (locale === "ar" ? "التالي" : "Next")}
+        <Button onClick={handleNext} disabled={!canProceed} className="h-12 px-6 touch-manipulation gap-1.5 flex-1 max-w-[200px]">
+          {isLastCategory ? (<><Send className="h-4 w-4" /> {t("survey.submit")}</>) : (<>{locale === "ar" ? "التالي" : "Next"} <ChevronRight className="h-4 w-4" /></>)}
         </Button>
       </div>
     </div>
