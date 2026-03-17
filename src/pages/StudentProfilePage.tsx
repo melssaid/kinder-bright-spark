@@ -461,6 +461,11 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
             )}
           </TabsContent>
 
+          {/* Photos Tab */}
+          <TabsContent value="photos" className="space-y-3">
+            <StudentPhotos studentId={student.id} studentName={student.name} />
+          </TabsContent>
+
           {/* Parents Tab - Now includes bulk messaging */}
           <TabsContent value="parents" className="space-y-6">
             <ParentManager studentId={student.id} studentName={student.name} analysis={analysis} />
