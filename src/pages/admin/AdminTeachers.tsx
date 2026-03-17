@@ -369,6 +369,35 @@ const AdminTeachers = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Teacher Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-4 w-4" />
+              {isAr ? "تعديل بيانات الحساب" : "Edit Account"}
+            </DialogTitle>
+            <DialogDescription>
+              {isAr ? "تعديل الاسم أو البريد الإلكتروني" : "Update name or email address"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label className="text-xs">{isAr ? "الاسم" : "Full Name"}</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder={isAr ? "الاسم الكامل..." : "Full name..."} className="text-sm" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">{isAr ? "البريد الإلكتروني الجديد (اختياري)" : "New Email (optional)"}</Label>
+              <Input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="user@school.com" className="text-sm" dir="ltr" />
+            </div>
+            <Button onClick={handleSaveEdit} disabled={saving || (!editName.trim() && !editEmail.trim())} className="w-full" size="sm">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <Pencil className="h-4 w-4 me-2" />}
+              {isAr ? "حفظ التعديلات" : "Save Changes"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
