@@ -37,11 +37,12 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
   ];
 
   const handleSeedDemo = async () => {
-    if (!user || students.length > 0) return;
+    const effectiveTeacherId = overrideTeacherId || user?.id;
+    if (!effectiveTeacherId || students.length > 0) return;
     setSeeding(true);
     try {
       for (const s of demoStudents) {
-        const student = await addStudent(s, user.id);
+        const student = await addStudent(s, effectiveTeacherId);
         if (!student) continue;
 
         // Add 2 surveys with AI analysis for each student
