@@ -7,7 +7,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, GraduationCap, ChevronRight, Trash2, FileDown, MessageCircle } from "lucide-react";
+import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, GraduationCap, ChevronRight, Trash2, FileDown, MessageCircle, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -50,6 +50,13 @@ const AdminTeachers = () => {
   const [createdCredentials, setCreatedCredentials] = useState<{
     name: string; email: string; password: string; role: string; kindergartenName: string;
   } | null>(null);
+
+  // Edit state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingTeacher, setEditingTeacher] = useState<TeacherProfile | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     supabase.from("kindergartens").select("id, name").order("name").then(({ data }) => setKindergartens((data || []) as Kindergarten[]));
@@ -145,6 +152,33 @@ const AdminTeachers = () => {
     const msg = buildCredentialWhatsAppMessage({ ...createdCredentials, isAr });
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
     toast.success(isAr ? "تم فتح واتساب" : "WhatsApp opened");
+  };
+
+  const handleOpenEdit = (teacher: TeacherProfile, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingTeacher(teacher);
+    setEditName(teacher.full_name);
+    setEditEmail(""); // email not stored in profiles, user fills it
+    setEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingTeacher || (!editName.trim() && !editEmail.trim())) return;
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("update-teacher", {
+        body: { userId: editingTeacher.id, fullName: editName.trim() || undefined, email: editEmail.trim() || undefined },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(isAr ? "تم تحديث البيانات بنجاح" : "Account updated successfully");
+      setEditOpen(false);
+      loadTeachers();
+    } catch (err: any) {
+      toast.error(err.message || (isAr ? "حدث خطأ" : "An error occurred"));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getKgName = (id: string) => kindergartens.find((k) => k.id === id)?.name || "—";
@@ -247,6 +281,9 @@ const AdminTeachers = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={(e) => handleOpenEdit(t, e)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={(e) => e.stopPropagation()}>
@@ -330,6 +367,35 @@ const AdminTeachers = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Teacher Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-4 w-4" />
+              {isAr ? "تعديل بيانات الحساب" : "Edit Account"}
+            </DialogTitle>
+            <DialogDescription>
+              {isAr ? "تعديل الاسم أو البريد الإلكتروني" : "Update name or email address"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label className="text-xs">{isAr ? "الاسم" : "Full Name"}</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder={isAr ? "الاسم الكامل..." : "Full name..."} className="text-sm" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">{isAr ? "البريد الإلكتروني الجديد (اختياري)" : "New Email (optional)"}</Label>
+              <Input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="user@school.com" className="text-sm" dir="ltr" />
+            </div>
+            <Button onClick={handleSaveEdit} disabled={saving || (!editName.trim() && !editEmail.trim())} className="w-full" size="sm">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <Pencil className="h-4 w-4 me-2" />}
+              {isAr ? "حفظ التعديلات" : "Save Changes"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </DashboardLayout>
