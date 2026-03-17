@@ -338,9 +338,9 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                         <Zap className="h-6 w-6 text-emerald-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-bold">{isAr ? "📋 تقييم يومي سريع" : "📋 Quick Daily Check-in"}</h3>
+                        <h3 className="text-sm font-bold">{isAr ? "📋 تقييم يومي" : "📋 Daily Check-in"}</h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {isAr ? "3 أسئلة بالإيموجي - مزاج، طاقة، تفاعل" : "3 emoji questions - mood, energy, interaction"}
+                          {isAr ? "7 بنود بالإيموجي - مزاج، طاقة، تفاعل، وجبة، مشاركة..." : "7 emoji items - mood, energy, social, meal, participation..."}
                         </p>
                       </div>
                       <Badge variant="secondary" className="shrink-0 text-[10px]">{isAr ? "يومي" : "Daily"}</Badge>
