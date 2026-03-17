@@ -16,6 +16,7 @@ import { BehaviorAnalysis } from "@/components/assessment/BehaviorAnalysis";
 import { BulkWhatsApp } from "@/components/assessment/BulkWhatsApp";
 import { AnalysisView } from "@/components/analysis/AnalysisView";
 import { AttendanceTable } from "@/components/attendance/AttendanceTable";
+import { StudentPhotos } from "@/components/students/StudentPhotos";
 import { surveyCategories } from "@/data/surveyQuestions";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
