@@ -48,7 +48,7 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
         // Add 2 surveys with AI analysis for each student
         for (let i = 0; i < 2; i++) {
           const answers = generateDemoSurveyAnswers();
-          const survey = await addSurvey({ student_id: student.id, teacher_id: user.id, answers });
+          const survey = await addSurvey({ student_id: student.id, teacher_id: effectiveTeacherId, answers });
           if (survey) {
             const analysis = generateDemoAnalysis(student.name, answers);
             await updateSurveyAnalysis(survey.id, analysis);
