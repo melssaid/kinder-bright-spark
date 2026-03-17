@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2, Send, CheckCircle, ChevronLeft, ChevronRight, Brain, Sparkles } from "lucide-react";
+import { Loader2, Send, CheckCircle, ChevronLeft, ChevronRight, Brain, Sparkles, Share2 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { surveyCategories } from "@/data/surveyQuestions";
@@ -98,6 +98,14 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
     }
   };
 
+  const handleShareWhatsApp = () => {
+    const date = new Date().toLocaleDateString(isAr ? "ar-SA" : "en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    const msg = isAr
+      ? `🌈 *تقرير التقييم الشامل - روضة كيندر BH*\n📅 ${date}\n👶 *الطفل/ة:* ${student.name}\n\n✅ تم إجراء تقييم شامل لطفلكم يشمل جميع مجالات النمو (المعرفي، اللغوي، الاجتماعي، الحركي، الرعاية الذاتية).\n\n📊 سيتم تحليل النتائج بالذكاء الاصطناعي وإرسال التقرير المفصّل قريباً.\n\nمع تحيات المعلمة 🌸\nروضة كيندر BH`
+      : `🌈 *Comprehensive Assessment Report - Kinder BH*\n📅 ${date}\n👶 *Child:* ${student.name}\n\n✅ A comprehensive assessment covering all development areas has been completed.\n\n📊 Results will be analyzed by AI and a detailed report will follow.\n\nBest regards, Teacher 🌸\nKinder BH`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
   // Saved state — show options to analyze or go back
   if (saved) {
     return (
@@ -109,14 +117,18 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
               <CheckCircle className="h-14 w-14 text-primary" />
               <h3 className="text-xl font-bold text-center">{isAr ? "تم حفظ التقييم بنجاح! ✅" : "Assessment Saved! ✅"}</h3>
               <p className="text-sm text-muted-foreground text-center max-w-sm">
-                {isAr ? "يمكنك الآن تحليل التقييم بالذكاء الاصطناعي للحصول على تقرير مفصّل وتوصيات مخصصة" : "You can now analyze the assessment with AI for a detailed report and recommendations"}
+                {isAr ? "يمكنك تحليل التقييم بالذكاء الاصطناعي أو إرسال إشعار لولي الأمر" : "Analyze with AI or notify the parent"}
               </p>
               <div className="flex flex-col gap-3 w-full max-w-xs">
                 <Button onClick={handleAnalyze} disabled={analyzing} className="h-12 gap-2 text-sm w-full">
                   {analyzing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
                   {analyzing ? (isAr ? "جاري التحليل..." : "Analyzing...") : (isAr ? "🤖 تحليل بالذكاء الاصطناعي" : "🤖 Analyze with AI")}
                 </Button>
-                <Button variant="outline" onClick={onComplete} className="h-10 text-sm w-full">
+                <Button onClick={handleShareWhatsApp} variant="outline" className="h-11 gap-2 text-sm w-full">
+                  <Share2 className="h-4 w-4" />
+                  {isAr ? "📤 إرسال إشعار لولي الأمر" : "📤 Notify Parent via WhatsApp"}
+                </Button>
+                <Button variant="ghost" onClick={onComplete} className="h-10 text-sm w-full text-muted-foreground">
                   {isAr ? "عرض النتائج لاحقاً" : "View Results Later"}
                 </Button>
               </div>

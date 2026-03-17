@@ -16,6 +16,7 @@ import { BehaviorAnalysis } from "@/components/assessment/BehaviorAnalysis";
 import { BulkWhatsApp } from "@/components/assessment/BulkWhatsApp";
 import { AnalysisView } from "@/components/analysis/AnalysisView";
 import { AttendanceTable } from "@/components/attendance/AttendanceTable";
+import { StudentPhotos } from "@/components/students/StudentPhotos";
 import { surveyCategories } from "@/data/surveyQuestions";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -236,12 +237,13 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setAssessmentMode(null); }} className="space-y-4">
-          <TabsList className="w-full grid grid-cols-5 h-12">
-            <TabsTrigger value="overview" className="text-[10px] sm:text-sm py-3">{isAr ? "📋 عام" : "📋 Overview"}</TabsTrigger>
-            <TabsTrigger value="assess" className="text-[10px] sm:text-sm py-3">{isAr ? "📝 تقييم" : "📝 Assess"}</TabsTrigger>
-            <TabsTrigger value="reports" className="text-[10px] sm:text-sm py-3">{isAr ? "🧠 تقارير" : "🧠 Reports"}</TabsTrigger>
-            <TabsTrigger value="parents" className="text-[10px] sm:text-sm py-3">{isAr ? "👪 الأهل" : "👪 Parents"}</TabsTrigger>
-            <TabsTrigger value="attendance" className="text-[10px] sm:text-sm py-3">{isAr ? "📅 حضور" : "📅 Attend."}</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-6 h-12">
+            <TabsTrigger value="overview" className="text-[9px] sm:text-sm py-3">{isAr ? "📋 عام" : "📋 Overview"}</TabsTrigger>
+            <TabsTrigger value="assess" className="text-[9px] sm:text-sm py-3">{isAr ? "📝 تقييم" : "📝 Assess"}</TabsTrigger>
+            <TabsTrigger value="reports" className="text-[9px] sm:text-sm py-3">{isAr ? "🧠 تقارير" : "🧠 Reports"}</TabsTrigger>
+            <TabsTrigger value="photos" className="text-[9px] sm:text-sm py-3">{isAr ? "📷 صور" : "📷 Photos"}</TabsTrigger>
+            <TabsTrigger value="parents" className="text-[9px] sm:text-sm py-3">{isAr ? "👪 أهل" : "👪 Parents"}</TabsTrigger>
+            <TabsTrigger value="attendance" className="text-[9px] sm:text-sm py-3">{isAr ? "📅 حضور" : "📅 Attend."}</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -336,9 +338,9 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                         <Zap className="h-6 w-6 text-emerald-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-bold">{isAr ? "📋 تقييم يومي سريع" : "📋 Quick Daily Check-in"}</h3>
+                        <h3 className="text-sm font-bold">{isAr ? "📋 تقييم يومي" : "📋 Daily Check-in"}</h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {isAr ? "3 أسئلة بالإيموجي - مزاج، طاقة، تفاعل" : "3 emoji questions - mood, energy, interaction"}
+                          {isAr ? "7 بنود بالإيموجي - مزاج، طاقة، تفاعل، وجبة، مشاركة..." : "7 emoji items - mood, energy, social, meal, participation..."}
                         </p>
                       </div>
                       <Badge variant="secondary" className="shrink-0 text-[10px]">{isAr ? "يومي" : "Daily"}</Badge>
@@ -457,6 +459,11 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                 })}
               </div>
             )}
+          </TabsContent>
+
+          {/* Photos Tab */}
+          <TabsContent value="photos" className="space-y-3">
+            <StudentPhotos studentId={student.id} studentName={student.name} />
           </TabsContent>
 
           {/* Parents Tab - Now includes bulk messaging */}
