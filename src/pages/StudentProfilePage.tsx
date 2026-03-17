@@ -112,6 +112,21 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
   const latestSurvey = surveys.find(s => s.analysis);
   const analysis = latestSurvey?.analysis as any;
 
+  // Helper to extract localized value (handles both string and {ar, en} objects)
+  const loc = (val: any): string => {
+    if (!val) return "";
+    if (typeof val === "string") return val;
+    return (isAr ? val?.ar : val?.en) || val?.ar || val?.en || "";
+  };
+  const locArray = (val: any): string[] => {
+    if (Array.isArray(val)) return val.map((v: any) => typeof v === "string" ? v : loc(v));
+    if (val && typeof val === "object" && !Array.isArray(val)) {
+      const picked = isAr ? val?.ar : val?.en;
+      return Array.isArray(picked) ? picked : [];
+    }
+    return [];
+  };
+
   const categoryScores = surveyCategories.map(cat => {
     const answers = latestSurvey?.answers || {};
     const answered = cat.questions.filter(q => answers[q.id] !== undefined);
@@ -237,7 +252,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                     <CardTitle className="text-base">{isAr ? "ملخص التحليل" : "Analysis Summary"}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{analysis.summary}</p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{loc(analysis.summary)}</p>
                   </CardContent>
                 </Card>
 
@@ -248,7 +263,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-1">
-                        {(Array.isArray(analysis.strengths) ? analysis.strengths : []).slice(0, 3).map((s: string, i: number) => (
+                        {locArray(analysis.strengths).slice(0, 3).map((s: string, i: number) => (
                           <li key={i} className="text-xs text-muted-foreground">• {s}</li>
                         ))}
                       </ul>
@@ -260,7 +275,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-1">
-                        {(Array.isArray(analysis.improvements) ? analysis.improvements : []).slice(0, 3).map((s: string, i: number) => (
+                        {locArray(analysis.improvements).slice(0, 3).map((s: string, i: number) => (
                           <li key={i} className="text-xs text-muted-foreground">• {s}</li>
                         ))}
                       </ul>
