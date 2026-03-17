@@ -16,9 +16,10 @@ interface StudentManagerProps {
   onStudentsChange: () => void;
   selectedStudent: DbStudent | null;
   onSelectStudent: (student: DbStudent | null) => void;
+  overrideTeacherId?: string;
 }
 
-export function StudentManager({ students, onStudentsChange, selectedStudent, onSelectStudent }: StudentManagerProps) {
+export function StudentManager({ students, onStudentsChange, selectedStudent, onSelectStudent, overrideTeacherId }: StudentManagerProps) {
   const { t, locale } = useI18n();
   const { user } = useAuth();
   const [name, setName] = useState("");
@@ -36,17 +37,18 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
   ];
 
   const handleSeedDemo = async () => {
-    if (!user || students.length > 0) return;
+    const effectiveTeacherId = overrideTeacherId || user?.id;
+    if (!effectiveTeacherId || students.length > 0) return;
     setSeeding(true);
     try {
       for (const s of demoStudents) {
-        const student = await addStudent(s, user.id);
+        const student = await addStudent(s, effectiveTeacherId);
         if (!student) continue;
 
         // Add 2 surveys with AI analysis for each student
         for (let i = 0; i < 2; i++) {
           const answers = generateDemoSurveyAnswers();
-          const survey = await addSurvey({ student_id: student.id, teacher_id: user.id, answers });
+          const survey = await addSurvey({ student_id: student.id, teacher_id: effectiveTeacherId, answers });
           if (survey) {
             const analysis = generateDemoAnalysis(student.name, answers);
             await updateSurveyAnalysis(survey.id, analysis);
@@ -56,7 +58,7 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
         // Add attendance records
         const attendanceRecords = generateDemoAttendanceDates();
         for (const rec of attendanceRecords) {
-          await setAttendance(student.id, rec.date, rec.status, user.id);
+          await setAttendance(student.id, rec.date, rec.status, effectiveTeacherId);
         }
       }
       onStudentsChange();
@@ -69,12 +71,13 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
   };
 
   const handleAdd = async () => {
-    if (!name.trim() || !user) return;
+    const effectiveTeacherId = overrideTeacherId || user?.id;
+    if (!name.trim() || !effectiveTeacherId) return;
     if (students.length >= 30) {
       toast.error(t("students.max"));
       return;
     }
-    const student = await addStudent({ name: name.trim(), age: parseInt(age), gender }, user.id);
+    const student = await addStudent({ name: name.trim(), age: parseInt(age), gender }, effectiveTeacherId);
     if (student) {
       setName("");
       onStudentsChange();

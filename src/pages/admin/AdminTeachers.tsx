@@ -7,17 +7,25 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff } from "lucide-react";
+import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, GraduationCap, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 interface Kindergarten { id: string; name: string; }
-interface TeacherProfile { id: string; full_name: string; kindergarten_id: string | null; }
+interface TeacherProfile {
+  id: string;
+  full_name: string;
+  kindergarten_id: string | null;
+  role?: string;
+  studentCount?: number;
+}
 
 type CreateRole = "teacher" | "kg_admin";
 
 const AdminTeachers = () => {
   const { locale } = useI18n();
+  const navigate = useNavigate();
   const isAr = locale === "ar";
   const [kindergartens, setKindergartens] = useState<Kindergarten[]>([]);
   const [selectedKg, setSelectedKg] = useState<string>("");
@@ -26,7 +34,6 @@ const AdminTeachers = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<CreateRole>("teacher");
 
-  // Form fields
   const [teacherName, setTeacherName] = useState("");
   const [teacherEmail, setTeacherEmail] = useState("");
   const [teacherPassword, setTeacherPassword] = useState("");
@@ -36,8 +43,24 @@ const AdminTeachers = () => {
   }, []);
 
   const loadTeachers = async () => {
-    const { data } = await supabase.from("profiles").select("id, full_name, kindergarten_id").not("kindergarten_id", "is", null);
-    setTeachers((data || []) as TeacherProfile[]);
+    const { data: profiles } = await supabase.from("profiles").select("id, full_name, kindergarten_id").not("kindergarten_id", "is", null);
+    const { data: roles } = await supabase.from("user_roles").select("user_id, role");
+    const { data: students } = await supabase.from("students").select("id, teacher_id");
+
+    const roleMap: Record<string, string> = {};
+    (roles || []).forEach((r: any) => { roleMap[r.user_id] = r.role; });
+
+    const studentCountMap: Record<string, number> = {};
+    (students || []).forEach((s: any) => {
+      studentCountMap[s.teacher_id] = (studentCountMap[s.teacher_id] || 0) + 1;
+    });
+
+    const enriched = (profiles || []).map((p: any) => ({
+      ...p,
+      role: roleMap[p.id] || "teacher",
+      studentCount: studentCountMap[p.id] || 0,
+    }));
+    setTeachers(enriched as TeacherProfile[]);
   };
 
   useEffect(() => { loadTeachers(); }, []);
@@ -60,12 +83,11 @@ const AdminTeachers = () => {
           role: selectedRole,
         },
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      const roleLabel = selectedRole === "kg_admin" 
-        ? (isAr ? "مديرة روضة" : "KG Director") 
+      const roleLabel = selectedRole === "kg_admin"
+        ? (isAr ? "مديرة روضة" : "KG Director")
         : (isAr ? "معلمة" : "Teacher");
       toast.success(isAr ? `تم إنشاء حساب ${roleLabel}: ${teacherName}` : `${roleLabel} account created: ${teacherName}`);
       setTeacherName("");
@@ -87,9 +109,10 @@ const AdminTeachers = () => {
       <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">{isAr ? "إدارة الحسابات" : "Manage Accounts"}</h1>
-          <p className="text-sm text-muted-foreground">{isAr ? "إنشاء حسابات مديرات الروضات والمعلمات" : "Create director and teacher accounts"}</p>
+          <p className="text-sm text-muted-foreground">{isAr ? "إنشاء حسابات وإدارة معلمات ومديرات الروضات" : "Create accounts and manage teachers and directors"}</p>
         </div>
 
+        {/* Create Account Card */}
         <Card>
           <CardHeader className="pb-3 px-3 sm:px-6">
             <CardTitle className="text-sm sm:text-base flex items-center gap-2">
@@ -101,23 +124,12 @@ const AdminTeachers = () => {
             <div className="space-y-2">
               <Label className="text-xs">{isAr ? "الدور" : "Role"}</Label>
               <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as CreateRole)}>
-                <SelectTrigger className="text-sm">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="teacher">
-                    {isAr ? "👩‍🏫 معلمة" : "👩‍🏫 Teacher"}
-                  </SelectItem>
-                  <SelectItem value="kg_admin">
-                    {isAr ? "👩‍💼 مديرة روضة" : "👩‍💼 KG Director"}
-                  </SelectItem>
+                  <SelectItem value="teacher">{isAr ? "👩‍🏫 معلمة" : "👩‍🏫 Teacher"}</SelectItem>
+                  <SelectItem value="kg_admin">{isAr ? "👩‍💼 مديرة روضة" : "👩‍💼 KG Director"}</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-[10px] text-muted-foreground">
-                {selectedRole === "kg_admin" 
-                  ? (isAr ? "مديرة الروضة ترى جميع معلمات وطلاب روضتها" : "KG Director can view all teachers and students in their kindergarten")
-                  : (isAr ? "المعلمة تدير طلابها فقط" : "Teacher manages their own students only")}
-              </p>
             </div>
 
             <div className="space-y-2">
@@ -174,6 +186,7 @@ const AdminTeachers = () => {
           </CardContent>
         </Card>
 
+        {/* Registered Accounts */}
         <Card>
           <CardHeader className="px-3 sm:px-6">
             <CardTitle className="text-sm sm:text-base flex items-center gap-2">
@@ -187,14 +200,32 @@ const AdminTeachers = () => {
           <CardContent className="px-3 sm:px-6">
             <div className="space-y-2">
               {filteredTeachers.map((t) => (
-                <div key={t.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg border">
-                  <div className="flex items-center gap-2 min-w-0">
+                <div
+                  key={t.id}
+                  className="flex items-center justify-between p-2 sm:p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/students?teacher=${t.id}`)}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                    <span className="font-medium text-sm truncate">{t.full_name}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm truncate">{t.full_name}</span>
+                        <Badge variant={t.role === "kg_admin" ? "default" : "outline"} className="text-[9px] px-1.5 py-0 shrink-0">
+                          {t.role === "kg_admin" ? (isAr ? "مديرة" : "Director") : (isAr ? "معلمة" : "Teacher")}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] sm:text-xs text-muted-foreground">
+                          {t.kindergarten_id ? getKgName(t.kindergarten_id) : "—"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                          <GraduationCap className="h-3 w-3" />
+                          {t.studentCount || 0} {isAr ? "طالب" : "students"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0">
-                    {t.kindergarten_id ? getKgName(t.kindergarten_id) : "—"}
-                  </span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 rtl:rotate-180" />
                 </div>
               ))}
               {filteredTeachers.length === 0 && (
