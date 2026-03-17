@@ -7,7 +7,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
-import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, Trash2, GraduationCap, ChevronRight } from "lucide-react";
+import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, Trash2, GraduationCap, ChevronRight, FileDown, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,8 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { generateCredentialPdf, buildCredentialWhatsAppMessage } from "@/lib/credentialsPdf";
 
 interface TeacherProfile {
   id: string;
@@ -37,27 +39,21 @@ const KgAdminTeachers = () => {
   const [teacherEmail, setTeacherEmail] = useState("");
   const [teacherPassword, setTeacherPassword] = useState("");
 
+  // Credential sharing
+  const [shareOpen, setShareOpen] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState<{
+    name: string; email: string; password: string; role: string; kindergartenName: string;
+  } | null>(null);
+
   const loadTeachers = async () => {
     if (!kindergartenId) return;
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, full_name, kindergarten_id")
-      .eq("kindergarten_id", kindergartenId);
-
-    const { data: students } = await supabase
-      .from("students")
-      .select("id, teacher_id")
-      .eq("kindergarten_id", kindergartenId);
+    const { data: profiles } = await supabase.from("profiles").select("id, full_name, kindergarten_id").eq("kindergarten_id", kindergartenId);
+    const { data: students } = await supabase.from("students").select("id, teacher_id").eq("kindergarten_id", kindergartenId);
 
     const studentCountMap: Record<string, number> = {};
-    (students || []).forEach((s: any) => {
-      studentCountMap[s.teacher_id] = (studentCountMap[s.teacher_id] || 0) + 1;
-    });
+    (students || []).forEach((s: any) => { studentCountMap[s.teacher_id] = (studentCountMap[s.teacher_id] || 0) + 1; });
 
-    const enriched = (profiles || []).map((p: any) => ({
-      ...p,
-      studentCount: studentCountMap[p.id] || 0,
-    }));
+    const enriched = (profiles || []).map((p: any) => ({ ...p, studentCount: studentCountMap[p.id] || 0 }));
     setTeachers(enriched as TeacherProfile[]);
   };
 
@@ -81,9 +77,18 @@ const KgAdminTeachers = () => {
           role: "teacher",
         },
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+
+      const roleLabel = isAr ? "معلمة" : "Teacher";
+      setCreatedCredentials({
+        name: teacherName.trim(),
+        email: teacherEmail.trim().toLowerCase(),
+        password: teacherPassword,
+        role: roleLabel,
+        kindergartenName: kindergartenName || "",
+      });
+      setShareOpen(true);
 
       toast.success(isAr ? `تم إنشاء حساب المعلمة: ${teacherName}` : `Teacher account created: ${teacherName}`);
       setTeacherName("");
@@ -100,9 +105,7 @@ const KgAdminTeachers = () => {
   const handleDelete = async (teacher: TeacherProfile) => {
     setDeleting(teacher.id);
     try {
-      const { data, error } = await supabase.functions.invoke("delete-teacher", {
-        body: { userId: teacher.id },
-      });
+      const { data, error } = await supabase.functions.invoke("delete-teacher", { body: { userId: teacher.id } });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       toast.success(isAr ? `تم حذف المعلمة: ${teacher.full_name}` : `Teacher deleted: ${teacher.full_name}`);
@@ -114,14 +117,25 @@ const KgAdminTeachers = () => {
     }
   };
 
+  const handleDownloadPdf = () => {
+    if (!createdCredentials) return;
+    generateCredentialPdf({ ...createdCredentials, isAr });
+    toast.success(isAr ? "تم تحميل ملف PDF" : "PDF downloaded");
+  };
+
+  const handleShareWhatsApp = () => {
+    if (!createdCredentials) return;
+    const msg = buildCredentialWhatsAppMessage({ ...createdCredentials, isAr });
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+    toast.success(isAr ? "تم فتح واتساب" : "WhatsApp opened");
+  };
+
   return (
     <DashboardLayout>
       <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-2xl mx-auto">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">{isAr ? "معلمات الروضة" : "Kindergarten Teachers"}</h1>
-          <p className="text-sm text-muted-foreground">
-            {kindergartenName || (isAr ? "روضتي" : "My Kindergarten")}
-          </p>
+          <p className="text-sm text-muted-foreground">{kindergartenName || (isAr ? "روضتي" : "My Kindergarten")}</p>
         </div>
 
         <Card>
@@ -144,13 +158,9 @@ const KgAdminTeachers = () => {
               <Label className="text-xs">{isAr ? "كلمة المرور المؤقتة" : "Temporary Password"}</Label>
               <div className="relative">
                 <Input
-                  type={showPassword ? "text" : "password"}
-                  value={teacherPassword}
-                  onChange={(e) => setTeacherPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="text-sm pe-10"
-                  dir="ltr"
-                  minLength={6}
+                  type={showPassword ? "text" : "password"} value={teacherPassword}
+                  onChange={(e) => setTeacherPassword(e.target.value)} placeholder="••••••••"
+                  className="text-sm pe-10" dir="ltr" minLength={6}
                 />
                 <Button type="button" variant="ghost" size="icon" className="absolute end-0 top-0 h-full w-10" onClick={() => setShowPassword(!showPassword)}>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -175,30 +185,20 @@ const KgAdminTeachers = () => {
           <CardContent className="px-3 sm:px-6">
             <div className="space-y-2">
               {teachers.map((t) => (
-                <div
-                  key={t.id}
-                  className="flex items-center justify-between p-2 sm:p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/students?teacher=${t.id}`)}
-                >
+                <div key={t.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => navigate(`/students?teacher=${t.id}`)}>
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                     <div className="min-w-0 flex-1">
                       <span className="font-medium text-sm truncate block">{t.full_name}</span>
                       <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
-                        <GraduationCap className="h-3 w-3" />
-                        {t.studentCount || 0} {isAr ? "طالب" : "students"}
+                        <GraduationCap className="h-3 w-3" /> {t.studentCount || 0} {isAr ? "طالب" : "students"}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={(e) => e.stopPropagation()}>
                           {deleting === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                         </Button>
                       </AlertDialogTrigger>
@@ -206,17 +206,12 @@ const KgAdminTeachers = () => {
                         <AlertDialogHeader>
                           <AlertDialogTitle>{isAr ? "حذف المعلمة" : "Delete Teacher"}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            {isAr
-                              ? `هل أنت متأكدة من حذف "${t.full_name}"؟ سيتم حذف جميع بيانات الطلاب والتقييمات المرتبطة نهائياً.`
-                              : `Are you sure you want to delete "${t.full_name}"? All associated students and data will be permanently deleted.`}
+                            {isAr ? `هل أنت متأكدة من حذف "${t.full_name}"؟ سيتم حذف جميع البيانات المرتبطة نهائياً.` : `Are you sure you want to delete "${t.full_name}"? All data will be permanently deleted.`}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>{isAr ? "إلغاء" : "Cancel"}</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() => handleDelete(t)}
-                          >
+                          <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDelete(t)}>
                             {isAr ? "حذف نهائياً" : "Delete Permanently"}
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -233,6 +228,55 @@ const KgAdminTeachers = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Share Credentials Dialog */}
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              {isAr ? "تم إنشاء الحساب بنجاح!" : "Account Created Successfully!"}
+            </DialogTitle>
+            <DialogDescription>
+              {isAr ? "شارك بيانات الدخول مع المعلمة الجديدة" : "Share login credentials with the new teacher"}
+            </DialogDescription>
+          </DialogHeader>
+          {createdCredentials && (
+            <div className="space-y-3">
+              <Card className="bg-muted/50">
+                <CardContent className="p-3 space-y-1.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isAr ? "الاسم:" : "Name:"}</span>
+                    <span className="font-medium">{createdCredentials.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isAr ? "الروضة:" : "KG:"}</span>
+                    <span className="font-medium">{createdCredentials.kindergartenName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isAr ? "البريد:" : "Email:"}</span>
+                    <span className="font-medium" dir="ltr">{createdCredentials.email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{isAr ? "كلمة المرور:" : "Password:"}</span>
+                    <span className="font-medium font-mono" dir="ltr">{createdCredentials.password}</span>
+                  </div>
+                </CardContent>
+              </Card>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" onClick={handleDownloadPdf} className="gap-1.5 text-xs h-10">
+                  <FileDown className="h-4 w-4" />
+                  {isAr ? "تحميل PDF" : "Download PDF"}
+                </Button>
+                <Button onClick={handleShareWhatsApp} className="gap-1.5 text-xs h-10 bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <MessageCircle className="h-4 w-4" />
+                  {isAr ? "إرسال واتساب" : "Send WhatsApp"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
