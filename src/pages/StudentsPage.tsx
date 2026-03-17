@@ -19,6 +19,9 @@ const StudentsPage = () => {
   const [searchParams] = useSearchParams();
   const teacherIdParam = searchParams.get("teacher");
 
+  const [students, setStudents] = useState<DbStudent[]>([]);
+  const [teacherName, setTeacherName] = useState<string | null>(null);
+
   // Admin or KG Admin can view a specific teacher's students
   const targetTeacherId = (isAdmin || isKgAdmin) ? teacherIdParam : null;
 
