@@ -1,254 +1,290 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Users, GraduationCap, ClipboardList, CalendarCheck, TrendingUp, ChevronRight, FileText } from "lucide-react";
+import {
+  Building2, Users, GraduationCap, ClipboardList, ChevronRight,
+  ChevronDown, UserCircle, Plus
+} from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useNavigate } from "react-router-dom";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend
-} from "recharts";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-interface KgDetail {
+interface StaffMember {
   id: string;
-  name: string;
+  full_name: string;
+  role: string;
   studentCount: number;
-  teacherCount: number;
-  surveyCount: number;
 }
 
-const CHART_COLORS = [
-  "hsl(199, 89%, 48%)", "hsl(142, 71%, 45%)", "hsl(43, 96%, 56%)",
-  "hsl(330, 81%, 60%)", "hsl(262, 52%, 56%)", "hsl(17, 76%, 56%)",
-  "hsl(175, 60%, 45%)", "hsl(350, 65%, 55%)",
-];
+interface KgTree {
+  id: string;
+  name: string;
+  staff: StaffMember[];
+  studentCount: number;
+  surveyCount: number;
+}
 
 const AdminDashboard = () => {
   const { locale } = useI18n();
   const navigate = useNavigate();
   const isAr = locale === "ar";
-  const [stats, setStats] = useState({ kindergartens: 0, teachers: 0, students: 0, surveys: 0, attendance: 0 });
-  const [kgDetails, setKgDetails] = useState<KgDetail[]>([]);
-  const [recentActivity, setRecentActivity] = useState<{ date: string; surveys: number; attendance: number }[]>([]);
+  const [kgTrees, setKgTrees] = useState<KgTree[]>([]);
+  const [totals, setTotals] = useState({ kgs: 0, staff: 0, students: 0, surveys: 0 });
+  const [loading, setLoading] = useState(true);
+  const [expandedKgs, setExpandedKgs] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const load = async () => {
-      const [kgRes, teacherRes, studentRes, surveyRes, attendanceRes] = await Promise.all([
-        supabase.from("kindergartens").select("id, name"),
-        supabase.from("user_roles").select("id, user_id", { count: "exact" }).eq("role", "teacher"),
-        supabase.from("students").select("id, kindergarten_id", { count: "exact" }),
-        supabase.from("surveys").select("id, teacher_id, date", { count: "exact" }),
-        supabase.from("attendance").select("id, date", { count: "exact" }),
+      const [kgRes, profilesRes, rolesRes, studentsRes, surveysRes] = await Promise.all([
+        supabase.from("kindergartens").select("id, name").order("name"),
+        supabase.from("profiles").select("id, full_name, kindergarten_id").not("kindergarten_id", "is", null),
+        supabase.from("user_roles").select("user_id, role"),
+        supabase.from("students").select("id, teacher_id, kindergarten_id"),
+        supabase.from("surveys").select("id, teacher_id"),
       ]);
 
       const kindergartens = (kgRes.data || []) as { id: string; name: string }[];
-      const students = (studentRes.data || []) as { id: string; kindergarten_id: string | null }[];
-      const surveys = (surveyRes.data || []) as { id: string; teacher_id: string; date: string | null }[];
+      const profiles = (profilesRes.data || []) as { id: string; full_name: string; kindergarten_id: string }[];
+      const roles = (rolesRes.data || []) as { user_id: string; role: string }[];
+      const students = (studentsRes.data || []) as { id: string; teacher_id: string; kindergarten_id: string | null }[];
+      const surveys = (surveysRes.data || []) as { id: string; teacher_id: string }[];
 
-      setStats({
-        kindergartens: kindergartens.length,
-        teachers: teacherRes.count || 0,
-        students: studentRes.count || 0,
-        surveys: surveyRes.count || 0,
-        attendance: attendanceRes.count || 0,
+      const roleMap: Record<string, string> = {};
+      roles.forEach(r => { roleMap[r.user_id] = r.role; });
+
+      const studentsByTeacher: Record<string, number> = {};
+      students.forEach(s => {
+        studentsByTeacher[s.teacher_id] = (studentsByTeacher[s.teacher_id] || 0) + 1;
       });
 
-      const { data: profiles } = await supabase.from("profiles").select("id, kindergarten_id").not("kindergarten_id", "is", null);
-      const teacherKgMap: Record<string, string> = {};
-      (profiles || []).forEach((p: any) => { if (p.kindergarten_id) teacherKgMap[p.id] = p.kindergarten_id; });
+      const surveysByTeacher: Record<string, number> = {};
+      surveys.forEach(s => {
+        surveysByTeacher[s.teacher_id] = (surveysByTeacher[s.teacher_id] || 0) + 1;
+      });
 
-      const details: KgDetail[] = kindergartens.map((kg) => ({
-        id: kg.id,
-        name: kg.name,
-        studentCount: students.filter((s) => s.kindergarten_id === kg.id).length,
-        teacherCount: Object.values(teacherKgMap).filter((kid) => kid === kg.id).length,
-        surveyCount: surveys.filter((s) => teacherKgMap[s.teacher_id] === kg.id).length,
-      }));
-      setKgDetails(details);
+      const trees: KgTree[] = kindergartens.map(kg => {
+        const kgProfiles = profiles.filter(p => p.kindergarten_id === kg.id);
+        const staff: StaffMember[] = kgProfiles
+          .map(p => ({
+            id: p.id,
+            full_name: p.full_name,
+            role: roleMap[p.id] || "teacher",
+            studentCount: studentsByTeacher[p.id] || 0,
+          }))
+          // Directors first, then teachers
+          .sort((a, b) => {
+            if (a.role === "kg_admin" && b.role !== "kg_admin") return -1;
+            if (a.role !== "kg_admin" && b.role === "kg_admin") return 1;
+            return a.full_name.localeCompare(b.full_name);
+          });
 
-      const last7: { date: string; surveys: number; attendance: number }[] = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split("T")[0];
-        last7.push({
-          date: d.toLocaleDateString(isAr ? "ar-SA" : "en-US", { weekday: "short", day: "numeric" }),
-          surveys: surveys.filter((s) => s.date && s.date.startsWith(dateStr)).length,
-          attendance: ((attendanceRes.data || []) as { id: string; date: string }[]).filter((a) => a.date === dateStr).length,
-        });
+        const kgStudentCount = students.filter(s => s.kindergarten_id === kg.id).length;
+        const kgTeacherIds = kgProfiles.map(p => p.id);
+        const kgSurveyCount = surveys.filter(s => kgTeacherIds.includes(s.teacher_id)).length;
+
+        return { id: kg.id, name: kg.name, staff, studentCount: kgStudentCount, surveyCount: kgSurveyCount };
+      });
+
+      setKgTrees(trees);
+      setTotals({
+        kgs: kindergartens.length,
+        staff: profiles.length,
+        students: students.length,
+        surveys: surveys.length,
+      });
+      // Auto-expand if only 1-2 KGs
+      if (trees.length <= 2) {
+        setExpandedKgs(new Set(trees.map(t => t.id)));
       }
-      setRecentActivity(last7);
+      setLoading(false);
     };
     load();
   }, []);
 
-  const summaryCards = [
-    { icon: Building2, label: isAr ? "الروضات" : "Kindergartens", value: stats.kindergartens, color: "text-primary" },
-    { icon: Users, label: isAr ? "المعلمات" : "Teachers", value: stats.teachers, color: "text-[hsl(142,71%,45%)]" },
-    { icon: GraduationCap, label: isAr ? "الطلاب" : "Students", value: stats.students, color: "text-accent" },
-    { icon: ClipboardList, label: isAr ? "التقييمات" : "Assessments", value: stats.surveys, color: "text-secondary-foreground" },
-    { icon: CalendarCheck, label: isAr ? "الحضور" : "Attendance", value: stats.attendance, color: "text-[hsl(43,96%,56%)]" },
-  ];
+  const toggleKg = (id: string) => {
+    setExpandedKgs(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
-  const pieData = kgDetails.map((kg) => ({ name: kg.name, value: kg.studentCount })).filter((d) => d.value > 0);
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="min-h-[50vh] flex items-center justify-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
-      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-4xl mx-auto">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold">{isAr ? "لوحة تحكم الأدمن" : "Admin Dashboard"}</h1>
-          <p className="text-sm text-muted-foreground">{isAr ? "نظرة شاملة على جميع الروضات" : "Overview of all kindergartens"}</p>
+          <h1 className="text-xl sm:text-2xl font-bold">{isAr ? "لوحة تحكم النظام" : "System Dashboard"}</h1>
+          <p className="text-sm text-muted-foreground">{isAr ? "الهيكل التنظيمي الكامل" : "Full organizational structure"}</p>
         </div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-          {summaryCards.map((c) => (
-            <Card key={c.label}>
-              <CardContent className="p-3 sm:p-4 flex flex-col items-center sm:flex-row sm:items-start gap-1 sm:gap-2">
-                <c.icon className={`h-5 w-5 sm:h-4 sm:w-4 ${c.color} shrink-0`} />
-                <div className="text-center sm:text-start">
-                  <p className="text-lg sm:text-2xl font-bold leading-none">{c.value}</p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 leading-tight">{c.label}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Quick Access */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {/* Global Summary */}
+        <div className="grid grid-cols-4 gap-2">
           {[
-            { icon: GraduationCap, label: isAr ? "عرض جميع الطلاب" : "View All Students", to: "/students", color: "text-primary" },
-            { icon: FileText, label: isAr ? "عرض التقارير" : "View Reports", to: "/reports", color: "text-emerald-600" },
-            { icon: Building2, label: isAr ? "إدارة الروضات" : "Manage KGs", to: "/admin/kindergartens", color: "text-amber-600" },
-            { icon: Users, label: isAr ? "إدارة الحسابات" : "Manage Accounts", to: "/admin/teachers", color: "text-purple-600" },
-          ].map((item) => (
-            <Card key={item.to} className="cursor-pointer hover:shadow-md transition-all active:scale-[0.98]" onClick={() => navigate(item.to)}>
-              <CardContent className="p-3 flex items-center gap-2">
-                <item.icon className={`h-5 w-5 ${item.color} shrink-0`} />
-                <span className="text-xs font-medium flex-1">{item.label}</span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+            { icon: Building2, value: totals.kgs, label: isAr ? "روضات" : "KGs", color: "text-primary" },
+            { icon: Users, value: totals.staff, label: isAr ? "حسابات" : "Staff", color: "text-[hsl(142,71%,45%)]" },
+            { icon: GraduationCap, value: totals.students, label: isAr ? "طلاب" : "Students", color: "text-accent-foreground" },
+            { icon: ClipboardList, value: totals.surveys, label: isAr ? "تقييمات" : "Surveys", color: "text-secondary-foreground" },
+          ].map((c, i) => (
+            <Card key={i}>
+              <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center">
+                <c.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${c.color} mb-0.5`} />
+                <p className="text-lg font-bold leading-none">{c.value}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-0.5">{c.label}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="pb-2 px-3 sm:px-6">
-              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                {isAr ? "إحصائيات الروضات" : "Kindergarten Stats"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-1 sm:px-6">
-              {kgDetails.length > 0 ? (
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={kgDetails} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                    <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip contentStyle={{ borderRadius: "0.75rem", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", fontSize: 12 }} />
-                    <Bar dataKey="studentCount" name={isAr ? "طلاب" : "Students"} fill="hsl(199, 89%, 48%)" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="teacherCount" name={isAr ? "معلمات" : "Teachers"} fill="hsl(142, 71%, 45%)" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="surveyCount" name={isAr ? "تقييمات" : "Assessments"} fill="hsl(43, 96%, 56%)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[220px] flex items-center justify-center text-muted-foreground text-sm">
-                  {isAr ? "أضف روضات لعرض البيانات" : "Add kindergartens to see data"}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2 px-3 sm:px-6">
-              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-accent" />
-                {isAr ? "توزيع الطلاب" : "Student Distribution"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-1 sm:px-6">
-              {pieData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={220}>
-                  <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
-                      {pieData.map((_, i) => (
-                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[220px] flex items-center justify-center text-muted-foreground text-sm">
-                  {isAr ? "لا توجد بيانات بعد" : "No data yet"}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        {/* Quick Actions */}
+        <div className="flex gap-2 flex-wrap">
+          <Button size="sm" variant="outline" onClick={() => navigate("/admin/kindergartens")} className="gap-1.5 text-xs">
+            <Plus className="h-3.5 w-3.5" />
+            {isAr ? "إضافة روضة" : "Add KG"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => navigate("/admin/teachers")} className="gap-1.5 text-xs">
+            <Plus className="h-3.5 w-3.5" />
+            {isAr ? "إنشاء حساب" : "Create Account"}
+          </Button>
         </div>
 
-        <Card>
-          <CardHeader className="pb-2 px-3 sm:px-6">
-            <CardTitle className="text-sm sm:text-base flex items-center gap-2">
-              <CalendarCheck className="h-4 w-4 text-primary" />
-              {isAr ? "النشاط — آخر 7 أيام" : "Activity — Last 7 Days"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-1 sm:px-6">
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={recentActivity} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} />
-                <Tooltip contentStyle={{ borderRadius: "0.75rem", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", fontSize: 12 }} />
-                <Bar dataKey="surveys" name={isAr ? "تقييمات" : "Assessments"} fill="hsl(199, 89%, 48%)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="attendance" name={isAr ? "حضور" : "Attendance"} fill="hsl(142, 71%, 45%)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {/* Hierarchical KG Tree */}
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {isAr ? "هيكل الروضات" : "Kindergarten Structure"}
+          </h2>
 
-        {kgDetails.length > 0 && (
-          <Card>
-            <CardHeader className="px-3 sm:px-6">
-              <CardTitle className="text-sm sm:text-base">{isAr ? "تفاصيل الروضات" : "Kindergarten Details"}</CardTitle>
-            </CardHeader>
-            <CardContent className="px-0 sm:px-6">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-start py-2 px-3 font-semibold text-xs sm:text-sm">{isAr ? "الروضة" : "Kindergarten"}</th>
-                      <th className="text-center py-2 px-2 font-semibold text-xs sm:text-sm">{isAr ? "معلمات" : "Teachers"}</th>
-                      <th className="text-center py-2 px-2 font-semibold text-xs sm:text-sm">{isAr ? "طلاب" : "Students"}</th>
-                      <th className="text-center py-2 px-2 font-semibold text-xs sm:text-sm">{isAr ? "تقييمات" : "Assessments"}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {kgDetails.map((kg) => (
-                      <tr key={kg.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => navigate(`/admin/kindergartens/${kg.id}`)}>
-                        <td className="py-2.5 px-3 font-medium text-xs sm:text-sm">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                            <span className="truncate">{kg.name}</span>
+          {kgTrees.length === 0 ? (
+            <Card className="border-dashed border-2">
+              <CardContent className="p-6 text-center space-y-3">
+                <Building2 className="h-10 w-10 mx-auto text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  {isAr ? "لا توجد روضات بعد. ابدأ بإضافة روضة جديدة." : "No kindergartens yet. Start by adding one."}
+                </p>
+                <Button size="sm" onClick={() => navigate("/admin/kindergartens")} className="gap-1.5">
+                  <Plus className="h-4 w-4" />
+                  {isAr ? "إضافة روضة" : "Add Kindergarten"}
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            kgTrees.map(kg => (
+              <Collapsible key={kg.id} open={expandedKgs.has(kg.id)} onOpenChange={() => toggleKg(kg.id)}>
+                <Card className="overflow-hidden">
+                  {/* KG Header - Level 1 */}
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center justify-between p-3 sm:p-4 cursor-pointer hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <Building2 className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm sm:text-base font-bold truncate">{kg.name}</p>
+                          <div className="flex items-center gap-3 text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                            <span className="flex items-center gap-0.5">
+                              <Users className="h-3 w-3" /> {kg.staff.length}
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <GraduationCap className="h-3 w-3" /> {kg.studentCount}
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <ClipboardList className="h-3 w-3" /> {kg.surveyCount}
+                            </span>
                           </div>
-                        </td>
-                        <td className="py-2.5 px-2 text-center text-xs sm:text-sm">{kg.teacherCount}</td>
-                        <td className="py-2.5 px-2 text-center text-xs sm:text-sm">{kg.studentCount}</td>
-                        <td className="py-2.5 px-2 text-center text-xs sm:text-sm">{kg.surveyCount}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-7 px-2 hidden sm:flex"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/admin/kindergartens/${kg.id}`); }}
+                        >
+                          {isAr ? "التفاصيل" : "Details"}
+                          <ChevronRight className="h-3 w-3 ms-1 rtl:rotate-180" />
+                        </Button>
+                        {expandedKgs.has(kg.id) ? (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+                        )}
+                      </div>
+                    </div>
+                  </CollapsibleTrigger>
+
+                  {/* Expanded Content - Level 2: Staff */}
+                  <CollapsibleContent>
+                    <div className="border-t">
+                      {kg.staff.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                          {isAr ? "لا توجد حسابات في هذه الروضة" : "No staff in this kindergarten"}
+                        </div>
+                      ) : (
+                        <div className="divide-y">
+                          {kg.staff.map(member => (
+                            <div
+                              key={member.id}
+                              className="flex items-center justify-between px-4 sm:px-5 py-2.5 hover:bg-muted/30 transition-colors cursor-pointer"
+                              onClick={() => navigate(`/students?teacher=${member.id}`)}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0 flex-1 ps-4 sm:ps-6">
+                                <UserCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-sm font-medium truncate">{member.full_name}</span>
+                                    <Badge
+                                      variant={member.role === "kg_admin" ? "default" : "outline"}
+                                      className="text-[9px] px-1.5 py-0 shrink-0"
+                                    >
+                                      {member.role === "kg_admin"
+                                        ? (isAr ? "مديرة" : "Director")
+                                        : (isAr ? "معلمة" : "Teacher")}
+                                    </Badge>
+                                  </div>
+                                  <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                                    <GraduationCap className="h-3 w-3" />
+                                    {member.studentCount} {isAr ? "طالب" : "students"}
+                                  </span>
+                                </div>
+                              </div>
+                              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 rtl:rotate-180" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Footer: View full details */}
+                      <div className="border-t px-4 py-2 bg-muted/20">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full text-xs h-8 text-primary"
+                          onClick={() => navigate(`/admin/kindergartens/${kg.id}`)}
+                        >
+                          {isAr ? "عرض تفاصيل الروضة الكاملة" : "View full kindergarten details"}
+                          <ChevronRight className="h-3 w-3 ms-1 rtl:rotate-180" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            ))
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );
