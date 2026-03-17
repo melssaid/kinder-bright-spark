@@ -16,6 +16,7 @@ import SettingsPage from "./pages/SettingsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminKindergartens from "./pages/admin/AdminKindergartens";
 import AdminTeachers from "./pages/admin/AdminTeachers";
+import AdminKindergartenDetail from "./pages/admin/AdminKindergartenDetail";
 import KgAdminDashboard from "./pages/kg-admin/KgAdminDashboard";
 import KgAdminTeachers from "./pages/kg-admin/KgAdminTeachers";
 import NotFound from "./pages/NotFound";
