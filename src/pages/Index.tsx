@@ -1,27 +1,21 @@
-import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Users, Brain, TrendingUp, ChevronRight, Plus, Sparkles, ClipboardList } from "lucide-react";
+import { Users, Brain, TrendingUp, ChevronRight, Plus, ClipboardList } from "lucide-react";
 import { useI18n } from "@/i18n";
-import { getStudents, getSurveys, DbStudent, DbSurvey } from "@/lib/database";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDashboard } from "@/features/dashboard/hooks/useDashboard";
+import { useState, useEffect } from "react";
 
 const Index = () => {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
   const isAr = locale === "ar";
-  const [students, setStudents] = useState<DbStudent[]>([]);
-  const [surveys, setSurveys] = useState<DbSurvey[]>([]);
+  const { students, analyzedSurveys, studentStatusMap, needsSurvey, totalProgress, isLoading } = useDashboard();
   const [showHint, setShowHint] = useState(false);
-
-  useEffect(() => {
-    getStudents().then(setStudents);
-    getSurveys().then(setSurveys);
-  }, []);
 
   useEffect(() => {
     const hintSeen = localStorage.getItem("kinder_hint_seen");
@@ -32,23 +26,6 @@ const Index = () => {
     setShowHint(false);
     localStorage.setItem("kinder_hint_seen", "true");
   };
-
-  const analyzedSurveys = surveys.filter(s => s.analysis);
-
-  const studentStatusMap = students.map(st => {
-    const studentSurveys = surveys.filter(s => s.student_id === st.id);
-    const analyzedStudentSurveys = studentSurveys.filter(s => s.analysis);
-    const latest = analyzedStudentSurveys.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] || null;
-    let status: "new" | "needs_survey" | "analyzed" = "new";
-    if (latest) status = "analyzed";
-    else if (studentSurveys.length > 0) status = "analyzed";
-    else status = "needs_survey";
-    return { student: st, latest, status, surveyCount: studentSurveys.length };
-  });
-
-  const needsSurvey = studentStatusMap.filter(x => x.status === "needs_survey").length;
-  const analyzed = studentStatusMap.filter(x => x.latest).length;
-  const totalProgress = students.length > 0 ? Math.round((analyzed / students.length) * 100) : 0;
 
   const getStatusBadge = (status: "new" | "needs_survey" | "analyzed", latest: any) => {
     if (status === "analyzed" && latest?.analysis) {
@@ -64,6 +41,16 @@ const Index = () => {
     }
     return <Badge variant="outline" className="text-[10px]">{isAr ? "جديد" : "New"}</Badge>;
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="min-h-[50vh] flex items-center justify-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
