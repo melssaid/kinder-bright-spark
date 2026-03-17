@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { I18nProvider } from "@/i18n";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
+import { RoleRedirect } from "@/components/layout/RoleRedirect";
 import Index from "./pages/Index";
 import StudentsPage from "./pages/StudentsPage";
 import StudentProfilePage from "./pages/StudentProfilePage";
@@ -57,7 +58,7 @@ const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/auth" element={<AuthRoute><AuthPage /></AuthRoute>} />
-      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      <Route path="/" element={<ProtectedRoute><RoleRedirect><Index /></RoleRedirect></ProtectedRoute>} />
       <Route path="/students" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
       <Route path="/students/:studentId" element={<ProtectedRoute><StudentProfilePage /></ProtectedRoute>} />
       <Route path="/students/:studentId/assess" element={<ProtectedRoute><StudentProfilePage initialTab="assess" /></ProtectedRoute>} />
