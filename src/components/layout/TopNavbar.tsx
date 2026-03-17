@@ -12,27 +12,43 @@ import logo from "@/assets/kinder-bh-logo.png";
 import { cn } from "@/lib/utils";
 
 export function TopNavbar() {
-  const { locale, setLocale, t, dir } = useI18n();
+  const { locale, setLocale, dir } = useI18n();
   const { signOut } = useAuth();
   const { kindergartenName, isAdmin, isKgAdmin } = useRole();
   const location = useLocation();
+  const isAr = locale === "ar";
 
-  const mainLinks = [
-    { to: "/", icon: LayoutDashboard, label: locale === "ar" ? "الرئيسية" : "Dashboard", end: true },
-    { to: "/students", icon: Users, label: locale === "ar" ? "الطلاب" : "Students" },
-    { to: "/reports", icon: FileText, label: locale === "ar" ? "التقارير" : "Reports" },
+  const teacherLinks = [
+    { to: "/", icon: LayoutDashboard, label: isAr ? "الرئيسية" : "Dashboard", end: true },
+    { to: "/students", icon: Users, label: isAr ? "الطلاب" : "Students" },
+    { to: "/reports", icon: FileText, label: isAr ? "التقارير" : "Reports" },
   ];
 
   const adminLinks = [
-    { to: "/admin", icon: Shield, label: locale === "ar" ? "لوحة الأدمن" : "Admin" },
-    { to: "/admin/kindergartens", icon: Building2, label: locale === "ar" ? "الروضات" : "Kindergartens" },
-    { to: "/admin/teachers", icon: KeyRound, label: locale === "ar" ? "المعلمات" : "Teachers" },
+    { to: "/admin", icon: Shield, label: isAr ? "لوحة التحكم" : "Dashboard", end: true },
+    { to: "/admin/kindergartens", icon: Building2, label: isAr ? "الروضات" : "Kindergartens" },
+    { to: "/admin/teachers", icon: KeyRound, label: isAr ? "المعلمات" : "Teachers" },
   ];
+
+  const kgAdminLinks = [
+    { to: "/kg-admin", icon: Building2, label: isAr ? "روضتي" : "My KG", end: true },
+    { to: "/kg-admin/teachers", icon: Users, label: isAr ? "المعلمات" : "Teachers" },
+    { to: "/students", icon: Users, label: isAr ? "الطلاب" : "Students" },
+    { to: "/reports", icon: FileText, label: isAr ? "التقارير" : "Reports" },
+  ];
+
+  const navLinks = isAdmin ? adminLinks : isKgAdmin ? kgAdminLinks : teacherLinks;
 
   const isActive = (path: string, end?: boolean) => {
     if (end) return location.pathname === path;
     return location.pathname.startsWith(path);
   };
+
+  const roleLabel = isAdmin
+    ? (isAr ? "مسؤول النظام" : "System Admin")
+    : isKgAdmin
+    ? kindergartenName || (isAr ? "مديرة الروضة" : "KG Admin")
+    : null;
 
   return (
     <header className="sticky top-0 z-50 bg-card border-b" dir={dir}>
@@ -40,16 +56,16 @@ export function TopNavbar() {
         <div className="flex items-center gap-2 shrink-0">
           <img src={logo} alt="Kinder BH" className="h-8 w-8 sm:h-9 sm:w-9 object-contain" />
           <h1 className="text-base sm:text-lg font-bold text-foreground font-[Quicksand] hidden sm:block">Kinder BH</h1>
-          {kindergartenName && (
+          {roleLabel && (
             <Badge variant="outline" className="hidden lg:flex items-center gap-1 text-[10px]">
-              <Building2 className="h-3 w-3" />
-              <span className="truncate max-w-[100px]">{kindergartenName}</span>
+              {isAdmin ? <Shield className="h-3 w-3" /> : <Building2 className="h-3 w-3" />}
+              <span className="truncate max-w-[120px]">{roleLabel}</span>
             </Badge>
           )}
         </div>
 
         <nav className="hidden md:flex items-center gap-1">
-          {mainLinks.map((link) => (
+          {navLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
@@ -65,49 +81,6 @@ export function TopNavbar() {
               <span>{link.label}</span>
             </NavLink>
           ))}
-          {isKgAdmin && (
-            <>
-              <div className="w-px h-6 bg-border mx-1" />
-              {[
-                { to: "/kg-admin", label: locale === "ar" ? "إدارة الروضة" : "My KG", icon: Building2 },
-                { to: "/kg-admin/teachers", label: locale === "ar" ? "المعلمات" : "Teachers", icon: Users },
-              ].map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                    isActive(link.to)
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  )}
-                >
-                  <link.icon className="h-3.5 w-3.5" />
-                  <span>{link.label}</span>
-                </NavLink>
-              ))}
-            </>
-          )}
-          {isAdmin && (
-            <>
-              <div className="w-px h-6 bg-border mx-1" />
-              {adminLinks.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                    isActive(link.to)
-                      ? "bg-accent/10 text-accent"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  )}
-                >
-                  <link.icon className="h-3.5 w-3.5" />
-                  <span>{link.label}</span>
-                </NavLink>
-              ))}
-            </>
-          )}
         </nav>
 
         <div className="flex items-center gap-1.5">
