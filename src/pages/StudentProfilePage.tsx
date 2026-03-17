@@ -263,7 +263,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-1">
-                        {(Array.isArray(analysis.strengths) ? analysis.strengths : []).slice(0, 3).map((s: string, i: number) => (
+                        {locArray(analysis.strengths).slice(0, 3).map((s: string, i: number) => (
                           <li key={i} className="text-xs text-muted-foreground">• {s}</li>
                         ))}
                       </ul>
