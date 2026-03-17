@@ -357,6 +357,11 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
             )}
           </TabsContent>
 
+          {/* Parents Tab */}
+          <TabsContent value="parents" className="space-y-3">
+            <ParentManager studentId={student.id} studentName={student.name} analysis={analysis} />
+          </TabsContent>
+
           {/* Attendance Tab */}
           <TabsContent value="attendance" className="space-y-4">
             {attendanceStats && attendanceStats.total > 0 && (
