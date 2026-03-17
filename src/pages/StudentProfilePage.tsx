@@ -112,6 +112,21 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
   const latestSurvey = surveys.find(s => s.analysis);
   const analysis = latestSurvey?.analysis as any;
 
+  // Helper to extract localized value (handles both string and {ar, en} objects)
+  const loc = (val: any): string => {
+    if (!val) return "";
+    if (typeof val === "string") return val;
+    return (isAr ? val?.ar : val?.en) || val?.ar || val?.en || "";
+  };
+  const locArray = (val: any): string[] => {
+    if (Array.isArray(val)) return val.map((v: any) => typeof v === "string" ? v : loc(v));
+    if (val && typeof val === "object" && !Array.isArray(val)) {
+      const picked = isAr ? val?.ar : val?.en;
+      return Array.isArray(picked) ? picked : [];
+    }
+    return [];
+  };
+
   const categoryScores = surveyCategories.map(cat => {
     const answers = latestSurvey?.answers || {};
     const answered = cat.questions.filter(q => answers[q.id] !== undefined);
