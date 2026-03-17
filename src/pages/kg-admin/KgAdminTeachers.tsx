@@ -45,6 +45,13 @@ const KgAdminTeachers = () => {
     name: string; email: string; password: string; role: string; kindergartenName: string;
   } | null>(null);
 
+  // Edit state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingTeacher, setEditingTeacher] = useState<TeacherProfile | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+
   const loadTeachers = async () => {
     if (!kindergartenId) return;
     const { data: profiles } = await supabase.from("profiles").select("id, full_name, kindergarten_id").eq("kindergarten_id", kindergartenId);
