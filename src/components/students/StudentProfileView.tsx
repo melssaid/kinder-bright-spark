@@ -407,6 +407,23 @@ export function StudentProfileView({ student, onBack }: StudentProfileViewProps)
                   <PlayCircle className="h-4 w-4" />
                   {isAr ? "تقييم جديد" : "New Assessment"}
                 </Button>
+                {analysis && (
+                  <Button size="sm" variant="outline" className="gap-2 rounded-full" onClick={() => {
+                    generateStudentPdf({
+                      studentName: student.name,
+                      studentAge: student.age,
+                      studentGender: student.gender,
+                      analysis,
+                      answers: latestSurvey?.answers || {},
+                      surveyDate: latestSurvey?.date || new Date().toISOString(),
+                      isAr,
+                    });
+                    toast.success(isAr ? "تم تحميل التقرير بصيغة PDF" : "PDF report downloaded");
+                  }}>
+                    <FileDown className="h-4 w-4" />
+                    {isAr ? "تحميل PDF" : "PDF Report"}
+                  </Button>
+                )}
                 {analysis?.parentMessage && (
                   <Button size="sm" variant="outline" className="gap-2 rounded-full" onClick={handleShareWhatsApp}>
                     <Share2 className="h-4 w-4" />
