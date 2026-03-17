@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, PlayCircle, Share2, Brain, Calendar, ClipboardList, Users as UsersIcon } from "lucide-react";
+import { ParentManager } from "@/components/students/ParentManager";
 import { useI18n } from "@/i18n";
 import { DbStudent, DbSurvey, getStudents, getStudentSurveys, getAttendanceStats } from "@/lib/database";
 import { SurveyForm } from "@/components/survey/SurveyForm";
