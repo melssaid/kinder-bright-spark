@@ -51,6 +51,13 @@ const AdminTeachers = () => {
     name: string; email: string; password: string; role: string; kindergartenName: string;
   } | null>(null);
 
+  // Edit state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingTeacher, setEditingTeacher] = useState<TeacherProfile | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
     supabase.from("kindergartens").select("id, name").order("name").then(({ data }) => setKindergartens((data || []) as Kindergarten[]));
   }, []);
