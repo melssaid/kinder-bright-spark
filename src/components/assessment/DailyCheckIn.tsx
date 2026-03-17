@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { addSurvey } from "@/lib/database";
 import { DbStudent } from "@/lib/database";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, Share2 } from "lucide-react";
 
 interface DailyCheckInProps {
   student: DbStudent;
@@ -51,7 +52,102 @@ const dailyQuestions = [
       { emoji: "😶", labelAr: "منعزل", labelEn: "Isolated", value: 1 },
     ],
   },
+  {
+    id: "eating",
+    titleAr: "تناول الوجبة",
+    titleEn: "Meal intake",
+    options: [
+      { emoji: "🍽️", labelAr: "أكل جيداً", labelEn: "Ate well", value: 5 },
+      { emoji: "🥗", labelAr: "أكل معظمها", labelEn: "Ate most", value: 4 },
+      { emoji: "🍴", labelAr: "أكل قليلاً", labelEn: "Ate little", value: 3 },
+      { emoji: "🚫", labelAr: "لم يأكل", labelEn: "Didn't eat", value: 1 },
+    ],
+  },
+  {
+    id: "participation",
+    titleAr: "المشاركة في الأنشطة",
+    titleEn: "Activity participation",
+    options: [
+      { emoji: "🌟", labelAr: "مشاركة ممتازة", labelEn: "Excellent", value: 5 },
+      { emoji: "👍", labelAr: "مشاركة جيدة", labelEn: "Good", value: 4 },
+      { emoji: "🤷", labelAr: "مشاركة محدودة", labelEn: "Limited", value: 3 },
+      { emoji: "😶", labelAr: "لم يشارك", labelEn: "Didn't participate", value: 1 },
+    ],
+  },
+  {
+    id: "following_rules",
+    titleAr: "الالتزام بالقواعد",
+    titleEn: "Following rules",
+    options: [
+      { emoji: "✅", labelAr: "ملتزم تماماً", labelEn: "Fully compliant", value: 5 },
+      { emoji: "👌", labelAr: "ملتزم غالباً", labelEn: "Mostly compliant", value: 4 },
+      { emoji: "⚠️", labelAr: "يحتاج تذكير", labelEn: "Needs reminders", value: 3 },
+      { emoji: "❌", labelAr: "صعوبة في الالتزام", labelEn: "Difficulty complying", value: 1 },
+    ],
+  },
+  {
+    id: "independence",
+    titleAr: "الاستقلالية (ملابس، حمام، ترتيب)",
+    titleEn: "Independence (dressing, toilet, organizing)",
+    options: [
+      { emoji: "💪", labelAr: "مستقل تماماً", labelEn: "Fully independent", value: 5 },
+      { emoji: "👍", labelAr: "يحتاج مساعدة بسيطة", labelEn: "Needs little help", value: 4 },
+      { emoji: "🤲", labelAr: "يحتاج مساعدة متوسطة", labelEn: "Needs moderate help", value: 3 },
+      { emoji: "🧑‍🤝‍🧑", labelAr: "يحتاج مساعدة كاملة", labelEn: "Needs full help", value: 1 },
+    ],
+  },
 ];
+
+function buildDailyReportMessage(student: DbStudent, answers: Record<string, number>, isAr: boolean): string {
+  const date = new Date().toLocaleDateString(isAr ? "ar-SA" : "en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  
+  const getLabel = (qId: string, value: number) => {
+    const q = dailyQuestions.find(dq => dq.id === qId);
+    const opt = q?.options.find(o => o.value === value);
+    if (!opt) return "";
+    return `${opt.emoji} ${isAr ? opt.labelAr : opt.labelEn}`;
+  };
+
+  if (isAr) {
+    return `🌈 *التقرير اليومي - روضة كيندر BH*
+📅 ${date}
+
+👶 *الطفل/ة:* ${student.name}
+
+📊 *ملخص اليوم:*
+
+😊 المزاج: ${getLabel("mood", answers.mood)}
+⚡ الطاقة: ${getLabel("energy", answers.energy)}
+👥 التفاعل: ${getLabel("social", answers.social)}
+🍽️ الوجبة: ${getLabel("eating", answers.eating)}
+🎯 المشاركة: ${getLabel("participation", answers.participation)}
+📏 الالتزام: ${getLabel("following_rules", answers.following_rules)}
+💪 الاستقلالية: ${getLabel("independence", answers.independence)}
+
+✨ نتمنى لطفلكم يوماً سعيداً!
+مع تحيات المعلمة 🌸
+روضة كيندر BH`;
+  }
+
+  return `🌈 *Daily Report - Kinder BH*
+📅 ${date}
+
+👶 *Child:* ${student.name}
+
+📊 *Today's Summary:*
+
+😊 Mood: ${getLabel("mood", answers.mood)}
+⚡ Energy: ${getLabel("energy", answers.energy)}
+👥 Social: ${getLabel("social", answers.social)}
+🍽️ Meal: ${getLabel("eating", answers.eating)}
+🎯 Participation: ${getLabel("participation", answers.participation)}
+📏 Rules: ${getLabel("following_rules", answers.following_rules)}
+💪 Independence: ${getLabel("independence", answers.independence)}
+
+✨ Wishing your child a wonderful day!
+Best regards, Teacher 🌸
+Kinder BH`;
+}
 
 export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
   const { locale } = useI18n();
@@ -77,10 +173,14 @@ export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
     if (result) {
       setSaved(true);
       toast.success(isAr ? "تم حفظ التقييم اليومي ✅" : "Daily check-in saved ✅");
-      setTimeout(onComplete, 1500);
     } else {
       toast.error(isAr ? "خطأ في الحفظ" : "Error saving");
     }
+  };
+
+  const handleShareWhatsApp = () => {
+    const msg = buildDailyReportMessage(student, answers, isAr);
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   if (saved) {
@@ -90,6 +190,18 @@ export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
           <CardContent className="flex flex-col items-center justify-center py-10 gap-4">
             <CheckCircle className="h-14 w-14 text-primary" />
             <h3 className="text-lg font-bold">{isAr ? "تم حفظ التقييم اليومي! ✅" : "Daily Check-in Saved! ✅"}</h3>
+            <p className="text-sm text-muted-foreground text-center max-w-xs">
+              {isAr ? "يمكنك الآن إرسال التقرير لولي الأمر عبر واتساب" : "You can now share the report with the parent via WhatsApp"}
+            </p>
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              <Button onClick={handleShareWhatsApp} className="h-12 gap-2 text-sm w-full">
+                <Share2 className="h-5 w-5" />
+                {isAr ? "📤 إرسال لولي الأمر عبر واتساب" : "📤 Send to Parent via WhatsApp"}
+              </Button>
+              <Button variant="outline" onClick={onComplete} className="h-10 text-sm w-full">
+                {isAr ? "تم ✅" : "Done ✅"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
@@ -97,10 +209,13 @@ export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
   }
 
   return (
-    <div className="space-y-4" dir={isAr ? "rtl" : "ltr"}>
+    <div className="space-y-3" dir={isAr ? "rtl" : "ltr"}>
       <div className="text-center space-y-1">
-        <h3 className="text-base font-bold">{isAr ? "📋 التقييم اليومي السريع" : "📋 Quick Daily Check-in"}</h3>
+        <h3 className="text-base font-bold">{isAr ? "📋 التقييم اليومي" : "📋 Daily Check-in"}</h3>
         <p className="text-xs text-muted-foreground">{isAr ? "اختاري الإيموجي المناسب لحالة الطفل اليوم" : "Select the emoji that matches the child's state today"}</p>
+        <Badge variant="secondary" className="text-[10px]">
+          {Object.keys(answers).length}/{dailyQuestions.length} {isAr ? "مكتمل" : "completed"}
+        </Badge>
       </div>
 
       {dailyQuestions.map((question, qi) => (
@@ -108,9 +223,9 @@ export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
           key={question.id}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: qi * 0.1 }}
+          transition={{ delay: qi * 0.05 }}
         >
-          <Card>
+          <Card className={answers[question.id] !== undefined ? "border-primary/20" : ""}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">{isAr ? question.titleAr : question.titleEn}</CardTitle>
             </CardHeader>
@@ -120,14 +235,14 @@ export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
                   <button
                     key={opt.value}
                     onClick={() => setAnswers(prev => ({ ...prev, [question.id]: opt.value }))}
-                    className={`flex flex-col items-center gap-1 rounded-xl p-2 flex-1 min-h-[72px] transition-all duration-200 touch-manipulation active:scale-95 border-2 ${
+                    className={`flex flex-col items-center gap-1 rounded-xl p-1.5 flex-1 min-h-[64px] transition-all duration-200 touch-manipulation active:scale-95 border-2 ${
                       answers[question.id] === opt.value
                         ? "bg-primary/10 border-primary shadow-sm scale-[1.05]"
                         : "bg-muted/30 border-transparent hover:border-primary/20"
                     }`}
                   >
-                    <span className="text-2xl">{opt.emoji}</span>
-                    <span className="text-[9px] leading-tight text-center text-muted-foreground">
+                    <span className="text-xl">{opt.emoji}</span>
+                    <span className="text-[8px] leading-tight text-center text-muted-foreground">
                       {isAr ? opt.labelAr : opt.labelEn}
                     </span>
                   </button>
@@ -144,7 +259,7 @@ export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
         className="w-full h-12 gap-2 text-sm font-semibold"
       >
         {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle className="h-5 w-5" />}
-        {saving ? (isAr ? "جاري الحفظ..." : "Saving...") : (isAr ? "حفظ التقييم اليومي" : "Save Daily Check-in")}
+        {saving ? (isAr ? "جاري الحفظ..." : "Saving...") : (isAr ? "حفظ وإرسال للأهل" : "Save & Send to Parent")}
       </Button>
     </div>
   );
