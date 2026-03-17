@@ -116,7 +116,24 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Quick Access */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {[
+            { icon: GraduationCap, label: isAr ? "عرض جميع الطلاب" : "View All Students", to: "/students", color: "text-primary" },
+            { icon: FileText, label: isAr ? "عرض التقارير" : "View Reports", to: "/reports", color: "text-emerald-600" },
+            { icon: Building2, label: isAr ? "إدارة الروضات" : "Manage KGs", to: "/admin/kindergartens", color: "text-amber-600" },
+            { icon: Users, label: isAr ? "إدارة الحسابات" : "Manage Accounts", to: "/admin/teachers", color: "text-purple-600" },
+          ].map((item) => (
+            <Card key={item.to} className="cursor-pointer hover:shadow-md transition-all active:scale-[0.98]" onClick={() => navigate(item.to)}>
+              <CardContent className="p-3 flex items-center gap-2">
+                <item.icon className={`h-5 w-5 ${item.color} shrink-0`} />
+                <span className="text-xs font-medium flex-1">{item.label}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
           <Card>
             <CardHeader className="pb-2 px-3 sm:px-6">
               <CardTitle className="text-sm sm:text-base flex items-center gap-2">
