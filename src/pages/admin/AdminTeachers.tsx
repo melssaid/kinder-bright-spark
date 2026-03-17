@@ -154,16 +154,35 @@ const AdminTeachers = () => {
     toast.success(isAr ? "تم فتح واتساب" : "WhatsApp opened");
   };
 
+  const handleOpenEdit = (teacher: TeacherProfile, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingTeacher(teacher);
+    setEditName(teacher.full_name);
+    setEditEmail(""); // email not stored in profiles, user fills it
+    setEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingTeacher || (!editName.trim() && !editEmail.trim())) return;
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("update-teacher", {
+        body: { userId: editingTeacher.id, fullName: editName.trim() || undefined, email: editEmail.trim() || undefined },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(isAr ? "تم تحديث البيانات بنجاح" : "Account updated successfully");
+      setEditOpen(false);
+      loadTeachers();
+    } catch (err: any) {
+      toast.error(err.message || (isAr ? "حدث خطأ" : "An error occurred"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const getKgName = (id: string) => kindergartens.find((k) => k.id === id)?.name || "—";
   const filteredTeachers = selectedKg ? teachers.filter((t) => t.kindergarten_id === selectedKg) : teachers;
-
-  return (
-    <DashboardLayout>
-      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-2xl mx-auto">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold">{isAr ? "إدارة الحسابات" : "Manage Accounts"}</h1>
-          <p className="text-sm text-muted-foreground">{isAr ? "إنشاء حسابات وإدارة معلمات ومديرات الروضات" : "Create accounts and manage teachers and directors"}</p>
-        </div>
 
         {/* Create Account Card */}
         <Card>
