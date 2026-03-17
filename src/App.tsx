@@ -67,6 +67,7 @@ const AppRoutes = () => (
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/kindergartens" element={<AdminRoute><AdminKindergartens /></AdminRoute>} />
+      <Route path="/admin/kindergartens/:kgId" element={<AdminRoute><AdminKindergartenDetail /></AdminRoute>} />
       <Route path="/admin/teachers" element={<AdminRoute><AdminTeachers /></AdminRoute>} />
       <Route path="/kg-admin" element={<KgAdminRoute><KgAdminDashboard /></KgAdminRoute>} />
       <Route path="/kg-admin/teachers" element={<KgAdminRoute><KgAdminTeachers /></KgAdminRoute>} />
