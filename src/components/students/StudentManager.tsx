@@ -58,7 +58,7 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
         // Add attendance records
         const attendanceRecords = generateDemoAttendanceDates();
         for (const rec of attendanceRecords) {
-          await setAttendance(student.id, rec.date, rec.status, user.id);
+          await setAttendance(student.id, rec.date, rec.status, effectiveTeacherId);
         }
       }
       onStudentsChange();
