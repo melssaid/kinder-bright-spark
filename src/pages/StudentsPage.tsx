@@ -15,15 +15,15 @@ const StudentsPage = () => {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
   const isAr = locale === "ar";
-  const { isAdmin } = useRole();
+  const { isAdmin, isKgAdmin } = useRole();
   const [searchParams] = useSearchParams();
   const teacherIdParam = searchParams.get("teacher");
 
   const [students, setStudents] = useState<DbStudent[]>([]);
   const [teacherName, setTeacherName] = useState<string | null>(null);
 
-  // If admin is viewing a specific teacher's students
-  const targetTeacherId = isAdmin ? teacherIdParam : null;
+  // Admin or KG Admin can view a specific teacher's students
+  const targetTeacherId = (isAdmin || isKgAdmin) ? teacherIdParam : null;
 
   useEffect(() => {
     if (targetTeacherId) {
@@ -49,7 +49,7 @@ const StudentsPage = () => {
       <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-4xl mx-auto">
         {targetTeacherId && teacherName && (
           <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/teachers")} className="gap-1 text-xs">
+            <Button variant="ghost" size="sm" onClick={() => navigate(isKgAdmin ? "/kg-admin/teachers" : "/admin/teachers")} className="gap-1 text-xs">
               <ArrowRight className="h-3 w-3 rtl:rotate-180" />
               {isAr ? "رجوع للحسابات" : "Back to Accounts"}
             </Button>

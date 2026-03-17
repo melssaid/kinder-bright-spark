@@ -7,10 +7,14 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, GraduationCap, ChevronRight } from "lucide-react";
+import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, GraduationCap, ChevronRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Kindergarten { id: string; name: string; }
 interface TeacherProfile {
@@ -31,6 +35,7 @@ const AdminTeachers = () => {
   const [selectedKg, setSelectedKg] = useState<string>("");
   const [teachers, setTeachers] = useState<TeacherProfile[]>([]);
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<CreateRole>("teacher");
 
@@ -98,6 +103,23 @@ const AdminTeachers = () => {
       toast.error(err.message || (isAr ? "حدث خطأ" : "An error occurred"));
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleDeleteTeacher = async (teacher: TeacherProfile) => {
+    setDeleting(teacher.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-teacher", {
+        body: { userId: teacher.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(isAr ? `تم حذف الحساب: ${teacher.full_name}` : `Account deleted: ${teacher.full_name}`);
+      loadTeachers();
+    } catch (err: any) {
+      toast.error(err.message || (isAr ? "حدث خطأ" : "An error occurred"));
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -225,7 +247,40 @@ const AdminTeachers = () => {
                       </div>
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 rtl:rotate-180" />
+                  <div className="flex items-center gap-1 shrink-0">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {deleting === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>{isAr ? "حذف الحساب" : "Delete Account"}</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {isAr
+                              ? `هل أنت متأكد من حذف حساب "${t.full_name}"؟ سيتم حذف جميع بيانات الطلاب والتقييمات المرتبطة بهذا الحساب نهائياً.`
+                              : `Are you sure you want to delete "${t.full_name}"'s account? All associated students, assessments, and data will be permanently deleted.`}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{isAr ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => handleDeleteTeacher(t)}
+                          >
+                            {isAr ? "حذف نهائياً" : "Delete Permanently"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+                  </div>
                 </div>
               ))}
               {filteredTeachers.length === 0 && (

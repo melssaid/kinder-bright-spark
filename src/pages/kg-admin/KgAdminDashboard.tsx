@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, GraduationCap, ClipboardList, Brain } from "lucide-react";
+import { Users, GraduationCap, ClipboardList, Brain, ChevronRight } from "lucide-react";
 import { KgCharts } from "@/components/kg-admin/KgCharts";
 import { KgInsights } from "@/components/kg-admin/KgInsights";
+import { useNavigate } from "react-router-dom";
 
 interface TeacherInfo { id: string; full_name: string; }
 interface StudentInfo { id: string; name: string; age: number; gender: string; teacher_id: string; }
@@ -15,6 +16,7 @@ interface SurveyInfo { id: string; student_id: string; teacher_id: string; date:
 
 const KgAdminDashboard = () => {
   const { locale } = useI18n();
+  const navigate = useNavigate();
   const isAr = locale === "ar";
   const { kindergartenName, kindergartenId } = useRole();
   const [teachers, setTeachers] = useState<TeacherInfo[]>([]);
@@ -73,7 +75,7 @@ const KgAdminDashboard = () => {
         {/* Charts */}
         <KgCharts students={students} surveys={surveys} teachers={teachers} />
 
-        {/* Teachers list */}
+        {/* Teachers list - clickable */}
         <Card>
           <CardHeader className="px-3 sm:px-6 pb-2">
             <CardTitle className="text-sm sm:text-base flex items-center gap-2">
@@ -87,7 +89,11 @@ const KgAdminDashboard = () => {
                 const teacherStudents = students.filter(s => s.teacher_id === t.id);
                 const teacherSurveys = surveys.filter(s => s.teacher_id === t.id);
                 return (
-                  <div key={t.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg border">
+                  <div
+                    key={t.id}
+                    className="flex items-center justify-between p-2 sm:p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/students?teacher=${t.id}`)}
+                  >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-lg">👩‍🏫</span>
                       <div className="min-w-0">
@@ -97,6 +103,7 @@ const KgAdminDashboard = () => {
                         </p>
                       </div>
                     </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 rtl:rotate-180" />
                   </div>
                 );
               })}
@@ -107,7 +114,7 @@ const KgAdminDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Students list */}
+        {/* Students list - clickable */}
         <Card>
           <CardHeader className="px-3 sm:px-6 pb-2">
             <CardTitle className="text-sm sm:text-base flex items-center gap-2">
@@ -123,7 +130,11 @@ const KgAdminDashboard = () => {
                 const latestAnalyzed = studentSurveys.find(sv => sv.analysis);
                 const indicatorType = latestAnalyzed?.analysis?.indicators?.type;
                 return (
-                  <div key={s.id} className="flex items-center justify-between p-2 sm:p-3 rounded-lg border">
+                  <div
+                    key={s.id}
+                    className="flex items-center justify-between p-2 sm:p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/students/${s.id}`)}
+                  >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-lg">{s.gender === "male" ? "👦" : "👧"}</span>
                       <div className="min-w-0">
@@ -140,9 +151,12 @@ const KgAdminDashboard = () => {
                         </p>
                       </div>
                     </div>
-                    <span className="text-[10px] text-muted-foreground shrink-0">
-                      {studentSurveys.length} {isAr ? "تقييم" : "surveys"}
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] text-muted-foreground">
+                        {studentSurveys.length} {isAr ? "تقييم" : "surveys"}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+                    </div>
                   </div>
                 );
               })}
