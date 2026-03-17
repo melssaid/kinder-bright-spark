@@ -15,6 +15,7 @@ import { surveyCategories } from "@/data/surveyQuestions";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { generateStudentPdf } from "@/lib/pdfReport";
 
 interface StudentProfileViewProps {
   student: DbStudent;
