@@ -7,22 +7,30 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
-import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff } from "lucide-react";
+import { UserPlus, Users, CheckCircle2, Loader2, Eye, EyeOff, Trash2, GraduationCap, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TeacherProfile {
   id: string;
   full_name: string;
   kindergarten_id: string | null;
+  studentCount?: number;
 }
 
 const KgAdminTeachers = () => {
   const { locale } = useI18n();
+  const navigate = useNavigate();
   const isAr = locale === "ar";
   const { kindergartenId, kindergartenName } = useRole();
   const [teachers, setTeachers] = useState<TeacherProfile[]>([]);
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const [teacherName, setTeacherName] = useState("");
@@ -31,11 +39,26 @@ const KgAdminTeachers = () => {
 
   const loadTeachers = async () => {
     if (!kindergartenId) return;
-    const { data } = await supabase
+    const { data: profiles } = await supabase
       .from("profiles")
       .select("id, full_name, kindergarten_id")
       .eq("kindergarten_id", kindergartenId);
-    setTeachers((data || []) as TeacherProfile[]);
+
+    const { data: students } = await supabase
+      .from("students")
+      .select("id, teacher_id")
+      .eq("kindergarten_id", kindergartenId);
+
+    const studentCountMap: Record<string, number> = {};
+    (students || []).forEach((s: any) => {
+      studentCountMap[s.teacher_id] = (studentCountMap[s.teacher_id] || 0) + 1;
+    });
+
+    const enriched = (profiles || []).map((p: any) => ({
+      ...p,
+      studentCount: studentCountMap[p.id] || 0,
+    }));
+    setTeachers(enriched as TeacherProfile[]);
   };
 
   useEffect(() => { loadTeachers(); }, [kindergartenId]);
@@ -71,6 +94,23 @@ const KgAdminTeachers = () => {
       toast.error(err.message || (isAr ? "حدث خطأ" : "An error occurred"));
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleDelete = async (teacher: TeacherProfile) => {
+    setDeleting(teacher.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-teacher", {
+        body: { userId: teacher.id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(isAr ? `تم حذف المعلمة: ${teacher.full_name}` : `Teacher deleted: ${teacher.full_name}`);
+      loadTeachers();
+    } catch (err: any) {
+      toast.error(err.message || (isAr ? "حدث خطأ" : "An error occurred"));
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -135,9 +175,55 @@ const KgAdminTeachers = () => {
           <CardContent className="px-3 sm:px-6">
             <div className="space-y-2">
               {teachers.map((t) => (
-                <div key={t.id} className="flex items-center gap-2 p-2 sm:p-3 rounded-lg border">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                  <span className="font-medium text-sm truncate">{t.full_name}</span>
+                <div
+                  key={t.id}
+                  className="flex items-center justify-between p-2 sm:p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/students?teacher=${t.id}`)}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium text-sm truncate block">{t.full_name}</span>
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
+                        <GraduationCap className="h-3 w-3" />
+                        {t.studentCount || 0} {isAr ? "طالب" : "students"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {deleting === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>{isAr ? "حذف المعلمة" : "Delete Teacher"}</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {isAr
+                              ? `هل أنت متأكدة من حذف "${t.full_name}"؟ سيتم حذف جميع بيانات الطلاب والتقييمات المرتبطة نهائياً.`
+                              : `Are you sure you want to delete "${t.full_name}"? All associated students and data will be permanently deleted.`}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>{isAr ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => handleDelete(t)}
+                          >
+                            {isAr ? "حذف نهائياً" : "Delete Permanently"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+                  </div>
                 </div>
               ))}
               {teachers.length === 0 && (
