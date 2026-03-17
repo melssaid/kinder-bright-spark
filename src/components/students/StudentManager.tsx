@@ -16,9 +16,10 @@ interface StudentManagerProps {
   onStudentsChange: () => void;
   selectedStudent: DbStudent | null;
   onSelectStudent: (student: DbStudent | null) => void;
+  overrideTeacherId?: string;
 }
 
-export function StudentManager({ students, onStudentsChange, selectedStudent, onSelectStudent }: StudentManagerProps) {
+export function StudentManager({ students, onStudentsChange, selectedStudent, onSelectStudent, overrideTeacherId }: StudentManagerProps) {
   const { t, locale } = useI18n();
   const { user } = useAuth();
   const [name, setName] = useState("");

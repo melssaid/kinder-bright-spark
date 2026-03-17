@@ -41,8 +41,10 @@ export async function getProfile(userId: string): Promise<DbProfile | null> {
 }
 
 // Students
-export async function getStudents(): Promise<DbStudent[]> {
-  const { data } = await supabase.from("students").select("*").order("created_at", { ascending: true });
+export async function getStudents(teacherId?: string): Promise<DbStudent[]> {
+  let query = supabase.from("students").select("*").order("created_at", { ascending: true });
+  if (teacherId) query = query.eq("teacher_id", teacherId);
+  const { data } = await query;
   return (data || []) as DbStudent[];
 }
 
