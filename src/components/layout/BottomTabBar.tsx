@@ -1,22 +1,38 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useI18n } from "@/i18n";
 import { useRole } from "@/hooks/useRole";
-import { LayoutDashboard, Users, FileText, Settings, Shield, Building2 } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Settings, Shield, Building2, KeyRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomTabBar() {
   const { locale, dir } = useI18n();
   const { isAdmin, isKgAdmin } = useRole();
   const location = useLocation();
+  const isAr = locale === "ar";
 
-  const tabs = [
-    { to: "/", icon: LayoutDashboard, label: locale === "ar" ? "الرئيسية" : "Home", end: true },
-    { to: "/students", icon: Users, label: locale === "ar" ? "الطلاب" : "Students" },
-    { to: "/reports", icon: FileText, label: locale === "ar" ? "التقارير" : "Reports" },
-    ...(isAdmin ? [{ to: "/admin", icon: Shield, label: locale === "ar" ? "أدمن" : "Admin" }] :
-        isKgAdmin ? [{ to: "/kg-admin", icon: Building2, label: locale === "ar" ? "روضتي" : "My KG" }] : []),
-    { to: "/settings", icon: Settings, label: locale === "ar" ? "الإعدادات" : "Settings" },
+  const teacherTabs = [
+    { to: "/", icon: LayoutDashboard, label: isAr ? "الرئيسية" : "Home", end: true },
+    { to: "/students", icon: Users, label: isAr ? "الطلاب" : "Students" },
+    { to: "/reports", icon: FileText, label: isAr ? "التقارير" : "Reports" },
+    { to: "/settings", icon: Settings, label: isAr ? "الإعدادات" : "Settings" },
   ];
+
+  const adminTabs = [
+    { to: "/admin", icon: LayoutDashboard, label: isAr ? "الرئيسية" : "Home", end: true },
+    { to: "/admin/kindergartens", icon: Building2, label: isAr ? "الروضات" : "KGs" },
+    { to: "/admin/teachers", icon: KeyRound, label: isAr ? "المعلمات" : "Teachers" },
+    { to: "/settings", icon: Settings, label: isAr ? "الإعدادات" : "Settings" },
+  ];
+
+  const kgAdminTabs = [
+    { to: "/kg-admin", icon: LayoutDashboard, label: isAr ? "الرئيسية" : "Home", end: true },
+    { to: "/kg-admin/teachers", icon: Users, label: isAr ? "المعلمات" : "Teachers" },
+    { to: "/students", icon: Users, label: isAr ? "الطلاب" : "Students" },
+    { to: "/reports", icon: FileText, label: isAr ? "التقارير" : "Reports" },
+    { to: "/settings", icon: Settings, label: isAr ? "الإعدادات" : "Settings" },
+  ];
+
+  const tabs = isAdmin ? adminTabs : isKgAdmin ? kgAdminTabs : teacherTabs;
 
   const isActive = (path: string, end?: boolean) => {
     if (end) return location.pathname === path;
