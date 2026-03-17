@@ -165,7 +165,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
 
   return (
     <DashboardLayout>
-      <div className="p-3 sm:p-4 md:p-6 space-y-4 max-w-4xl mx-auto pb-24">
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 max-w-4xl mx-auto pb-24" dir={isAr ? "rtl" : "ltr"}>
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-primary/10 via-background to-accent/10">
