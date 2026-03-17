@@ -137,10 +137,118 @@ export function ParentManager({ studentId, studentName, analysis }: ParentManage
 
   const buildWhatsAppMessage = () => {
     if (!analysis) return "";
-    const parentMsg = typeof analysis.parentMessage === "string" ? analysis.parentMessage : (isAr ? analysis.parentMessage?.ar : analysis.parentMessage?.en) || "";
-    const plan = analysis.actionPlan;
-    const planText = Array.isArray(plan) ? plan.join("\n") : (isAr ? plan?.ar : plan?.en)?.join?.("\n") || "";
-    return `${isAr ? "📋 تقرير" : "📋 Report"}: ${studentName}\n\n${parentMsg}\n\n${isAr ? "📅 خطة العمل:" : "📅 Action Plan:"}\n${planText}`;
+    
+    const date = new Date().toLocaleDateString(isAr ? "ar-SA" : "en-US", { year: "numeric", month: "long", day: "numeric" });
+    
+    const domainEmojis: Record<string, string> = {
+      cognitive: "🧠", language: "💬", social_emotional: "❤️",
+      gross_motor: "🏃", fine_motor: "✂️", self_care: "🧽",
+      attention: "🎯", creativity: "🎨", behavior: "📋", daily_mood: "😊",
+    };
+    const domainNamesAr: Record<string, string> = {
+      cognitive: "التطور المعرفي", language: "اللغة والتواصل", social_emotional: "الاجتماعي العاطفي",
+      gross_motor: "الحركية الكبرى", fine_motor: "الحركية الدقيقة", self_care: "الرعاية الذاتية",
+      attention: "الانتباه والتركيز", creativity: "الإبداع", behavior: "السلوك", daily_mood: "الرفاهية اليومية",
+    };
+    const domainNamesEn: Record<string, string> = {
+      cognitive: "Cognitive", language: "Language", social_emotional: "Social-Emotional",
+      gross_motor: "Gross Motor", fine_motor: "Fine Motor", self_care: "Self-Care",
+      attention: "Attention", creativity: "Creativity", behavior: "Behavior", daily_mood: "Daily Wellbeing",
+    };
+
+    const getBar = (score: number) => {
+      const filled = Math.round(score / 10);
+      return "█".repeat(filled) + "░".repeat(10 - filled);
+    };
+
+    const getLevel = (score: number) => {
+      if (score >= 80) return isAr ? "متقدم ✨" : "Advanced ✨";
+      if (score >= 60) return isAr ? "جيد ✅" : "Good ✅";
+      if (score >= 40) return isAr ? "في طور النمو 🔄" : "Developing 🔄";
+      return isAr ? "يحتاج دعم ⚠️" : "Needs Support ⚠️";
+    };
+
+    let msg = "";
+    
+    // Header
+    msg += isAr
+      ? `📋 *تقرير التقييم النمائي الشامل*\n━━━━━━━━━━━━━━━━\n👤 الطفل: *${studentName}*\n📅 التاريخ: ${date}\n`
+      : `📋 *Comprehensive Developmental Report*\n━━━━━━━━━━━━━━━━\n👤 Child: *${studentName}*\n📅 Date: ${date}\n`;
+
+    // Overall Score
+    const overallScore = analysis.overallScore || (analysis.scores ? Math.round(Object.values(analysis.scores as Record<string, number>).reduce((a: number, b: number) => a + b, 0) / Object.keys(analysis.scores).length) : 0);
+    msg += isAr
+      ? `\n🏆 *الدرجة الإجمالية: ${overallScore}%* ${getLevel(overallScore)}\n`
+      : `\n🏆 *Overall Score: ${overallScore}%* ${getLevel(overallScore)}\n`;
+
+    // Domain Scores Table
+    msg += isAr ? `\n📊 *درجات المجالات النمائية:*\n` : `\n📊 *Domain Scores:*\n`;
+    const scores = analysis.scores || {};
+    for (const [key, score] of Object.entries(scores) as [string, number][]) {
+      const emoji = domainEmojis[key] || "📌";
+      const name = isAr ? domainNamesAr[key] : domainNamesEn[key];
+      if (name) {
+        msg += `${emoji} ${name}: ${getBar(score)} ${score}%\n`;
+      }
+    }
+
+    // Summary
+    if (analysis.summary) {
+      msg += isAr ? `\n📝 *الملخص العام:*\n${analysis.summary}\n` : `\n📝 *Summary:*\n${analysis.summary}\n`;
+    }
+
+    // Strengths
+    if (analysis.strengths?.length) {
+      msg += isAr ? `\n💪 *نقاط القوة:*\n` : `\n💪 *Strengths:*\n`;
+      analysis.strengths.forEach((s: string) => { msg += `  ✅ ${s}\n`; });
+    }
+
+    // Areas for Improvement
+    if (analysis.improvements?.length) {
+      msg += isAr ? `\n🔄 *مجالات تحتاج تطوير:*\n` : `\n🔄 *Areas for Growth:*\n`;
+      analysis.improvements.forEach((s: string) => { msg += `  📌 ${s}\n`; });
+    }
+
+    // Indicators
+    if (analysis.indicators) {
+      const typeLabels: Record<string, { ar: string; en: string }> = {
+        gifted: { ar: "متقدم/موهوب 🌟", en: "Advanced/Gifted 🌟" },
+        typical: { ar: "ضمن المسار الطبيعي ✅", en: "On Track ✅" },
+        delayed: { ar: "يحتاج متابعة متخصصة ⚠️", en: "Needs Specialist Follow-up ⚠️" },
+        mixed: { ar: "أداء متفاوت بين المجالات 🔀", en: "Mixed Performance 🔀" },
+      };
+      const typeLabel = typeLabels[analysis.indicators.type] || typeLabels.typical;
+      msg += isAr
+        ? `\n🔍 *مستوى التطور:* ${typeLabel.ar}\n`
+        : `\n🔍 *Development Level:* ${typeLabel.en}\n`;
+      if (analysis.indicators.details) {
+        msg += `${analysis.indicators.details}\n`;
+      }
+    }
+
+    // Parent Message
+    if (analysis.parentMessage) {
+      msg += isAr ? `\n💌 *رسالة لولي الأمر:*\n${analysis.parentMessage}\n` : `\n💌 *Message for You:*\n${analysis.parentMessage}\n`;
+    }
+
+    // Action Plan
+    if (analysis.actionPlan?.length) {
+      msg += isAr ? `\n📅 *خطة الأنشطة المنزلية:*\n` : `\n📅 *Home Activity Plan:*\n`;
+      analysis.actionPlan.forEach((step: string) => { msg += `\n${step}\n`; });
+    }
+
+    // Teacher Recommendations
+    if (analysis.teacherRecommendations?.length) {
+      msg += isAr ? `\n👩‍🏫 *توصيات المعلمة:*\n` : `\n👩‍🏫 *Teacher Recommendations:*\n`;
+      analysis.teacherRecommendations.forEach((r: string) => { msg += `  📎 ${r}\n`; });
+    }
+
+    // Footer
+    msg += isAr
+      ? `\n━━━━━━━━━━━━━━━━\n🏫 تم إعداد هذا التقرير باستخدام نظام Kinder BH للتقييم النمائي\n💡 هذا التقرير استرشادي ولا يغني عن التقييم المتخصص`
+      : `\n━━━━━━━━━━━━━━━━\n🏫 Generated by Kinder BH Developmental Assessment System\n💡 This report is for guidance and does not replace specialist evaluation`;
+
+    return msg;
   };
 
   const handleSendWhatsApp = (g: Guardian) => {
