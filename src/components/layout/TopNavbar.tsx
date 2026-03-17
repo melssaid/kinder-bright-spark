@@ -5,26 +5,22 @@ import { useRole } from "@/hooks/useRole";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  LayoutDashboard, Users, ClipboardList, History, CalendarCheck, Settings,
-  Shield, Building2, KeyRound, Globe, LogOut, Menu, X
+  LayoutDashboard, Users, FileText, Settings,
+  Shield, Building2, KeyRound, Globe, LogOut
 } from "lucide-react";
 import logo from "@/assets/kinder-bh-logo.png";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function TopNavbar() {
   const { locale, setLocale, t, dir } = useI18n();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { kindergartenName, isAdmin, isKgAdmin } = useRole();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const mainLinks = [
-    { to: "/", icon: LayoutDashboard, label: t("nav.dashboard"), end: true },
-    { to: "/students", icon: Users, label: t("nav.students") },
-    { to: "/survey", icon: ClipboardList, label: locale === "ar" ? "استقصاء" : "Survey" },
-    { to: "/attendance", icon: CalendarCheck, label: t("attendance.title") },
-    { to: "/history", icon: History, label: locale === "ar" ? "السجل" : "History" },
+    { to: "/", icon: LayoutDashboard, label: locale === "ar" ? "الرئيسية" : "Dashboard", end: true },
+    { to: "/students", icon: Users, label: locale === "ar" ? "الطلاب" : "Students" },
+    { to: "/reports", icon: FileText, label: locale === "ar" ? "التقارير" : "Reports" },
   ];
 
   const adminLinks = [
@@ -41,7 +37,6 @@ export function TopNavbar() {
   return (
     <header className="sticky top-0 z-50 bg-card border-b" dir={dir}>
       <div className="flex items-center justify-between px-3 sm:px-6 h-14">
-        {/* Logo */}
         <div className="flex items-center gap-2 shrink-0">
           <img src={logo} alt="Kinder BH" className="h-8 w-8 sm:h-9 sm:w-9 object-contain" />
           <h1 className="text-base sm:text-lg font-bold text-foreground font-[Quicksand] hidden sm:block">Kinder BH</h1>
@@ -53,7 +48,6 @@ export function TopNavbar() {
           )}
         </div>
 
-        {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-1">
           {mainLinks.map((link) => (
             <NavLink
@@ -116,7 +110,6 @@ export function TopNavbar() {
           )}
         </nav>
 
-        {/* Right side actions */}
         <div className="flex items-center gap-1.5">
           <Button variant="ghost" size="sm" onClick={() => setLocale(locale === "en" ? "ar" : "en")} className="h-8 w-8 p-0">
             <Globe className="h-4 w-4" />

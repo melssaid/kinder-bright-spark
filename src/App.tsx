@@ -8,9 +8,8 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useRole } from "@/hooks/useRole";
 import Index from "./pages/Index";
 import StudentsPage from "./pages/StudentsPage";
-import SurveyPage from "./pages/SurveyPage";
-import HistoryPage from "./pages/HistoryPage";
-import AttendancePage from "./pages/AttendancePage";
+import StudentProfilePage from "./pages/StudentProfilePage";
+import ReportsPage from "./pages/ReportsPage";
 import AuthPage from "./pages/AuthPage";
 import SettingsPage from "./pages/SettingsPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -60,15 +59,19 @@ const AppRoutes = () => (
       <Route path="/auth" element={<AuthRoute><AuthPage /></AuthRoute>} />
       <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
       <Route path="/students" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
-      <Route path="/survey" element={<ProtectedRoute><SurveyPage /></ProtectedRoute>} />
-      <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
-      <Route path="/attendance" element={<ProtectedRoute><AttendancePage /></ProtectedRoute>} />
+      <Route path="/students/:studentId" element={<ProtectedRoute><StudentProfilePage /></ProtectedRoute>} />
+      <Route path="/students/:studentId/assess" element={<ProtectedRoute><StudentProfilePage initialTab="assess" /></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/kindergartens" element={<AdminRoute><AdminKindergartens /></AdminRoute>} />
       <Route path="/admin/teachers" element={<AdminRoute><AdminTeachers /></AdminRoute>} />
       <Route path="/kg-admin" element={<KgAdminRoute><KgAdminDashboard /></KgAdminRoute>} />
       <Route path="/kg-admin/teachers" element={<KgAdminRoute><KgAdminTeachers /></KgAdminRoute>} />
+      {/* Redirects for old routes */}
+      <Route path="/survey" element={<Navigate to="/students" replace />} />
+      <Route path="/history" element={<Navigate to="/reports" replace />} />
+      <Route path="/attendance" element={<Navigate to="/students" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>
