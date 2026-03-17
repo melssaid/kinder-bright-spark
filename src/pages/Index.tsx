@@ -4,8 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Users, ClipboardList, TrendingUp, Brain, ChevronRight, Plus, Info, Sparkles, CalendarCheck } from "lucide-react";
+import { Users, Brain, TrendingUp, ChevronRight, Plus, Sparkles, ClipboardList } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { getStudents, getSurveys, DbStudent, DbSurvey } from "@/lib/database";
 import { useNavigate } from "react-router-dom";
@@ -36,17 +35,14 @@ const Index = () => {
 
   const analyzedSurveys = surveys.filter(s => s.analysis);
 
-  // Build student status map
   const studentStatusMap = students.map(st => {
     const studentSurveys = surveys.filter(s => s.student_id === st.id);
     const analyzedStudentSurveys = studentSurveys.filter(s => s.analysis);
     const latest = analyzedStudentSurveys.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] || null;
-    
     let status: "new" | "needs_survey" | "analyzed" = "new";
     if (latest) status = "analyzed";
     else if (studentSurveys.length > 0) status = "analyzed";
     else status = "needs_survey";
-
     return { student: st, latest, status, surveyCount: studentSurveys.length };
   });
 
@@ -72,8 +68,7 @@ const Index = () => {
   return (
     <DashboardLayout>
       <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5 max-w-5xl mx-auto">
-        
-        {/* First-use guidance hint */}
+
         <AnimatePresence>
           {showHint && (
             <motion.div
@@ -90,21 +85,16 @@ const Index = () => {
                     {isAr ? "كيف يعمل التطبيق؟" : "How does it work?"}
                   </p>
                   <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1 bg-muted/60 px-2 py-1 rounded-full">
-                      <span className="text-primary font-bold">1</span> {isAr ? "أضف الطلاب" : "Add Students"}
-                    </span>
-                    <span className="text-muted-foreground">→</span>
-                    <span className="flex items-center gap-1 bg-muted/60 px-2 py-1 rounded-full">
-                      <span className="text-primary font-bold">2</span> {isAr ? "املأ الاستقصاء" : "Fill Survey"}
-                    </span>
-                    <span className="text-muted-foreground">→</span>
-                    <span className="flex items-center gap-1 bg-muted/60 px-2 py-1 rounded-full">
-                      <span className="text-primary font-bold">3</span> {isAr ? "احصل على تحليل AI" : "Get AI Analysis"}
-                    </span>
-                    <span className="text-muted-foreground">→</span>
-                    <span className="flex items-center gap-1 bg-muted/60 px-2 py-1 rounded-full">
-                      <span className="text-primary font-bold">4</span> {isAr ? "شارك التقرير" : "Share Report"}
-                    </span>
+                    {[
+                      { n: "1", l: isAr ? "أضف الطلاب" : "Add Students" },
+                      { n: "2", l: isAr ? "افتح ملف الطالب" : "Open Profile" },
+                      { n: "3", l: isAr ? "املأ التقييم" : "Run Assessment" },
+                      { n: "4", l: isAr ? "شارك التقرير" : "Share Report" },
+                    ].map((step, i) => (
+                      <span key={i} className="flex items-center gap-1 bg-muted/60 px-2 py-1 rounded-full">
+                        <span className="text-primary font-bold">{step.n}</span> {step.l}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -112,24 +102,8 @@ const Index = () => {
           )}
         </AnimatePresence>
 
-        {/* Progress overview */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg sm:text-xl font-bold">{isAr ? "لوحة المتابعة" : "Dashboard"}</h1>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="text-muted-foreground hover:text-foreground">
-                  <Info className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p className="text-xs max-w-[200px]">
-                  {isAr ? "هنا ترين حالة كل طالب والإجراءات المطلوبة" : "See each student's status and required actions"}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
+          <h1 className="text-lg sm:text-xl font-bold">{isAr ? "لوحة المتابعة" : "Dashboard"}</h1>
           {students.length > 0 && (
             <div className="flex items-center gap-3">
               <Progress value={totalProgress} className="flex-1 h-2" />
@@ -138,25 +112,22 @@ const Index = () => {
           )}
         </div>
 
-        {/* Quick stats */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {[
             { icon: Users, value: students.length, label: isAr ? "طلاب" : "Students", color: "text-primary", action: () => navigate("/students") },
-            { icon: ClipboardList, value: surveys.length, label: isAr ? "استقصاء" : "Surveys", color: "text-info", action: () => navigate("/survey") },
-            { icon: Brain, value: analyzedSurveys.length, label: isAr ? "تحليلات" : "Analyses", color: "text-success", action: () => navigate("/history") },
-            { icon: TrendingUp, value: needsSurvey, label: isAr ? "بانتظار" : "Pending", color: "text-warning", action: () => navigate("/survey") },
+            { icon: Brain, value: analyzedSurveys.length, label: isAr ? "تحليلات" : "Analyses", color: "text-success", action: () => navigate("/reports") },
+            { icon: TrendingUp, value: needsSurvey, label: isAr ? "بانتظار" : "Pending", color: "text-warning", action: () => navigate("/students") },
           ].map((item, i) => (
-            <Card key={i} className="cursor-pointer hover:border-primary/30 transition-colors" onClick={item.action}>
-              <CardContent className="p-2.5 sm:p-3 flex flex-col items-center text-center">
-                <item.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${item.color} mb-1`} />
-                <p className="text-lg sm:text-xl font-bold leading-none">{item.value}</p>
-                <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-0.5">{item.label}</p>
+            <Card key={i} className="cursor-pointer hover:border-primary/30 transition-colors active:scale-[0.98]" onClick={item.action}>
+              <CardContent className="p-3 flex flex-col items-center text-center">
+                <item.icon className={`h-6 w-6 ${item.color} mb-1`} />
+                <p className="text-xl font-bold leading-none">{item.value}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{item.label}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Student cards - smart hub */}
         {students.length === 0 ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border-dashed border-2">
@@ -169,13 +140,9 @@ const Index = () => {
                   {isAr ? "أضف طلابك لبدء تقييم سلوكهم وتطورهم باستخدام الذكاء الاصطناعي" : "Add your students to start assessing their behavior and development with AI"}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                  <Button onClick={() => navigate("/students")} className="gap-2">
-                    <Plus className="h-4 w-4" />
+                  <Button onClick={() => navigate("/students")} className="gap-2 h-12 text-base">
+                    <Plus className="h-5 w-5" />
                     {isAr ? "إضافة طلاب" : "Add Students"}
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/students")} className="gap-2">
-                    <Sparkles className="h-4 w-4" />
-                    {isAr ? "بيانات تجريبية" : "Demo Data"}
                   </Button>
                 </div>
               </CardContent>
@@ -201,15 +168,15 @@ const Index = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
                 >
-                  <Card className="hover:shadow-md transition-all">
+                  <Card
+                    className="hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                    onClick={() => navigate(`/students/${student.id}`)}
+                  >
                     <CardContent className="p-3 sm:p-4">
                       <div className="flex items-center gap-3">
-                        {/* Avatar */}
                         <div className="text-2xl sm:text-3xl shrink-0">
                           {student.gender === "male" ? "👦" : "👧"}
                         </div>
-
-                        {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
                             <p className="text-sm font-semibold truncate">{student.name}</p>
@@ -219,41 +186,27 @@ const Index = () => {
                             <span>{isAr ? `${student.age} سنوات` : `${student.age} yrs`}</span>
                             <span>•</span>
                             <span>{surveyCount} {isAr ? "تقييم" : "surveys"}</span>
-                            {latest && (
-                              <>
-                                <span>•</span>
-                                <span>{new Date(latest.date).toLocaleDateString(isAr ? "ar-SA" : "en-US", { month: "short", day: "numeric" })}</span>
-                              </>
-                            )}
                           </div>
                         </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {status === "needs_survey" || !latest ? (
-                            <Button
-                              size="sm"
-                              onClick={(e) => { e.stopPropagation(); navigate("/survey"); }}
-                              className="h-8 text-xs gap-1"
-                            >
-                              <ClipboardList className="h-3.5 w-3.5" />
-                              <span className="hidden sm:inline">{isAr ? "تقييم" : "Assess"}</span>
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => { e.stopPropagation(); navigate("/history"); }}
-                              className="h-8 text-xs gap-1"
-                            >
-                              <Brain className="h-3.5 w-3.5" />
-                              <span className="hidden sm:inline">{isAr ? "التحليل" : "Analysis"}</span>
-                            </Button>
-                          )}
+                        <div className="shrink-0">
+                          <Button
+                            size="sm"
+                            variant={status === "needs_survey" ? "default" : "outline"}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(status === "needs_survey" ? `/students/${student.id}/assess` : `/students/${student.id}`);
+                            }}
+                            className="h-10 min-w-[44px] text-xs gap-1"
+                          >
+                            {status === "needs_survey" ? (
+                              <><ClipboardList className="h-4 w-4" /><span className="hidden sm:inline">{isAr ? "تقييم" : "Assess"}</span></>
+                            ) : (
+                              <><Brain className="h-4 w-4" /><span className="hidden sm:inline">{isAr ? "الملف" : "Profile"}</span></>
+                            )}
+                          </Button>
                         </div>
                       </div>
 
-                      {/* Score preview for analyzed students */}
                       {latest?.analysis?.scores && (
                         <div className="mt-2 pt-2 border-t flex gap-1 overflow-x-auto">
                           {Object.entries(latest.analysis.scores as Record<string, number>).slice(0, 5).map(([key, val]) => (
@@ -272,28 +225,6 @@ const Index = () => {
                 </motion.div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Quick actions */}
-        {students.length > 0 && (
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              className="h-auto py-3 flex flex-col items-center gap-1.5"
-              onClick={() => navigate("/survey")}
-            >
-              <ClipboardList className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">{isAr ? "تقييم جديد" : "New Assessment"}</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto py-3 flex flex-col items-center gap-1.5"
-              onClick={() => navigate("/attendance")}
-            >
-              <CalendarCheck className="h-5 w-5 text-success" />
-              <span className="text-xs font-medium">{isAr ? "تسجيل الحضور" : "Record Attendance"}</span>
-            </Button>
           </div>
         )}
       </div>
