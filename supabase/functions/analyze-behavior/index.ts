@@ -8,62 +8,59 @@ const corsHeaders = {
 // Map question IDs to readable descriptions so the AI has full context
 const questionMap: Record<string, { en: string; ar: string; category: string }> = {
   cog1: { en: "Sort objects by color/shape/size", ar: "تصنيف الأشياء حسب اللون/الشكل/الحجم", category: "cognitive" },
-  cog2: { en: "Understand cause and effect", ar: "فهم السبب والنتيجة", category: "cognitive" },
   cog3: { en: "Count objects up to 10", ar: "عدّ الأشياء حتى 10", category: "cognitive" },
-  cog4: { en: "Solve simple puzzles (4-8 pieces)", ar: "حل ألغاز بسيطة (4-8 قطع)", category: "cognitive" },
   cog5: { en: "Follow 2-3 step instructions", ar: "اتباع تعليمات من 2-3 خطوات", category: "cognitive" },
   lan1: { en: "Speak in 4+ word sentences", ar: "التحدث بجمل من 4+ كلمات", category: "language" },
-  lan2: { en: "Tell a simple story", ar: "سرد قصة بسيطة", category: "language" },
   lan3: { en: "Understand who/what/where questions", ar: "فهم أسئلة مَن/ماذا/أين", category: "language" },
-  lan4: { en: "Speech clarity to unfamiliar adults", ar: "وضوح الكلام للبالغين", category: "language" },
-  lan5: { en: "Interest in books and stories", ar: "اهتمام بالكتب والقصص", category: "language" },
   se1: { en: "Play cooperatively with others", ar: "اللعب التعاوني مع الآخرين", category: "social_emotional" },
-  se2: { en: "Identify and name feelings", ar: "تحديد وتسمية المشاعر", category: "social_emotional" },
-  se3: { en: "Show empathy when others are upset", ar: "إظهار التعاطف", category: "social_emotional" },
   se4: { en: "Wait for turn and share", ar: "انتظار الدور والمشاركة", category: "social_emotional" },
   se5: { en: "Manage frustration and anger", ar: "إدارة الإحباط والغضب", category: "social_emotional" },
-  se6: { en: "Separate from caregiver without distress", ar: "الانفصال عن مقدم الرعاية", category: "social_emotional" },
-  gm1: { en: "Run, jump, climb with coordination", ar: "الجري والقفز والتسلق بتناسق", category: "gross_motor" },
-  gm2: { en: "Kick and throw a ball", ar: "ركل ورمي الكرة", category: "gross_motor" },
-  gm3: { en: "Maintain balance", ar: "الحفاظ على التوازن", category: "gross_motor" },
-  gm4: { en: "Pedal a tricycle", ar: "قيادة دراجة ثلاثية", category: "gross_motor" },
-  fm1: { en: "Hold pencil with proper grip", ar: "مسك القلم بالمسكة الصحيحة", category: "fine_motor" },
-  fm2: { en: "Cut with scissors along a line", ar: "القص بالمقص على خط", category: "fine_motor" },
-  fm3: { en: "Draw recognizable shapes", ar: "رسم أشكال مميزة", category: "fine_motor" },
-  fm4: { en: "Button/unbutton and use zippers", ar: "فتح/إغلاق الأزرار والسحّاب", category: "fine_motor" },
-  fm5: { en: "String beads or do lacing", ar: "تنظيم الخرز أو التشبيك", category: "fine_motor" },
+  gm1: { en: "Run, jump, climb with coordination", ar: "الجري والقفز والتسلق بتناسق", category: "motor" },
+  fm1: { en: "Hold pencil with proper grip", ar: "مسك القلم بالمسكة الصحيحة", category: "motor" },
   sc1: { en: "Eat independently with utensils", ar: "الأكل المستقل بأدوات الطعام", category: "self_care" },
   sc2: { en: "Use toilet independently", ar: "استخدام الحمام مستقلاً", category: "self_care" },
-  sc3: { en: "Wash and dry hands independently", ar: "غسل وتجفيف اليدين مستقلاً", category: "self_care" },
-  sc4: { en: "Attempt to dress/undress independently", ar: "محاولة ارتداء/خلع الملابس مستقلاً", category: "self_care" },
-  att1: { en: "Focus on directed activity 10+ min", ar: "التركيز على نشاط موجّه 10+ دقائق", category: "attention" },
-  att2: { en: "Sit appropriately during group time", ar: "الجلوس المناسب أثناء وقت الحلقة", category: "attention" },
-  att3: { en: "Complete tasks before moving on", ar: "إكمال المهام قبل الانتقال", category: "attention" },
-  att4: { en: "Resistance to distraction", ar: "مقاومة التشتت", category: "attention" },
-  cr1: { en: "Engage in pretend/imaginative play", ar: "اللعب التخيلي/التمثيلي", category: "creativity" },
-  cr2: { en: "Enjoy drawing, painting, crafting", ar: "الاستمتاع بالرسم والأعمال اليدوية", category: "creativity" },
-  cr3: { en: "Respond to music (singing, dancing)", ar: "الاستجابة للموسيقى", category: "creativity" },
-  cr4: { en: "Try new approaches when stuck", ar: "تجربة طرق جديدة عند الفشل", category: "creativity" },
-  beh1: { en: "Follow classroom rules and routines", ar: "الالتزام بقواعد الفصل", category: "behavior" },
-  beh2: { en: "Respond positively to adult guidance", ar: "الاستجابة لتوجيه البالغين", category: "behavior" },
-  beh3: { en: "Handle transitions smoothly", ar: "الانتقال بين الأنشطة بسلاسة", category: "behavior" },
-  beh4: { en: "Resolve conflicts with words", ar: "حل النزاعات بالكلام", category: "behavior" },
   dm1: { en: "Overall mood today", ar: "المزاج العام اليوم", category: "daily_mood" },
   dm2: { en: "Energy level today", ar: "مستوى الطاقة اليوم", category: "daily_mood" },
-  dm3: { en: "Ate well today", ar: "الأكل الجيد اليوم", category: "daily_mood" },
-  dm4: { en: "Drank enough water today", ar: "شرب كمية كافية من الماء", category: "daily_mood" },
+  // Legacy keys for older assessments
+  cog2: { en: "Understand cause and effect", ar: "فهم السبب والنتيجة", category: "cognitive" },
+  cog4: { en: "Solve simple puzzles", ar: "حل ألغاز بسيطة", category: "cognitive" },
+  lan2: { en: "Tell a simple story", ar: "سرد قصة بسيطة", category: "language" },
+  lan4: { en: "Speech clarity", ar: "وضوح الكلام", category: "language" },
+  lan5: { en: "Interest in books", ar: "اهتمام بالكتب", category: "language" },
+  se2: { en: "Identify feelings", ar: "تحديد المشاعر", category: "social_emotional" },
+  se3: { en: "Show empathy", ar: "إظهار التعاطف", category: "social_emotional" },
+  se6: { en: "Separate from caregiver", ar: "الانفصال عن مقدم الرعاية", category: "social_emotional" },
+  gm2: { en: "Kick and throw", ar: "ركل ورمي الكرة", category: "motor" },
+  gm3: { en: "Balance", ar: "التوازن", category: "motor" },
+  gm4: { en: "Pedal tricycle", ar: "قيادة دراجة", category: "motor" },
+  fm2: { en: "Cut with scissors", ar: "القص بالمقص", category: "motor" },
+  fm3: { en: "Draw shapes", ar: "رسم أشكال", category: "motor" },
+  fm4: { en: "Button/unbutton", ar: "الأزرار والسحّاب", category: "motor" },
+  fm5: { en: "String beads", ar: "تنظيم الخرز", category: "motor" },
+  sc3: { en: "Wash hands", ar: "غسل اليدين", category: "self_care" },
+  sc4: { en: "Dress independently", ar: "ارتداء الملابس", category: "self_care" },
+  att1: { en: "Focus 10+ min", ar: "التركيز 10+ دقائق", category: "cognitive" },
+  att2: { en: "Sit during group time", ar: "الجلوس أثناء الحلقة", category: "social_emotional" },
+  att3: { en: "Complete tasks", ar: "إكمال المهام", category: "cognitive" },
+  att4: { en: "Resistance to distraction", ar: "مقاومة التشتت", category: "cognitive" },
+  cr1: { en: "Pretend play", ar: "اللعب التخيلي", category: "social_emotional" },
+  cr2: { en: "Enjoy art", ar: "الاستمتاع بالفن", category: "motor" },
+  cr3: { en: "Respond to music", ar: "الاستجابة للموسيقى", category: "social_emotional" },
+  cr4: { en: "Try new approaches", ar: "تجربة طرق جديدة", category: "cognitive" },
+  beh1: { en: "Follow rules", ar: "الالتزام بالقواعد", category: "social_emotional" },
+  beh2: { en: "Respond to guidance", ar: "الاستجابة للتوجيه", category: "social_emotional" },
+  beh3: { en: "Handle transitions", ar: "الانتقال بين الأنشطة", category: "social_emotional" },
+  beh4: { en: "Resolve conflicts with words", ar: "حل النزاعات بالكلام", category: "social_emotional" },
+  dm3: { en: "Ate well", ar: "الأكل الجيد", category: "daily_mood" },
+  dm4: { en: "Drank water", ar: "شرب الماء", category: "daily_mood" },
 };
 
 const categoryNames: Record<string, { en: string; ar: string; emoji: string }> = {
   cognitive: { en: "Cognitive Development", ar: "التطور المعرفي", emoji: "🧠" },
   language: { en: "Language & Communication", ar: "اللغة والتواصل", emoji: "💬" },
   social_emotional: { en: "Social-Emotional", ar: "الاجتماعي العاطفي", emoji: "❤️" },
-  gross_motor: { en: "Gross Motor Skills", ar: "المهارات الحركية الكبرى", emoji: "🏃" },
-  fine_motor: { en: "Fine Motor Skills", ar: "المهارات الحركية الدقيقة", emoji: "✂️" },
+  motor: { en: "Motor Skills", ar: "المهارات الحركية", emoji: "🏃" },
   self_care: { en: "Self-Care", ar: "الرعاية الذاتية", emoji: "🧽" },
-  attention: { en: "Attention & Focus", ar: "الانتباه والتركيز", emoji: "🎯" },
-  creativity: { en: "Creativity", ar: "الإبداع", emoji: "🎨" },
-  behavior: { en: "Behavior", ar: "السلوك وضبط النفس", emoji: "📋" },
   daily_mood: { en: "Daily Wellbeing", ar: "الرفاهية اليومية", emoji: "😊" },
 };
 
@@ -128,101 +125,76 @@ serve(async (req) => {
 
 ## هيكل الإجابة (JSON):
 {
-  "summary": "ملخص شامل (فقرتان على الأقل) يتضمن الصورة العامة للطفل ومستوى تطوره مقارنة بعمره",
+  "summary": "ملخص شامل يتضمن الصورة العامة للطفل ومستوى تطوره مقارنة بعمره",
   "domainAnalysis": {
-    "cognitive": "تحليل مفصّل للتطور المعرفي مع أمثلة من الإجابات",
-    "language": "تحليل مفصّل للغة والتواصل",
-    "social_emotional": "تحليل مفصّل للجانب الاجتماعي العاطفي",
-    "gross_motor": "تحليل المهارات الحركية الكبرى",
-    "fine_motor": "تحليل المهارات الحركية الدقيقة",
+    "cognitive": "تحليل التطور المعرفي",
+    "language": "تحليل اللغة والتواصل",
+    "social_emotional": "تحليل الجانب الاجتماعي العاطفي",
+    "motor": "تحليل المهارات الحركية",
     "self_care": "تحليل الرعاية الذاتية",
-    "attention": "تحليل الانتباه والتركيز",
-    "creativity": "تحليل الإبداع",
-    "behavior": "تحليل السلوك وضبط النفس",
     "daily_mood": "تحليل الرفاهية اليومية"
   },
-  "strengths": ["نقطة قوة محددة مع شرح 1", "نقطة قوة 2", "نقطة قوة 3"],
-  "improvements": ["مجال يحتاج تطوير مع شرح 1", "مجال 2", "مجال 3"],
-  "teacherRecommendations": ["توصية عملية محددة 1", "توصية 2", "توصية 3", "توصية 4", "توصية 5"],
-  "parentMessage": "رسالة مفصّلة ودافئة للأهل (3 فقرات على الأقل) تتضمن: وصف نقاط القوة، المجالات التي تحتاج دعم، ونصائح عملية للمنزل",
+  "strengths": ["نقطة قوة 1", "نقطة قوة 2", "نقطة قوة 3"],
+  "improvements": ["مجال يحتاج تطوير 1", "مجال 2", "مجال 3"],
+  "teacherRecommendations": ["توصية عملية 1", "توصية 2", "توصية 3"],
+  "parentMessage": "رسالة دافئة للأهل تتضمن: نقاط القوة، المجالات التي تحتاج دعم، ونصائح للمنزل",
   "actionPlan": [
-    "اليوم 1: (عنوان النشاط) - وصف تفصيلي للنشاط مع الخطوات والمواد المطلوبة والهدف",
-    "اليوم 2: (عنوان النشاط) - وصف تفصيلي",
-    "اليوم 3: (عنوان النشاط) - وصف تفصيلي",
-    "اليوم 4: (عنوان النشاط) - وصف تفصيلي",
-    "اليوم 5: (عنوان النشاط) - وصف تفصيلي"
+    "اليوم 1: وصف النشاط",
+    "اليوم 2: وصف النشاط",
+    "اليوم 3: وصف النشاط"
   ],
   "indicators": { 
     "type": "gifted|typical|delayed|mixed", 
-    "details": "شرح مفصّل لمستوى التطور مع تبرير بناءً على البيانات",
-    "areasOfConcern": ["أي مجالات تحتاج متابعة متخصصة"],
-    "areasOfExcellence": ["المجالات التي يتفوق فيها الطفل"]
+    "details": "شرح لمستوى التطور"
   },
   "scores": {
     "cognitive": 0-100,
     "language": 0-100,
     "social_emotional": 0-100,
-    "gross_motor": 0-100,
-    "fine_motor": 0-100,
+    "motor": 0-100,
     "self_care": 0-100,
-    "attention": 0-100,
-    "creativity": 0-100,
-    "behavior": 0-100,
     "daily_mood": 0-100
   },
   "overallScore": 0-100
 }`
-      : `You are an expert child development specialist with extensive experience in kindergarten developmental assessment. Analyze the survey data in depth and provide a comprehensive professional report.
+      : `You are an expert child development specialist. Analyze the survey data and provide a professional report.
 
 ## Instructions:
-- Analyze each developmental domain separately with specific references to the answers
-- Compare the child's performance to age-appropriate milestones
-- Provide practical, specific recommendations (not generic) based on actual results
-- Write the parent message in a warm, professional tone with sufficient detail
-- Action plan should be detailed with specific activities for each day
+- Analyze each developmental domain with specific references to answers
+- Compare performance to age-appropriate milestones
+- Provide practical, specific recommendations
+- Write a warm parent message
 
 ## Response Structure (JSON):
 {
-  "summary": "Comprehensive summary (at least 2 paragraphs) including overall picture and development level compared to age",
+  "summary": "Comprehensive summary of overall development",
   "domainAnalysis": {
-    "cognitive": "Detailed cognitive development analysis with examples from answers",
-    "language": "Detailed language & communication analysis",
-    "social_emotional": "Detailed social-emotional analysis",
-    "gross_motor": "Gross motor skills analysis",
-    "fine_motor": "Fine motor skills analysis",
+    "cognitive": "Cognitive analysis",
+    "language": "Language analysis",
+    "social_emotional": "Social-emotional analysis",
+    "motor": "Motor skills analysis",
     "self_care": "Self-care analysis",
-    "attention": "Attention & focus analysis",
-    "creativity": "Creativity analysis",
-    "behavior": "Behavior & self-regulation analysis",
-    "daily_mood": "Daily wellbeing analysis"
+    "daily_mood": "Wellbeing analysis"
   },
-  "strengths": ["Specific strength with explanation 1", "strength 2", "strength 3"],
-  "improvements": ["Area needing development with explanation 1", "area 2", "area 3"],
-  "teacherRecommendations": ["Specific practical recommendation 1", "rec 2", "rec 3", "rec 4", "rec 5"],
-  "parentMessage": "Detailed warm message for parents (at least 3 paragraphs) including: strengths, areas needing support, and practical home tips",
+  "strengths": ["Strength 1", "Strength 2", "Strength 3"],
+  "improvements": ["Area 1", "Area 2", "Area 3"],
+  "teacherRecommendations": ["Rec 1", "Rec 2", "Rec 3"],
+  "parentMessage": "Warm message for parents with strengths, areas needing support, and home tips",
   "actionPlan": [
-    "Day 1: (Activity title) - Detailed description with steps, materials needed, and goal",
-    "Day 2: (Activity title) - Detailed description",
-    "Day 3: (Activity title) - Detailed description",
-    "Day 4: (Activity title) - Detailed description",
-    "Day 5: (Activity title) - Detailed description"
+    "Day 1: Activity",
+    "Day 2: Activity",
+    "Day 3: Activity"
   ],
   "indicators": { 
     "type": "gifted|typical|delayed|mixed", 
-    "details": "Detailed explanation of development level with data-backed reasoning",
-    "areasOfConcern": ["Any areas needing specialist follow-up"],
-    "areasOfExcellence": ["Areas where child excels"]
+    "details": "Development level explanation"
   },
   "scores": {
     "cognitive": 0-100,
     "language": 0-100,
     "social_emotional": 0-100,
-    "gross_motor": 0-100,
-    "fine_motor": 0-100,
+    "motor": 0-100,
     "self_care": 0-100,
-    "attention": 0-100,
-    "creativity": 0-100,
-    "behavior": 0-100,
     "daily_mood": 0-100
   },
   "overallScore": 0-100
@@ -282,7 +254,7 @@ serve(async (req) => {
         parentMessage: "",
         actionPlan: [],
         indicators: { type: "typical", details: "", areasOfConcern: [], areasOfExcellence: [] },
-        scores: { cognitive: 50, language: 50, social_emotional: 50, gross_motor: 50, fine_motor: 50, self_care: 50, attention: 50, creativity: 50, behavior: 50, daily_mood: 50 },
+        scores: { cognitive: 50, language: 50, social_emotional: 50, motor: 50, self_care: 50, daily_mood: 50 },
         overallScore: 50,
       };
     }

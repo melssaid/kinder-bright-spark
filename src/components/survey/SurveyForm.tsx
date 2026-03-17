@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Loader2, Send, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Send, CheckCircle, ChevronLeft, ChevronRight, Brain, Sparkles } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { surveyCategories } from "@/data/surveyQuestions";
@@ -24,10 +23,12 @@ interface SurveyFormProps {
 export function SurveyForm({ student, onComplete }: SurveyFormProps) {
   const { t, locale } = useI18n();
   const { user } = useAuth();
+  const isAr = locale === "ar";
   const [currentCategory, setCurrentCategory] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number | string>>({});
   const [analyzing, setAnalyzing] = useState(false);
-  const [completed, setCompleted] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [savedSurveyId, setSavedSurveyId] = useState<string | null>(null);
 
   const totalQuestions = surveyCategories.reduce((sum, c) => sum + c.questions.length, 0);
   const answeredQuestions = Object.keys(answers).length;
@@ -41,74 +42,84 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
-  const swipeDirection = useRef(0);
-
   const handleSwipe = useCallback((_: any, info: PanInfo) => {
     const threshold = 50;
     if (Math.abs(info.offset.x) > threshold) {
-      if (info.offset.x > 0 && locale === "en" && currentCategory > 0) {
-        setCurrentCategory(prev => prev - 1);
-      } else if (info.offset.x < 0 && locale === "en" && currentCategory < surveyCategories.length - 1) {
-        setCurrentCategory(prev => prev + 1);
-      } else if (info.offset.x < 0 && locale === "ar" && currentCategory > 0) {
-        setCurrentCategory(prev => prev - 1);
-      } else if (info.offset.x > 0 && locale === "ar" && currentCategory < surveyCategories.length - 1) {
-        setCurrentCategory(prev => prev + 1);
-      }
+      const goNext = isAr ? info.offset.x > 0 : info.offset.x < 0;
+      const goPrev = isAr ? info.offset.x < 0 : info.offset.x > 0;
+      if (goNext && currentCategory < surveyCategories.length - 1) setCurrentCategory(prev => prev + 1);
+      if (goPrev && currentCategory > 0) setCurrentCategory(prev => prev - 1);
     }
-  }, [currentCategory, locale]);
+  }, [currentCategory, isAr]);
 
   const handleNext = () => {
-    if (isLastCategory) handleSubmit();
+    if (isLastCategory) handleSave();
     else setCurrentCategory(prev => prev + 1);
   };
 
-  const handleSubmit = async () => {
+  // Step 1: Save assessment without AI analysis
+  const handleSave = async () => {
     if (!user) return;
     setAnalyzing(true);
     const survey = await addSurvey({ student_id: student.id, teacher_id: user.id, answers });
-    if (!survey) { setAnalyzing(false); toast.error("Error saving survey"); return; }
+    if (!survey) { setAnalyzing(false); toast.error(isAr ? "خطأ في الحفظ" : "Error saving"); return; }
+    setSavedSurveyId(survey.id);
+    setSaved(true);
+    setAnalyzing(false);
+    toast.success(isAr ? "تم حفظ التقييم بنجاح!" : "Assessment saved successfully!");
+  };
 
+  // Step 2: Trigger AI analysis on saved survey
+  const handleAnalyze = async () => {
+    if (!savedSurveyId) return;
+    setAnalyzing(true);
     try {
       const { data, error } = await supabase.functions.invoke("analyze-behavior", {
         body: { studentName: student.name, studentAge: student.age, surveyData: answers, locale },
       });
       if (error) throw error;
       if (data?.error) {
-        if (data.error.includes("Rate limit")) toast.error(locale === "ar" ? "تم تجاوز حد الطلبات" : "Rate limit exceeded");
-        else if (data.error.includes("Payment")) toast.error(locale === "ar" ? "يرجى إضافة رصيد" : "Please add credits");
+        if (data.error.includes("Rate limit")) toast.error(isAr ? "تم تجاوز حد الطلبات، حاول لاحقاً" : "Rate limit exceeded");
+        else if (data.error.includes("Payment")) toast.error(isAr ? "يرجى إضافة رصيد" : "Please add credits");
         else throw new Error(data.error);
+        setAnalyzing(false);
+        return;
       }
       if (data?.analysis) {
-        await updateSurveyAnalysis(survey.id, data.analysis);
+        await updateSurveyAnalysis(savedSurveyId, data.analysis);
       }
-      setCompleted(true);
-      toast.success(locale === "ar" ? "تم التحليل بنجاح!" : "Analysis complete!");
+      toast.success(isAr ? "تم التحليل بنجاح!" : "Analysis complete!");
+      onComplete();
     } catch (err) {
       console.error("Analysis error:", err);
-      toast.error(locale === "ar" ? "حدث خطأ في التحليل" : "Analysis error occurred");
+      toast.error(isAr ? "حدث خطأ في التحليل" : "Analysis error occurred");
     } finally {
       setAnalyzing(false);
     }
   };
 
-  if (completed) {
+  // Saved state — show options to analyze or go back
+  if (saved) {
     return (
       <>
-        <Confetti recycle={false} numberOfPieces={500} />
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="border-success/30">
-            <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
-              <CheckCircle className="h-16 w-16 text-success" />
-              <h3 className="text-xl font-bold">{t("survey.complete")}</h3>
-              <p className="text-sm text-muted-foreground text-center max-w-md">
-                {locale === "ar" ? "تم تحليل الاستقصاء بنجاح! يمكنك الآن عرض التقرير التفصيلي." : "Survey analyzed successfully! You can now view the detailed report."}
+        <Confetti recycle={false} numberOfPieces={300} />
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
+          <Card className="border-primary/20">
+            <CardContent className="flex flex-col items-center justify-center py-10 gap-5">
+              <CheckCircle className="h-14 w-14 text-primary" />
+              <h3 className="text-xl font-bold text-center">{isAr ? "تم حفظ التقييم بنجاح! ✅" : "Assessment Saved! ✅"}</h3>
+              <p className="text-sm text-muted-foreground text-center max-w-sm">
+                {isAr ? "يمكنك الآن تحليل التقييم بالذكاء الاصطناعي للحصول على تقرير مفصّل وتوصيات مخصصة" : "You can now analyze the assessment with AI for a detailed report and recommendations"}
               </p>
-              <Button onClick={onComplete}>{t("analysis.viewResults")}</Button>
+              <div className="flex flex-col gap-3 w-full max-w-xs">
+                <Button onClick={handleAnalyze} disabled={analyzing} className="h-12 gap-2 text-sm w-full">
+                  {analyzing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                  {analyzing ? (isAr ? "جاري التحليل..." : "Analyzing...") : (isAr ? "🤖 تحليل بالذكاء الاصطناعي" : "🤖 Analyze with AI")}
+                </Button>
+                <Button variant="outline" onClick={onComplete} className="h-10 text-sm w-full">
+                  {isAr ? "عرض النتائج لاحقاً" : "View Results Later"}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -118,17 +129,11 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
 
   if (analyzing) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
             <Loader2 className="h-12 w-12 text-primary animate-spin" />
-            <h3 className="text-lg font-semibold">{t("survey.analyzing")}</h3>
-            <p className="text-sm text-muted-foreground">
-              {locale === "ar" ? "يقوم الذكاء الاصطناعي بتحليل الإجابات..." : "AI is analyzing the responses..."}
-            </p>
+            <h3 className="text-lg font-semibold">{isAr ? "جاري الحفظ..." : "Saving..."}</h3>
           </CardContent>
         </Card>
       </motion.div>
@@ -136,7 +141,8 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" dir={isAr ? "rtl" : "ltr"}>
+      {/* Progress */}
       <div className="space-y-1">
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{answeredQuestions}/{totalQuestions}</span>
@@ -145,6 +151,7 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
         <Progress value={progress} className="h-2" />
       </div>
 
+      {/* Category pills */}
       <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
         {surveyCategories.map((cat, i) => {
           const catAnswered = cat.questions.every(q => answers[q.id] !== undefined);
@@ -158,12 +165,13 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
         })}
       </div>
 
+      {/* Questions */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentCategory}
-          initial={{ opacity: 0, x: locale === "ar" ? -30 : 30 }}
+          initial={{ opacity: 0, x: isAr ? -30 : 30 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: locale === "ar" ? 30 : -30 }}
+          exit={{ opacity: 0, x: isAr ? 30 : -30 }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
@@ -187,7 +195,7 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: qi * 0.05 }}
                 >
-                  <p className="text-sm font-medium leading-relaxed">{locale === "ar" ? question.textAr : question.textEn}</p>
+                  <p className="text-sm font-medium leading-relaxed text-start">{isAr ? question.textAr : question.textEn}</p>
                   {question.type === "scale" ? (
                     <div className="grid grid-cols-5 gap-1.5">
                       {[1, 2, 3, 4, 5].map(val => (
@@ -219,7 +227,7 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
                             }`}
                           >
                             <RadioGroupItem value={String(opt.value)} id={`${question.id}-${opt.value}`} />
-                            <span className="text-sm">{locale === "ar" ? opt.ar : opt.en}</span>
+                            <span className="text-sm">{isAr ? opt.ar : opt.en}</span>
                           </label>
                         ))}
                       </div>
@@ -232,13 +240,14 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
         </motion.div>
       </AnimatePresence>
 
+      {/* Navigation */}
       <div className="flex justify-between gap-3 sticky bottom-0 bg-background/95 backdrop-blur-sm py-3 -mx-1 px-1 border-t border-border/50">
         <Button variant="outline" onClick={() => setCurrentCategory(prev => prev - 1)} disabled={currentCategory === 0} className="h-12 px-5 touch-manipulation gap-1.5">
-          <ChevronLeft className="h-4 w-4" />
-          {locale === "ar" ? "السابق" : "Previous"}
+          {isAr ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {isAr ? "السابق" : "Previous"}
         </Button>
         <Button onClick={handleNext} disabled={!canProceed} className="h-12 px-6 touch-manipulation gap-1.5 flex-1 max-w-[200px]">
-          {isLastCategory ? (<><Send className="h-4 w-4" /> {t("survey.submit")}</>) : (<>{locale === "ar" ? "التالي" : "Next"} <ChevronRight className="h-4 w-4" /></>)}
+          {isLastCategory ? (<><Send className="h-4 w-4" /> {t("survey.submit")}</>) : (<>{isAr ? "التالي" : "Next"} {isAr ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</>)}
         </Button>
       </div>
     </div>

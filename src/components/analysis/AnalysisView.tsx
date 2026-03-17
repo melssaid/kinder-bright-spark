@@ -18,43 +18,68 @@ interface AnalysisViewProps {
 
 export function AnalysisView({ student, survey }: AnalysisViewProps) {
   const { t, locale } = useI18n();
+  const isAr = locale === "ar";
   const reportRef = useRef<HTMLDivElement>(null);
   const analysis = survey.analysis;
+
+  // Helper to extract localized values
+  const loc = (val: any): string => {
+    if (!val) return "";
+    if (typeof val === "string") return val;
+    return (isAr ? val?.ar : val?.en) || val?.ar || val?.en || "";
+  };
+  const locArray = (val: any): string[] => {
+    if (Array.isArray(val)) return val.map((v: any) => typeof v === "string" ? v : loc(v));
+    if (val && typeof val === "object" && !Array.isArray(val)) {
+      const picked = isAr ? val?.ar : val?.en;
+      return Array.isArray(picked) ? picked : [];
+    }
+    return [];
+  };
 
   if (!analysis) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
-          {locale === "ar" ? "لا توجد نتائج تحليل لهذا الاستقصاء" : "No analysis results for this survey"}
+          {isAr ? "لا توجد نتائج تحليل لهذا الاستقصاء" : "No analysis results for this survey"}
         </CardContent>
       </Card>
     );
   }
 
-  const radarData = [
-    { subject: locale === "ar" ? "الانتباه" : "Attention", value: analysis.scores.attention },
-    { subject: locale === "ar" ? "اجتماعي" : "Social", value: analysis.scores.social },
-    { subject: locale === "ar" ? "عاطفي" : "Emotional", value: analysis.scores.emotional },
-    { subject: locale === "ar" ? "نطق" : "Speech", value: analysis.scores.speech },
-    { subject: locale === "ar" ? "حركي" : "Motor", value: analysis.scores.motor },
-    { subject: locale === "ar" ? "إدراكي" : "Cognitive", value: analysis.scores.cognitive },
-    { subject: locale === "ar" ? "إبداع" : "Creativity", value: analysis.scores.creativity },
+  const scoreKeys = [
+    { key: "cognitive", ar: "المعرفي", en: "Cognitive" },
+    { key: "language", ar: "اللغة", en: "Language" },
+    { key: "social_emotional", ar: "اجتماعي", en: "Social" },
+    { key: "motor", ar: "حركي", en: "Motor" },
+    { key: "self_care", ar: "رعاية ذاتية", en: "Self-Care" },
+    { key: "daily_mood", ar: "الرفاهية", en: "Wellbeing" },
+    // Legacy keys for older assessments
+    { key: "attention", ar: "انتباه", en: "Attention" },
+    { key: "creativity", ar: "إبداع", en: "Creativity" },
+    { key: "behavior", ar: "سلوك", en: "Behavior" },
+    { key: "gross_motor", ar: "حركة كبرى", en: "Gross Motor" },
+    { key: "fine_motor", ar: "حركة دقيقة", en: "Fine Motor" },
   ];
 
-  const barData = Object.entries(analysis.scores).map(([key, value]) => ({
-    name: key,
-    score: value,
-  }));
+  const radarData = scoreKeys
+    .filter(s => analysis.scores?.[s.key] !== undefined)
+    .map(s => ({
+      subject: isAr ? s.ar : s.en,
+      value: analysis.scores[s.key],
+    }));
+
+  const barData = radarData.map(d => ({ name: d.subject, score: d.value }));
 
   const indicatorColor: Record<string, string> = {
-    gifted: "bg-success/15 text-success border-success/30",
-    typical: "bg-info/15 text-info border-info/30",
-    delayed: "bg-warning/15 text-warning-foreground border-warning/30",
-    mixed: "bg-accent text-accent-foreground border-accent/30",
+    gifted: "bg-primary/10 text-primary border-primary/30",
+    typical: "bg-muted text-muted-foreground border-border",
+    delayed: "bg-destructive/10 text-destructive border-destructive/30",
+    mixed: "bg-accent/10 text-accent-foreground border-accent/30",
   };
 
   const handleShareWhatsApp = () => {
-    const msg = `${locale === "ar" ? "تقرير نمو الطفل" : "Child Development Report"}: ${student.name}\n\n${analysis.parentMessage}\n\n${analysis.actionPlan.join("\n")}`;
+    const msg = `${isAr ? "تقرير نمو الطفل" : "Child Development Report"}: ${student.name}\n\n${loc(analysis.parentMessage)}\n\n${locArray(analysis.actionPlan).join("\n")}`;
     const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
   };
@@ -62,7 +87,7 @@ export function AnalysisView({ student, survey }: AnalysisViewProps) {
   const handleExportPDF = async () => {
     if (!reportRef.current) return;
     try {
-      toast.info(locale === "ar" ? "جاري إنشاء PDF..." : "Generating PDF...");
+      toast.info(isAr ? "جاري إنشاء PDF..." : "Generating PDF...");
       const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
@@ -70,14 +95,14 @@ export function AnalysisView({ student, survey }: AnalysisViewProps) {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save(`${student.name}-report-${new Date().toLocaleDateString()}.pdf`);
-      toast.success(locale === "ar" ? "تم تصدير PDF" : "PDF exported");
+      toast.success(isAr ? "تم تصدير PDF" : "PDF exported");
     } catch {
-      toast.error(locale === "ar" ? "خطأ في التصدير" : "Export error");
+      toast.error(isAr ? "خطأ في التصدير" : "Export error");
     }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" dir={isAr ? "rtl" : "ltr"}>
       {/* Action buttons */}
       <div className="flex gap-2 flex-wrap">
         <Button onClick={handleShareWhatsApp} variant="outline" className="gap-2">
@@ -92,19 +117,21 @@ export function AnalysisView({ student, survey }: AnalysisViewProps) {
         {/* Header */}
         <div className="text-center pb-2 border-b">
           <h2 className="text-xl font-bold">🌈 Kinder BH</h2>
-          <p className="text-sm text-muted-foreground">{student.name} — {new Date(survey.date).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}</p>
+          <p className="text-sm text-muted-foreground">{student.name} — {new Date(survey.date).toLocaleDateString(isAr ? "ar-SA" : "en-US")}</p>
         </div>
 
         {/* Indicator badge */}
-        <Card className={`border-2 ${indicatorColor[analysis.indicators.type] || ""}`}>
-          <CardContent className="py-3 flex items-center gap-3">
-            <Star className="h-5 w-5" />
-            <div>
-              <p className="text-sm font-bold">{t("analysis.indicators")}: {t(`indicators.${analysis.indicators.type}`)}</p>
-              <p className="text-xs text-muted-foreground">{analysis.indicators.details}</p>
-            </div>
-          </CardContent>
-        </Card>
+        {analysis.indicators?.type && (
+          <Card className={`border-2 ${indicatorColor[analysis.indicators.type] || ""}`}>
+            <CardContent className="py-3 flex items-center gap-3">
+              <Star className="h-5 w-5 shrink-0" />
+              <div>
+                <p className="text-sm font-bold">{t("analysis.indicators")}: {t(`indicators.${analysis.indicators.type}`)}</p>
+                <p className="text-xs text-muted-foreground">{loc(analysis.indicators.details)}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Summary */}
         <Card>
@@ -114,45 +141,47 @@ export function AnalysisView({ student, survey }: AnalysisViewProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm leading-relaxed">{analysis.summary}</p>
+            <p className="text-sm leading-relaxed">{loc(analysis.summary)}</p>
           </CardContent>
         </Card>
 
-        {/* Charts side by side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">{t("analysis.scores")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="hsl(var(--border))" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9 }} />
-                  <Radar dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.25} strokeWidth={2} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+        {/* Charts */}
+        {radarData.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">{t("analysis.scores")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <RadarChart data={radarData}>
+                    <PolarGrid stroke="hsl(var(--border))" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: "hsl(var(--foreground))" }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9 }} />
+                    <Radar dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.25} strokeWidth={2} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">{t("analysis.scores")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={barData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
-                  <Tooltip />
-                  <Bar dataKey="score" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">{t("analysis.scores")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={barData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+                    <Tooltip />
+                    <Bar dataKey="score" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Score details */}
         <Card>
@@ -171,31 +200,31 @@ export function AnalysisView({ student, survey }: AnalysisViewProps) {
 
         {/* Strengths & Improvements */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="border-success/20">
+          <Card className="border-primary/20">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2 text-success">
+              <CardTitle className="text-base flex items-center gap-2 text-primary">
                 <CheckCircle className="h-4 w-4" /> {t("analysis.strengths")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-1">
-                {analysis.strengths.map((s, i) => (
-                  <li key={i} className="text-sm flex gap-2"><span className="text-success">✓</span> {s}</li>
+                {locArray(analysis.strengths).map((s, i) => (
+                  <li key={i} className="text-sm flex gap-2"><span className="text-primary shrink-0">✓</span> {s}</li>
                 ))}
               </ul>
             </CardContent>
           </Card>
 
-          <Card className="border-warning/20">
+          <Card className="border-destructive/20">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2 text-warning">
+              <CardTitle className="text-base flex items-center gap-2 text-destructive">
                 <AlertTriangle className="h-4 w-4" /> {t("analysis.improvements")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-1">
-                {analysis.improvements.map((s, i) => (
-                  <li key={i} className="text-sm flex gap-2"><span className="text-warning">!</span> {s}</li>
+                {locArray(analysis.improvements).map((s, i) => (
+                  <li key={i} className="text-sm flex gap-2"><span className="text-destructive shrink-0">!</span> {s}</li>
                 ))}
               </ul>
             </CardContent>
@@ -203,38 +232,46 @@ export function AnalysisView({ student, survey }: AnalysisViewProps) {
         </div>
 
         {/* Recommendations */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Heart className="h-4 w-4 text-primary" /> {t("analysis.recommendations")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {analysis.teacherRecommendations.map((r, i) => (
-                <li key={i} className="text-sm p-2 rounded-lg bg-primary/5 border border-primary/10">{r}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        {locArray(analysis.teacherRecommendations).length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Heart className="h-4 w-4 text-primary" /> {t("analysis.recommendations")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {locArray(analysis.teacherRecommendations).map((r, i) => (
+                  <li key={i} className="text-sm p-2 rounded-lg bg-primary/5 border border-primary/10">{r}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Parent Message */}
-        <Card className="border-primary/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <MessageCircle className="h-4 w-4 text-primary" /> {t("analysis.parentMessage")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm leading-relaxed bg-primary/5 p-3 rounded-lg">{analysis.parentMessage}</p>
-            <h4 className="text-sm font-semibold">{t("analysis.actionPlan")}</h4>
-            <div className="space-y-2">
-              {analysis.actionPlan.map((a, i) => (
-                <div key={i} className="text-sm p-2 rounded-lg bg-muted/30 border">{a}</div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {analysis.parentMessage && (
+          <Card className="border-primary/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <MessageCircle className="h-4 w-4 text-primary" /> {t("analysis.parentMessage")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm leading-relaxed bg-primary/5 p-3 rounded-lg">{loc(analysis.parentMessage)}</p>
+              {locArray(analysis.actionPlan).length > 0 && (
+                <>
+                  <h4 className="text-sm font-semibold">{t("analysis.actionPlan")}</h4>
+                  <div className="space-y-2">
+                    {locArray(analysis.actionPlan).map((a, i) => (
+                      <div key={i} className="text-sm p-2 rounded-lg bg-muted/30 border">{a}</div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
