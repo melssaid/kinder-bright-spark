@@ -237,12 +237,13 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setAssessmentMode(null); }} className="space-y-4">
-          <TabsList className="w-full grid grid-cols-5 h-12">
-            <TabsTrigger value="overview" className="text-[10px] sm:text-sm py-3">{isAr ? "📋 عام" : "📋 Overview"}</TabsTrigger>
-            <TabsTrigger value="assess" className="text-[10px] sm:text-sm py-3">{isAr ? "📝 تقييم" : "📝 Assess"}</TabsTrigger>
-            <TabsTrigger value="reports" className="text-[10px] sm:text-sm py-3">{isAr ? "🧠 تقارير" : "🧠 Reports"}</TabsTrigger>
-            <TabsTrigger value="parents" className="text-[10px] sm:text-sm py-3">{isAr ? "👪 الأهل" : "👪 Parents"}</TabsTrigger>
-            <TabsTrigger value="attendance" className="text-[10px] sm:text-sm py-3">{isAr ? "📅 حضور" : "📅 Attend."}</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-6 h-12">
+            <TabsTrigger value="overview" className="text-[9px] sm:text-sm py-3">{isAr ? "📋 عام" : "📋 Overview"}</TabsTrigger>
+            <TabsTrigger value="assess" className="text-[9px] sm:text-sm py-3">{isAr ? "📝 تقييم" : "📝 Assess"}</TabsTrigger>
+            <TabsTrigger value="reports" className="text-[9px] sm:text-sm py-3">{isAr ? "🧠 تقارير" : "🧠 Reports"}</TabsTrigger>
+            <TabsTrigger value="photos" className="text-[9px] sm:text-sm py-3">{isAr ? "📷 صور" : "📷 Photos"}</TabsTrigger>
+            <TabsTrigger value="parents" className="text-[9px] sm:text-sm py-3">{isAr ? "👪 أهل" : "👪 Parents"}</TabsTrigger>
+            <TabsTrigger value="attendance" className="text-[9px] sm:text-sm py-3">{isAr ? "📅 حضور" : "📅 Attend."}</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
