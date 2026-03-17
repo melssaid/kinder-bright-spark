@@ -237,7 +237,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                     <CardTitle className="text-base">{isAr ? "ملخص التحليل" : "Analysis Summary"}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{analysis.summary}</p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{typeof analysis.summary === "string" ? analysis.summary : (isAr ? analysis.summary?.ar : analysis.summary?.en) || ""}</p>
                   </CardContent>
                 </Card>
 
