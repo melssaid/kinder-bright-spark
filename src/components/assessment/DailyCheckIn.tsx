@@ -156,8 +156,30 @@ export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [attachedPhoto, setAttachedPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const allAnswered = dailyQuestions.every(q => answers[q.id] !== undefined);
+
+  const handleAttachPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(isAr ? "حجم الصورة كبير جداً (أقصى 5MB)" : "Image too large (max 5MB)");
+      return;
+    }
+    setAttachedPhoto(file);
+    const reader = new FileReader();
+    reader.onload = () => setPhotoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removePhoto = () => {
+    setAttachedPhoto(null);
+    setPhotoPreview(null);
+    if (photoInputRef.current) photoInputRef.current.value = "";
+  };
 
   const handleSave = async () => {
     if (!user || !allAnswered) return;
@@ -178,9 +200,32 @@ export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
     }
   };
 
-  const handleShareWhatsApp = () => {
+  const handleShareWhatsApp = async () => {
     const msg = buildDailyReportMessage(student, answers, isAr);
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+
+    // Try Web Share API with photo if available (works on mobile)
+    if (attachedPhoto && navigator.share && navigator.canShare) {
+      try {
+        const shareData: ShareData = {
+          text: msg,
+          files: [attachedPhoto],
+        };
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          toast.success(isAr ? "تمت المشاركة ✅" : "Shared ✅");
+          return;
+        }
+      } catch (err: any) {
+        if (err.name === "AbortError") return;
+        // Fall through to WhatsApp link
+      }
+    }
+
+    // Fallback: open WhatsApp with text only
+    const photoNote = attachedPhoto
+      ? (isAr ? "\n\n📸 *ملاحظة:* تم إرفاق صورة من نشاط الطفل اليوم (سيتم إرسالها بشكل منفصل)" : "\n\n📸 *Note:* A photo from today's activity is attached (will be sent separately)")
+      : "";
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg + photoNote)}`, "_blank");
   };
 
   if (saved) {
@@ -191,12 +236,51 @@ export function DailyCheckIn({ student, onComplete }: DailyCheckInProps) {
             <CheckCircle className="h-14 w-14 text-primary" />
             <h3 className="text-lg font-bold">{isAr ? "تم حفظ التقييم اليومي! ✅" : "Daily Check-in Saved! ✅"}</h3>
             <p className="text-sm text-muted-foreground text-center max-w-xs">
-              {isAr ? "يمكنك الآن إرسال التقرير لولي الأمر عبر واتساب" : "You can now share the report with the parent via WhatsApp"}
+              {isAr ? "يمكنك إرفاق صورة من نشاط اليوم ثم إرسال التقرير لولي الأمر" : "You can attach a photo from today's activity then send the report to parent"}
             </p>
+
+            {/* Photo attachment section */}
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleAttachPhoto}
+            />
+
+            {photoPreview ? (
+              <div className="relative w-full max-w-xs">
+                <img src={photoPreview} alt="" className="w-full h-40 object-cover rounded-xl border border-border" />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-2 right-2 h-7 w-7 rounded-full"
+                  onClick={removePhoto}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                <Badge className="absolute bottom-2 left-2 text-[10px] bg-primary/90">
+                  📸 {isAr ? "صورة مرفقة" : "Photo attached"}
+                </Badge>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => photoInputRef.current?.click()}
+                className="w-full max-w-xs h-11 gap-2 text-sm border-dashed border-2"
+              >
+                <ImagePlus className="h-4 w-4" />
+                {isAr ? "📷 إرفاق صورة من نشاط اليوم" : "📷 Attach photo from today"}
+              </Button>
+            )}
+
             <div className="flex flex-col gap-3 w-full max-w-xs">
               <Button onClick={handleShareWhatsApp} className="h-12 gap-2 text-sm w-full">
                 <Share2 className="h-5 w-5" />
-                {isAr ? "📤 إرسال لولي الأمر عبر واتساب" : "📤 Send to Parent via WhatsApp"}
+                {attachedPhoto
+                  ? (isAr ? "📤 إرسال التقرير مع الصورة" : "📤 Send Report with Photo")
+                  : (isAr ? "📤 إرسال لولي الأمر عبر واتساب" : "📤 Send to Parent via WhatsApp")}
               </Button>
               <Button variant="outline" onClick={onComplete} className="h-10 text-sm w-full">
                 {isAr ? "تم ✅" : "Done ✅"}
