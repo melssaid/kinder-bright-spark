@@ -19,6 +19,7 @@ interface Kindergarten {
 const AdminKindergartens = () => {
   const { user } = useAuth();
   const { locale } = useI18n();
+  const navigate = useNavigate();
   const [kindergartens, setKindergartens] = useState<Kindergarten[]>([]);
   const [newName, setNewName] = useState("");
   const [loading, setLoading] = useState(false);
