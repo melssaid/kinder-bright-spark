@@ -15,15 +15,12 @@ const StudentsPage = () => {
   const { t, locale } = useI18n();
   const navigate = useNavigate();
   const isAr = locale === "ar";
-  const { isAdmin } = useRole();
+  const { isAdmin, isKgAdmin } = useRole();
   const [searchParams] = useSearchParams();
   const teacherIdParam = searchParams.get("teacher");
 
-  const [students, setStudents] = useState<DbStudent[]>([]);
-  const [teacherName, setTeacherName] = useState<string | null>(null);
-
-  // If admin is viewing a specific teacher's students
-  const targetTeacherId = isAdmin ? teacherIdParam : null;
+  // Admin or KG Admin can view a specific teacher's students
+  const targetTeacherId = (isAdmin || isKgAdmin) ? teacherIdParam : null;
 
   useEffect(() => {
     if (targetTeacherId) {
