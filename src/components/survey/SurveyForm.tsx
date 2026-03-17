@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2, Send, CheckCircle, ChevronLeft, ChevronRight, Brain, Sparkles } from "lucide-react";
+import { Loader2, Send, CheckCircle, ChevronLeft, ChevronRight, Brain, Sparkles, Share2 } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/useAuth";
 import { surveyCategories } from "@/data/surveyQuestions";
