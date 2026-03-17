@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard, Users, FileText, Settings,
-  Shield, Building2, KeyRound, Globe, LogOut
+  Shield, Building2, KeyRound, Globe, LogOut, GraduationCap
 } from "lucide-react";
 import logo from "@/assets/kinder-bh-logo.png";
 import { cn } from "@/lib/utils";
@@ -28,12 +28,14 @@ export function TopNavbar() {
     { to: "/admin", icon: Shield, label: isAr ? "لوحة التحكم" : "Dashboard", end: true },
     { to: "/admin/kindergartens", icon: Building2, label: isAr ? "الروضات" : "Kindergartens" },
     { to: "/admin/teachers", icon: KeyRound, label: isAr ? "المعلمات" : "Teachers" },
+    { to: "/students", icon: GraduationCap, label: isAr ? "جميع الطلاب" : "All Students" },
+    { to: "/reports", icon: FileText, label: isAr ? "التقارير" : "Reports" },
   ];
 
   const kgAdminLinks = [
     { to: "/kg-admin", icon: Building2, label: isAr ? "روضتي" : "My KG", end: true },
-    { to: "/kg-admin/teachers", icon: Users, label: isAr ? "المعلمات" : "Teachers" },
-    { to: "/students", icon: Users, label: isAr ? "الطلاب" : "Students" },
+    { to: "/kg-admin/teachers", icon: KeyRound, label: isAr ? "المعلمات" : "Teachers" },
+    { to: "/students", icon: GraduationCap, label: isAr ? "الطلاب" : "Students" },
     { to: "/reports", icon: FileText, label: isAr ? "التقارير" : "Reports" },
   ];
 

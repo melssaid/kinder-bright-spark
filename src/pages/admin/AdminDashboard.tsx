@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Users, GraduationCap, ClipboardList, CalendarCheck, TrendingUp } from "lucide-react";
+import { Building2, Users, GraduationCap, ClipboardList, CalendarCheck, TrendingUp, ChevronRight, FileText } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { useNavigate } from "react-router-dom";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -25,6 +27,7 @@ const CHART_COLORS = [
 
 const AdminDashboard = () => {
   const { locale } = useI18n();
+  const navigate = useNavigate();
   const isAr = locale === "ar";
   const [stats, setStats] = useState({ kindergartens: 0, teachers: 0, students: 0, surveys: 0, attendance: 0 });
   const [kgDetails, setKgDetails] = useState<KgDetail[]>([]);
@@ -108,6 +111,24 @@ const AdminDashboard = () => {
                   <p className="text-lg sm:text-2xl font-bold leading-none">{c.value}</p>
                   <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 leading-tight">{c.label}</p>
                 </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Quick Access */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {[
+            { icon: GraduationCap, label: isAr ? "عرض جميع الطلاب" : "View All Students", to: "/students", color: "text-primary" },
+            { icon: FileText, label: isAr ? "عرض التقارير" : "View Reports", to: "/reports", color: "text-emerald-600" },
+            { icon: Building2, label: isAr ? "إدارة الروضات" : "Manage KGs", to: "/admin/kindergartens", color: "text-amber-600" },
+            { icon: Users, label: isAr ? "إدارة الحسابات" : "Manage Accounts", to: "/admin/teachers", color: "text-purple-600" },
+          ].map((item) => (
+            <Card key={item.to} className="cursor-pointer hover:shadow-md transition-all active:scale-[0.98]" onClick={() => navigate(item.to)}>
+              <CardContent className="p-3 flex items-center gap-2">
+                <item.icon className={`h-5 w-5 ${item.color} shrink-0`} />
+                <span className="text-xs font-medium flex-1">{item.label}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
               </CardContent>
             </Card>
           ))}
