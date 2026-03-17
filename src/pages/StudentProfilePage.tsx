@@ -25,12 +25,8 @@ const categoryMeta: Record<string, { emoji: string; titleAr: string; titleEn: st
   cognitive: { emoji: "🧠", titleAr: "التطور المعرفي", titleEn: "Cognitive" },
   language: { emoji: "💬", titleAr: "اللغة والتواصل", titleEn: "Language" },
   social_emotional: { emoji: "❤️", titleAr: "الاجتماعي العاطفي", titleEn: "Social-Emotional" },
-  gross_motor: { emoji: "🏃", titleAr: "الحركية الكبرى", titleEn: "Gross Motor" },
-  fine_motor: { emoji: "✂️", titleAr: "الحركية الدقيقة", titleEn: "Fine Motor" },
+  motor: { emoji: "🏃", titleAr: "المهارات الحركية", titleEn: "Motor Skills" },
   self_care: { emoji: "🧽", titleAr: "الرعاية الذاتية", titleEn: "Self-Care" },
-  attention: { emoji: "🎯", titleAr: "الانتباه والتركيز", titleEn: "Attention" },
-  creativity: { emoji: "🎨", titleAr: "الإبداع", titleEn: "Creativity" },
-  behavior: { emoji: "📋", titleAr: "السلوك", titleEn: "Behavior" },
   daily_mood: { emoji: "😊", titleAr: "الرفاهية اليومية", titleEn: "Wellbeing" },
 };
 
