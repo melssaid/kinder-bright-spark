@@ -8,7 +8,7 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Area, AreaChart
 } from "recharts";
-import { Brain, TrendingUp, Heart, MessageSquare, Zap, Star, ClipboardList, Calendar, ArrowLeft, Sparkles, PlayCircle, ChevronDown, Award, BookOpen, Users, Share2 } from "lucide-react";
+import { Brain, TrendingUp, Heart, MessageSquare, Zap, Star, ClipboardList, Calendar, ArrowLeft, Sparkles, PlayCircle, ChevronDown, Award, BookOpen, Users, Share2, FileDown } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { DbStudent, DbSurvey, getStudentSurveys, getAttendanceStats } from "@/lib/database";
 import { surveyCategories } from "@/data/surveyQuestions";
