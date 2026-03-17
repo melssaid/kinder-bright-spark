@@ -71,12 +71,13 @@ export function StudentManager({ students, onStudentsChange, selectedStudent, on
   };
 
   const handleAdd = async () => {
-    if (!name.trim() || !user) return;
+    const effectiveTeacherId = overrideTeacherId || user?.id;
+    if (!name.trim() || !effectiveTeacherId) return;
     if (students.length >= 30) {
       toast.error(t("students.max"));
       return;
     }
-    const student = await addStudent({ name: name.trim(), age: parseInt(age), gender }, user.id);
+    const student = await addStudent({ name: name.trim(), age: parseInt(age), gender }, effectiveTeacherId);
     if (student) {
       setName("");
       onStudentsChange();
