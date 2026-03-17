@@ -254,7 +254,7 @@ serve(async (req) => {
         parentMessage: "",
         actionPlan: [],
         indicators: { type: "typical", details: "", areasOfConcern: [], areasOfExcellence: [] },
-        scores: { cognitive: 50, language: 50, social_emotional: 50, gross_motor: 50, fine_motor: 50, self_care: 50, attention: 50, creativity: 50, behavior: 50, daily_mood: 50 },
+        scores: { cognitive: 50, language: 50, social_emotional: 50, motor: 50, self_care: 50, daily_mood: 50 },
         overallScore: 50,
       };
     }
