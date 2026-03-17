@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Users, GraduationCap, ClipboardList, CalendarCheck, TrendingUp } from "lucide-react";
+import { Building2, Users, GraduationCap, ClipboardList, CalendarCheck, TrendingUp, ChevronRight, FileText } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { useNavigate } from "react-router-dom";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
