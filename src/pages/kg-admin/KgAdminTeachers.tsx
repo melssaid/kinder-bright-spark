@@ -137,8 +137,34 @@ const KgAdminTeachers = () => {
     toast.success(isAr ? "تم فتح واتساب" : "WhatsApp opened");
   };
 
+  const handleOpenEdit = (teacher: TeacherProfile, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingTeacher(teacher);
+    setEditName(teacher.full_name);
+    setEditEmail("");
+    setEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingTeacher || (!editName.trim() && !editEmail.trim())) return;
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("update-teacher", {
+        body: { userId: editingTeacher.id, fullName: editName.trim() || undefined, email: editEmail.trim() || undefined },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(isAr ? "تم تحديث البيانات بنجاح" : "Account updated successfully");
+      setEditOpen(false);
+      loadTeachers();
+    } catch (err: any) {
+      toast.error(err.message || (isAr ? "حدث خطأ" : "An error occurred"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <DashboardLayout>
       <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-2xl mx-auto">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold">{isAr ? "معلمات الروضة" : "Kindergarten Teachers"}</h1>
