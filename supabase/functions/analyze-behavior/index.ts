@@ -106,103 +106,100 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { studentName, studentAge, surveyData, locale } = await req.json();
+    const body = await req.json();
+    const { studentName, studentAge, locale, mode } = body;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const isArabic = locale === "ar";
-    const readableData = buildReadableData(surveyData, isArabic);
+    let systemPrompt: string;
+    let userPrompt: string;
 
-    const systemPrompt = isArabic
-      ? `أنت خبير متخصص في تنمية الطفل ورياض الأطفال، حاصل على خبرة واسعة في التقييم النمائي الشامل. حلل بيانات الاستقصاء بعمق وقدم تقريراً مهنياً شاملاً.
+    if (mode === "instant_behavior") {
+      // Instant behavior analysis mode
+      const { behaviors, notes } = body;
+      const behaviorList = (behaviors || []).join(", ");
+
+      systemPrompt = isArabic
+        ? `أنت خبيرة في سلوك الأطفال ورياض الأطفال. المعلمة لاحظت سلوكيات معينة عند طفل وتحتاج حلول فورية عملية.
 
 ## التعليمات:
-- حلل كل مجال نمائي بشكل منفصل مع ذكر نقاط محددة من الإجابات
-- قارن أداء الطفل بالمعايير المتوقعة لعمره
-- قدم توصيات عملية ومحددة (ليست عامة) مبنية على النتائج الفعلية
-- اكتب رسالة الأهل بأسلوب دافئ ومهني مع تفاصيل كافية
-- خطة العمل يجب أن تكون تفصيلية مع أنشطة محددة لكل يوم
+- قدمي 4-6 حلول سريعة وعملية يمكن تطبيقها فوراً في الصف
+- اكتبي تحليلاً مختصراً لأسباب السلوك المحتملة
+- قدمي 3-4 نصائح وقائية لمنع تكرار السلوك
+- اكتبي رسالة مهنية ودافئة لولي الأمر تشرح الملاحظة وتقترح تعاوناً
 
 ## هيكل الإجابة (JSON):
 {
-  "summary": "ملخص شامل يتضمن الصورة العامة للطفل ومستوى تطوره مقارنة بعمره",
-  "domainAnalysis": {
-    "cognitive": "تحليل التطور المعرفي",
-    "language": "تحليل اللغة والتواصل",
-    "social_emotional": "تحليل الجانب الاجتماعي العاطفي",
-    "motor": "تحليل المهارات الحركية",
-    "self_care": "تحليل الرعاية الذاتية",
-    "daily_mood": "تحليل الرفاهية اليومية"
-  },
-  "strengths": ["نقطة قوة 1", "نقطة قوة 2", "نقطة قوة 3"],
-  "improvements": ["مجال يحتاج تطوير 1", "مجال 2", "مجال 3"],
-  "teacherRecommendations": ["توصية عملية 1", "توصية 2", "توصية 3"],
-  "parentMessage": "رسالة دافئة للأهل تتضمن: نقاط القوة، المجالات التي تحتاج دعم، ونصائح للمنزل",
-  "actionPlan": [
-    "اليوم 1: وصف النشاط",
-    "اليوم 2: وصف النشاط",
-    "اليوم 3: وصف النشاط"
-  ],
-  "indicators": { 
-    "type": "gifted|typical|delayed|mixed", 
-    "details": "شرح لمستوى التطور"
-  },
-  "scores": {
-    "cognitive": 0-100,
-    "language": 0-100,
-    "social_emotional": 0-100,
-    "motor": 0-100,
-    "self_care": 0-100,
-    "daily_mood": 0-100
-  },
-  "overallScore": 0-100
+  "quickSolutions": ["حل 1", "حل 2", "حل 3", "حل 4"],
+  "detailedAnalysis": "تحليل مختصر لأسباب السلوك وسياقه",
+  "preventionTips": ["نصيحة 1", "نصيحة 2", "نصيحة 3"],
+  "parentMessage": "رسالة لولي الأمر"
 }`
-      : `You are an expert child development specialist. Analyze the survey data and provide a professional report.
+        : `You are a child behavior expert. The teacher noticed specific behaviors and needs instant practical solutions.
 
 ## Instructions:
-- Analyze each developmental domain with specific references to answers
-- Compare performance to age-appropriate milestones
-- Provide practical, specific recommendations
-- Write a warm parent message
+- Provide 4-6 quick, practical solutions applicable immediately in class
+- Write a brief analysis of potential causes
+- Give 3-4 prevention tips
+- Write a warm, professional parent message
 
 ## Response Structure (JSON):
 {
-  "summary": "Comprehensive summary of overall development",
-  "domainAnalysis": {
-    "cognitive": "Cognitive analysis",
-    "language": "Language analysis",
-    "social_emotional": "Social-emotional analysis",
-    "motor": "Motor skills analysis",
-    "self_care": "Self-care analysis",
-    "daily_mood": "Wellbeing analysis"
-  },
-  "strengths": ["Strength 1", "Strength 2", "Strength 3"],
-  "improvements": ["Area 1", "Area 2", "Area 3"],
-  "teacherRecommendations": ["Rec 1", "Rec 2", "Rec 3"],
-  "parentMessage": "Warm message for parents with strengths, areas needing support, and home tips",
-  "actionPlan": [
-    "Day 1: Activity",
-    "Day 2: Activity",
-    "Day 3: Activity"
-  ],
-  "indicators": { 
-    "type": "gifted|typical|delayed|mixed", 
-    "details": "Development level explanation"
-  },
-  "scores": {
-    "cognitive": 0-100,
-    "language": 0-100,
-    "social_emotional": 0-100,
-    "motor": 0-100,
-    "self_care": 0-100,
-    "daily_mood": 0-100
-  },
+  "quickSolutions": ["Solution 1", "Solution 2", "Solution 3", "Solution 4"],
+  "detailedAnalysis": "Brief analysis of behavior causes and context",
+  "preventionTips": ["Tip 1", "Tip 2", "Tip 3"],
+  "parentMessage": "Message for parent"
+}`;
+
+      userPrompt = isArabic
+        ? `اسم الطفل: ${studentName}\nالعمر: ${studentAge} سنوات\n\n🔍 السلوكيات الملاحظة: ${behaviorList}\n\n${notes ? `📝 ملاحظات المعلمة: ${notes}` : ""}`
+        : `Child: ${studentName}\nAge: ${studentAge} years\n\n🔍 Observed behaviors: ${behaviorList}\n\n${notes ? `📝 Teacher notes: ${notes}` : ""}`;
+    } else {
+      // Standard comprehensive assessment mode
+      const { surveyData } = body;
+      const readableData = buildReadableData(surveyData || {}, isArabic);
+
+      systemPrompt = isArabic
+        ? `أنت خبير متخصص في تنمية الطفل ورياض الأطفال. حلل بيانات الاستقصاء وقدم تقريراً مهنياً شاملاً.
+
+## التعليمات:
+- حلل كل مجال نمائي بشكل منفصل
+- قارن أداء الطفل بالمعايير المتوقعة لعمره
+- قدم توصيات عملية ومحددة
+- اكتب رسالة الأهل بأسلوب دافئ ومهني
+
+## هيكل الإجابة (JSON):
+{
+  "summary": "ملخص شامل",
+  "strengths": ["نقطة قوة 1", "نقطة قوة 2", "نقطة قوة 3"],
+  "improvements": ["مجال 1", "مجال 2", "مجال 3"],
+  "teacherRecommendations": ["توصية 1", "توصية 2", "توصية 3"],
+  "parentMessage": "رسالة دافئة للأهل",
+  "actionPlan": ["اليوم 1: نشاط", "اليوم 2: نشاط", "اليوم 3: نشاط"],
+  "indicators": { "type": "gifted|typical|delayed|mixed", "details": "شرح" },
+  "scores": { "cognitive": 0-100, "language": 0-100, "social_emotional": 0-100, "motor": 0-100, "self_care": 0-100, "daily_mood": 0-100 },
+  "overallScore": 0-100
+}`
+        : `You are a child development expert. Analyze the survey and provide a professional report.
+
+## Response Structure (JSON):
+{
+  "summary": "Comprehensive summary",
+  "strengths": ["S1", "S2", "S3"],
+  "improvements": ["A1", "A2", "A3"],
+  "teacherRecommendations": ["R1", "R2", "R3"],
+  "parentMessage": "Warm parent message",
+  "actionPlan": ["Day 1: Activity", "Day 2: Activity", "Day 3: Activity"],
+  "indicators": { "type": "gifted|typical|delayed|mixed", "details": "explanation" },
+  "scores": { "cognitive": 0-100, "language": 0-100, "social_emotional": 0-100, "motor": 0-100, "self_care": 0-100, "daily_mood": 0-100 },
   "overallScore": 0-100
 }`;
 
-    const userPrompt = isArabic
-      ? `اسم الطفل: ${studentName}\nالعمر: ${studentAge} سنوات\n\n📊 نتائج التقييم التفصيلية:\n${readableData}`
-      : `Child name: ${studentName}\nAge: ${studentAge} years\n\n📊 Detailed Assessment Results:\n${readableData}`;
+      userPrompt = isArabic
+        ? `اسم الطفل: ${studentName}\nالعمر: ${studentAge} سنوات\n\n📊 نتائج التقييم:\n${readableData}`
+        : `Child: ${studentName}\nAge: ${studentAge} years\n\n📊 Assessment Results:\n${readableData}`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -245,18 +242,9 @@ serve(async (req) => {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(content);
     } catch {
-      analysis = {
-        summary: content,
-        domainAnalysis: {},
-        strengths: [],
-        improvements: [],
-        teacherRecommendations: [],
-        parentMessage: "",
-        actionPlan: [],
-        indicators: { type: "typical", details: "", areasOfConcern: [], areasOfExcellence: [] },
-        scores: { cognitive: 50, language: 50, social_emotional: 50, motor: 50, self_care: 50, daily_mood: 50 },
-        overallScore: 50,
-      };
+      analysis = mode === "instant_behavior"
+        ? { quickSolutions: [], detailedAnalysis: content, preventionTips: [], parentMessage: "" }
+        : { summary: content, strengths: [], improvements: [], teacherRecommendations: [], parentMessage: "", actionPlan: [], indicators: { type: "typical", details: "" }, scores: {}, overallScore: 50 };
     }
 
     return new Response(JSON.stringify({ analysis }), {

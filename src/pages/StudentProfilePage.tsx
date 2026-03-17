@@ -6,11 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, PlayCircle, Share2, Brain, Calendar, ClipboardList, Users as UsersIcon } from "lucide-react";
+import { ArrowLeft, PlayCircle, Share2, Brain, Calendar, ClipboardList, Users as UsersIcon, Zap, Search, FileText, MessageSquare } from "lucide-react";
 import { ParentManager } from "@/components/students/ParentManager";
 import { useI18n } from "@/i18n";
 import { DbStudent, DbSurvey, getStudents, getStudentSurveys, getAttendanceStats } from "@/lib/database";
 import { SurveyForm } from "@/components/survey/SurveyForm";
+import { DailyCheckIn } from "@/components/assessment/DailyCheckIn";
+import { BehaviorAnalysis } from "@/components/assessment/BehaviorAnalysis";
+import { BulkWhatsApp } from "@/components/assessment/BulkWhatsApp";
 import { AnalysisView } from "@/components/analysis/AnalysisView";
 import { AttendanceTable } from "@/components/attendance/AttendanceTable";
 import { surveyCategories } from "@/data/surveyQuestions";
@@ -65,6 +68,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
   const [attendanceStats, setAttendanceStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(initialTab || "overview");
+  const [assessmentMode, setAssessmentMode] = useState<"daily" | "behavior" | "monthly" | null>(null);
   const [selectedSurvey, setSelectedSurvey] = useState<DbSurvey | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -83,6 +87,21 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
       setLoading(false);
     });
   }, [studentId, refreshKey]);
+
+  // Helpers
+  const loc = (val: any): string => {
+    if (!val) return "";
+    if (typeof val === "string") return val;
+    return (isAr ? val?.ar : val?.en) || val?.ar || val?.en || "";
+  };
+  const locArray = (val: any): string[] => {
+    if (Array.isArray(val)) return val.map((v: any) => typeof v === "string" ? v : loc(v));
+    if (val && typeof val === "object" && !Array.isArray(val)) {
+      const picked = isAr ? val?.ar : val?.en;
+      return Array.isArray(picked) ? picked : [];
+    }
+    return [];
+  };
 
   if (loading) {
     return (
@@ -108,21 +127,6 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
   const latestSurvey = surveys.find(s => s.analysis);
   const analysis = latestSurvey?.analysis as any;
 
-  // Helper to extract localized value (handles both string and {ar, en} objects)
-  const loc = (val: any): string => {
-    if (!val) return "";
-    if (typeof val === "string") return val;
-    return (isAr ? val?.ar : val?.en) || val?.ar || val?.en || "";
-  };
-  const locArray = (val: any): string[] => {
-    if (Array.isArray(val)) return val.map((v: any) => typeof v === "string" ? v : loc(v));
-    if (val && typeof val === "object" && !Array.isArray(val)) {
-      const picked = isAr ? val?.ar : val?.en;
-      return Array.isArray(picked) ? picked : [];
-    }
-    return [];
-  };
-
   const categoryScores = surveyCategories.map(cat => {
     const answers = latestSurvey?.answers || {};
     const answered = cat.questions.filter(q => answers[q.id] !== undefined);
@@ -147,6 +151,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
 
   const handleAssessmentComplete = () => {
     setRefreshKey(k => k + 1);
+    setAssessmentMode(null);
     setActiveTab("reports");
     toast.success(isAr ? "تم التقييم! يمكنك الآن مشاهدة التقرير" : "Assessment done! View the report now");
   };
@@ -230,7 +235,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
         )}
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setAssessmentMode(null); }} className="space-y-4">
           <TabsList className="w-full grid grid-cols-5 h-12">
             <TabsTrigger value="overview" className="text-[10px] sm:text-sm py-3">{isAr ? "📋 عام" : "📋 Overview"}</TabsTrigger>
             <TabsTrigger value="assess" className="text-[10px] sm:text-sm py-3">{isAr ? "📝 تقييم" : "📝 Assess"}</TabsTrigger>
@@ -287,9 +292,7 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <p className="text-xs leading-relaxed bg-primary/5 p-3 rounded-lg">
-                        {typeof analysis.parentMessage === "string" ? analysis.parentMessage : (isAr ? analysis.parentMessage?.ar : analysis.parentMessage?.en)}
-                      </p>
+                      <p className="text-xs leading-relaxed bg-primary/5 p-3 rounded-lg">{loc(analysis.parentMessage)}</p>
                       <Button size="sm" variant="outline" onClick={handleShareWhatsApp} className="gap-2 h-10 w-full">
                         <Share2 className="h-4 w-4" />
                         {isAr ? "إرسال عبر واتساب" : "Share via WhatsApp"}
@@ -315,9 +318,89 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
             )}
           </TabsContent>
 
-          {/* Assessment Tab */}
-          <TabsContent value="assess">
-            <SurveyForm student={student} onComplete={handleAssessmentComplete} />
+          {/* Assessment Tab - Multi-type */}
+          <TabsContent value="assess" className="space-y-4">
+            {!assessmentMode ? (
+              <div className="space-y-3">
+                <p className="text-sm text-center text-muted-foreground">
+                  {isAr ? "اختاري نوع التقييم" : "Choose assessment type"}
+                </p>
+                <div className="grid grid-cols-1 gap-3">
+                  {/* Daily */}
+                  <Card
+                    className="cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98] touch-manipulation"
+                    onClick={() => setAssessmentMode("daily")}
+                  >
+                    <CardContent className="p-4 flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                        <Zap className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold">{isAr ? "📋 تقييم يومي سريع" : "📋 Quick Daily Check-in"}</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {isAr ? "3 أسئلة بالإيموجي - مزاج، طاقة، تفاعل" : "3 emoji questions - mood, energy, interaction"}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="shrink-0 text-[10px]">{isAr ? "يومي" : "Daily"}</Badge>
+                    </CardContent>
+                  </Card>
+
+                  {/* Behavior Analysis */}
+                  <Card
+                    className="cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98] touch-manipulation"
+                    onClick={() => setAssessmentMode("behavior")}
+                  >
+                    <CardContent className="p-4 flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
+                        <Search className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold">{isAr ? "🔍 تحليل سلوك آني" : "🔍 Instant Behavior Analysis"}</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {isAr ? "اختاري سلوكيات ملاحظة → تحليل AI → حلول فورية" : "Select behaviors → AI analysis → instant solutions"}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="shrink-0 text-[10px] bg-purple-100 text-purple-700">{isAr ? "آني" : "Instant"}</Badge>
+                    </CardContent>
+                  </Card>
+
+                  {/* Monthly Comprehensive */}
+                  <Card
+                    className="cursor-pointer hover:border-primary/30 transition-all active:scale-[0.98] touch-manipulation"
+                    onClick={() => setAssessmentMode("monthly")}
+                  >
+                    <CardContent className="p-4 flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <FileText className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold">{isAr ? "📊 تقييم شهري شامل" : "📊 Monthly Comprehensive"}</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {isAr ? "تقييم مفصّل لجميع مجالات النمو مع تحليل AI" : "Detailed assessment of all growth areas with AI analysis"}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="shrink-0 text-[10px]">{isAr ? "شهري" : "Monthly"}</Badge>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Button variant="outline" size="sm" onClick={() => setAssessmentMode(null)} className="gap-2">
+                  <ArrowLeft className="h-4 w-4" /> {isAr ? "العودة لأنواع التقييم" : "Back to assessment types"}
+                </Button>
+                
+                {assessmentMode === "daily" && (
+                  <DailyCheckIn student={student} onComplete={handleAssessmentComplete} />
+                )}
+                {assessmentMode === "behavior" && (
+                  <BehaviorAnalysis student={student} />
+                )}
+                {assessmentMode === "monthly" && (
+                  <SurveyForm student={student} onComplete={handleAssessmentComplete} />
+                )}
+              </div>
+            )}
           </TabsContent>
 
           {/* Reports Tab */}
@@ -341,36 +424,49 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
               </Card>
             ) : (
               <div className="space-y-2">
-                {surveys.map(survey => (
-                  <Card
-                    key={survey.id}
-                    className="cursor-pointer hover:border-primary/30 transition-colors active:scale-[0.99]"
-                    onClick={() => setSelectedSurvey(survey)}
-                  >
-                    <CardContent className="p-3 sm:p-4 flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium">
-                          {new Date(survey.date).toLocaleDateString(isAr ? "ar-SA" : "en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" })}
-                        </p>
-                        {survey.analysis && (
-                          <Badge variant="secondary" className="text-[10px] mt-1">
-                            {survey.analysis.indicators?.type === "gifted" ? "🌟" : "✅"} {isAr ? "تم التحليل" : "Analyzed"}
-                          </Badge>
-                        )}
-                      </div>
-                      <Button variant="outline" size="sm" className="text-xs h-10 min-w-[44px]">
-                        {isAr ? "عرض" : "View"}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                {surveys.map(survey => {
+                  const isDailyType = survey.answers?.["_type"] === "daily";
+                  return (
+                    <Card
+                      key={survey.id}
+                      className="cursor-pointer hover:border-primary/30 transition-colors active:scale-[0.99]"
+                      onClick={() => setSelectedSurvey(survey)}
+                    >
+                      <CardContent className="p-3 sm:p-4 flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium">
+                            {new Date(survey.date).toLocaleDateString(isAr ? "ar-SA" : "en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" })}
+                          </p>
+                          <div className="flex gap-1 mt-1">
+                            <Badge variant="outline" className="text-[10px]">
+                              {isDailyType ? (isAr ? "📋 يومي" : "📋 Daily") : (isAr ? "📊 شامل" : "📊 Full")}
+                            </Badge>
+                            {survey.analysis && (
+                              <Badge variant="secondary" className="text-[10px]">
+                                {(survey.analysis as any)?.indicators?.type === "gifted" ? "🌟" : "✅"} {isAr ? "تم التحليل" : "Analyzed"}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="text-xs h-10 min-w-[44px]">
+                          {isAr ? "عرض" : "View"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </TabsContent>
 
-          {/* Parents Tab */}
-          <TabsContent value="parents" className="space-y-3">
+          {/* Parents Tab - Now includes bulk messaging */}
+          <TabsContent value="parents" className="space-y-6">
             <ParentManager studentId={student.id} studentName={student.name} analysis={analysis} />
+            
+            {/* Bulk WhatsApp Section */}
+            <div className="border-t pt-6">
+              <BulkWhatsApp />
+            </div>
           </TabsContent>
 
           {/* Attendance Tab */}
