@@ -134,6 +134,7 @@ const AdminDashboard = () => {
           ))}
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-2 px-3 sm:px-6">
               <CardTitle className="text-sm sm:text-base flex items-center gap-2">
