@@ -27,6 +27,7 @@ const CHART_COLORS = [
 
 const AdminDashboard = () => {
   const { locale } = useI18n();
+  const navigate = useNavigate();
   const isAr = locale === "ar";
   const [stats, setStats] = useState({ kindergartens: 0, teachers: 0, students: 0, surveys: 0, attendance: 0 });
   const [kgDetails, setKgDetails] = useState<KgDetail[]>([]);
