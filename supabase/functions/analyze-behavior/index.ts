@@ -125,101 +125,76 @@ serve(async (req) => {
 
 ## هيكل الإجابة (JSON):
 {
-  "summary": "ملخص شامل (فقرتان على الأقل) يتضمن الصورة العامة للطفل ومستوى تطوره مقارنة بعمره",
+  "summary": "ملخص شامل يتضمن الصورة العامة للطفل ومستوى تطوره مقارنة بعمره",
   "domainAnalysis": {
-    "cognitive": "تحليل مفصّل للتطور المعرفي مع أمثلة من الإجابات",
-    "language": "تحليل مفصّل للغة والتواصل",
-    "social_emotional": "تحليل مفصّل للجانب الاجتماعي العاطفي",
-    "gross_motor": "تحليل المهارات الحركية الكبرى",
-    "fine_motor": "تحليل المهارات الحركية الدقيقة",
+    "cognitive": "تحليل التطور المعرفي",
+    "language": "تحليل اللغة والتواصل",
+    "social_emotional": "تحليل الجانب الاجتماعي العاطفي",
+    "motor": "تحليل المهارات الحركية",
     "self_care": "تحليل الرعاية الذاتية",
-    "attention": "تحليل الانتباه والتركيز",
-    "creativity": "تحليل الإبداع",
-    "behavior": "تحليل السلوك وضبط النفس",
     "daily_mood": "تحليل الرفاهية اليومية"
   },
-  "strengths": ["نقطة قوة محددة مع شرح 1", "نقطة قوة 2", "نقطة قوة 3"],
-  "improvements": ["مجال يحتاج تطوير مع شرح 1", "مجال 2", "مجال 3"],
-  "teacherRecommendations": ["توصية عملية محددة 1", "توصية 2", "توصية 3", "توصية 4", "توصية 5"],
-  "parentMessage": "رسالة مفصّلة ودافئة للأهل (3 فقرات على الأقل) تتضمن: وصف نقاط القوة، المجالات التي تحتاج دعم، ونصائح عملية للمنزل",
+  "strengths": ["نقطة قوة 1", "نقطة قوة 2", "نقطة قوة 3"],
+  "improvements": ["مجال يحتاج تطوير 1", "مجال 2", "مجال 3"],
+  "teacherRecommendations": ["توصية عملية 1", "توصية 2", "توصية 3"],
+  "parentMessage": "رسالة دافئة للأهل تتضمن: نقاط القوة، المجالات التي تحتاج دعم، ونصائح للمنزل",
   "actionPlan": [
-    "اليوم 1: (عنوان النشاط) - وصف تفصيلي للنشاط مع الخطوات والمواد المطلوبة والهدف",
-    "اليوم 2: (عنوان النشاط) - وصف تفصيلي",
-    "اليوم 3: (عنوان النشاط) - وصف تفصيلي",
-    "اليوم 4: (عنوان النشاط) - وصف تفصيلي",
-    "اليوم 5: (عنوان النشاط) - وصف تفصيلي"
+    "اليوم 1: وصف النشاط",
+    "اليوم 2: وصف النشاط",
+    "اليوم 3: وصف النشاط"
   ],
   "indicators": { 
     "type": "gifted|typical|delayed|mixed", 
-    "details": "شرح مفصّل لمستوى التطور مع تبرير بناءً على البيانات",
-    "areasOfConcern": ["أي مجالات تحتاج متابعة متخصصة"],
-    "areasOfExcellence": ["المجالات التي يتفوق فيها الطفل"]
+    "details": "شرح لمستوى التطور"
   },
   "scores": {
     "cognitive": 0-100,
     "language": 0-100,
     "social_emotional": 0-100,
-    "gross_motor": 0-100,
-    "fine_motor": 0-100,
+    "motor": 0-100,
     "self_care": 0-100,
-    "attention": 0-100,
-    "creativity": 0-100,
-    "behavior": 0-100,
     "daily_mood": 0-100
   },
   "overallScore": 0-100
 }`
-      : `You are an expert child development specialist with extensive experience in kindergarten developmental assessment. Analyze the survey data in depth and provide a comprehensive professional report.
+      : `You are an expert child development specialist. Analyze the survey data and provide a professional report.
 
 ## Instructions:
-- Analyze each developmental domain separately with specific references to the answers
-- Compare the child's performance to age-appropriate milestones
-- Provide practical, specific recommendations (not generic) based on actual results
-- Write the parent message in a warm, professional tone with sufficient detail
-- Action plan should be detailed with specific activities for each day
+- Analyze each developmental domain with specific references to answers
+- Compare performance to age-appropriate milestones
+- Provide practical, specific recommendations
+- Write a warm parent message
 
 ## Response Structure (JSON):
 {
-  "summary": "Comprehensive summary (at least 2 paragraphs) including overall picture and development level compared to age",
+  "summary": "Comprehensive summary of overall development",
   "domainAnalysis": {
-    "cognitive": "Detailed cognitive development analysis with examples from answers",
-    "language": "Detailed language & communication analysis",
-    "social_emotional": "Detailed social-emotional analysis",
-    "gross_motor": "Gross motor skills analysis",
-    "fine_motor": "Fine motor skills analysis",
+    "cognitive": "Cognitive analysis",
+    "language": "Language analysis",
+    "social_emotional": "Social-emotional analysis",
+    "motor": "Motor skills analysis",
     "self_care": "Self-care analysis",
-    "attention": "Attention & focus analysis",
-    "creativity": "Creativity analysis",
-    "behavior": "Behavior & self-regulation analysis",
-    "daily_mood": "Daily wellbeing analysis"
+    "daily_mood": "Wellbeing analysis"
   },
-  "strengths": ["Specific strength with explanation 1", "strength 2", "strength 3"],
-  "improvements": ["Area needing development with explanation 1", "area 2", "area 3"],
-  "teacherRecommendations": ["Specific practical recommendation 1", "rec 2", "rec 3", "rec 4", "rec 5"],
-  "parentMessage": "Detailed warm message for parents (at least 3 paragraphs) including: strengths, areas needing support, and practical home tips",
+  "strengths": ["Strength 1", "Strength 2", "Strength 3"],
+  "improvements": ["Area 1", "Area 2", "Area 3"],
+  "teacherRecommendations": ["Rec 1", "Rec 2", "Rec 3"],
+  "parentMessage": "Warm message for parents with strengths, areas needing support, and home tips",
   "actionPlan": [
-    "Day 1: (Activity title) - Detailed description with steps, materials needed, and goal",
-    "Day 2: (Activity title) - Detailed description",
-    "Day 3: (Activity title) - Detailed description",
-    "Day 4: (Activity title) - Detailed description",
-    "Day 5: (Activity title) - Detailed description"
+    "Day 1: Activity",
+    "Day 2: Activity",
+    "Day 3: Activity"
   ],
   "indicators": { 
     "type": "gifted|typical|delayed|mixed", 
-    "details": "Detailed explanation of development level with data-backed reasoning",
-    "areasOfConcern": ["Any areas needing specialist follow-up"],
-    "areasOfExcellence": ["Areas where child excels"]
+    "details": "Development level explanation"
   },
   "scores": {
     "cognitive": 0-100,
     "language": 0-100,
     "social_emotional": 0-100,
-    "gross_motor": 0-100,
-    "fine_motor": 0-100,
+    "motor": 0-100,
     "self_care": 0-100,
-    "attention": 0-100,
-    "creativity": 0-100,
-    "behavior": 0-100,
     "daily_mood": 0-100
   },
   "overallScore": 0-100
