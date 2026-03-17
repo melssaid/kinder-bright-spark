@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { addSurvey } from "@/lib/database";
 import { DbStudent } from "@/lib/database";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { CheckCircle, Loader2, Share2 } from "lucide-react";
+import { CheckCircle, Loader2, Share2, ImagePlus, X } from "lucide-react";
 
 interface DailyCheckInProps {
   student: DbStudent;
