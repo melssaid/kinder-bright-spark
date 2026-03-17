@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, PlayCircle, Share2, Brain, Calendar, ClipboardList, Users as UsersIcon } from "lucide-react";
+import { ParentManager } from "@/components/students/ParentManager";
 import { useI18n } from "@/i18n";
 import { DbStudent, DbSurvey, getStudents, getStudentSurveys, getAttendanceStats } from "@/lib/database";
 import { SurveyForm } from "@/components/survey/SurveyForm";
@@ -219,11 +220,12 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="w-full grid grid-cols-4 h-12">
-            <TabsTrigger value="overview" className="text-xs sm:text-sm py-3">{isAr ? "📋 نظرة عامة" : "📋 Overview"}</TabsTrigger>
-            <TabsTrigger value="assess" className="text-xs sm:text-sm py-3">{isAr ? "📝 تقييم" : "📝 Assess"}</TabsTrigger>
-            <TabsTrigger value="reports" className="text-xs sm:text-sm py-3">{isAr ? "🧠 التقارير" : "🧠 Reports"}</TabsTrigger>
-            <TabsTrigger value="attendance" className="text-xs sm:text-sm py-3">{isAr ? "📅 حضور" : "📅 Attend."}</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-5 h-12">
+            <TabsTrigger value="overview" className="text-[10px] sm:text-sm py-3">{isAr ? "📋 عام" : "📋 Overview"}</TabsTrigger>
+            <TabsTrigger value="assess" className="text-[10px] sm:text-sm py-3">{isAr ? "📝 تقييم" : "📝 Assess"}</TabsTrigger>
+            <TabsTrigger value="reports" className="text-[10px] sm:text-sm py-3">{isAr ? "🧠 تقارير" : "🧠 Reports"}</TabsTrigger>
+            <TabsTrigger value="parents" className="text-[10px] sm:text-sm py-3">{isAr ? "👪 الأهل" : "👪 Parents"}</TabsTrigger>
+            <TabsTrigger value="attendance" className="text-[10px] sm:text-sm py-3">{isAr ? "📅 حضور" : "📅 Attend."}</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -353,6 +355,11 @@ const StudentProfilePage = ({ initialTab }: StudentProfilePageProps) => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          {/* Parents Tab */}
+          <TabsContent value="parents" className="space-y-3">
+            <ParentManager studentId={student.id} studentName={student.name} analysis={analysis} />
           </TabsContent>
 
           {/* Attendance Tab */}
