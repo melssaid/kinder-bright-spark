@@ -184,6 +184,14 @@ const AdminTeachers = () => {
   const getKgName = (id: string) => kindergartens.find((k) => k.id === id)?.name || "—";
   const filteredTeachers = selectedKg ? teachers.filter((t) => t.kindergarten_id === selectedKg) : teachers;
 
+  return (
+    <DashboardLayout>
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-2xl mx-auto">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold">{isAr ? "إدارة الحسابات" : "Manage Accounts"}</h1>
+          <p className="text-sm text-muted-foreground">{isAr ? "إنشاء حسابات وإدارة معلمات ومديرات الروضات" : "Create accounts and manage teachers and directors"}</p>
+        </div>
+
         {/* Create Account Card */}
         <Card>
           <CardHeader className="pb-3 px-3 sm:px-6">
