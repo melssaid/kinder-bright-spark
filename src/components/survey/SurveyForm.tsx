@@ -41,6 +41,23 @@ export function SurveyForm({ student, onComplete }: SurveyFormProps) {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
+  const swipeDirection = useRef(0);
+
+  const handleSwipe = useCallback((_: any, info: PanInfo) => {
+    const threshold = 50;
+    if (Math.abs(info.offset.x) > threshold) {
+      if (info.offset.x > 0 && locale === "en" && currentCategory > 0) {
+        setCurrentCategory(prev => prev - 1);
+      } else if (info.offset.x < 0 && locale === "en" && currentCategory < surveyCategories.length - 1) {
+        setCurrentCategory(prev => prev + 1);
+      } else if (info.offset.x < 0 && locale === "ar" && currentCategory > 0) {
+        setCurrentCategory(prev => prev - 1);
+      } else if (info.offset.x > 0 && locale === "ar" && currentCategory < surveyCategories.length - 1) {
+        setCurrentCategory(prev => prev + 1);
+      }
+    }
+  }, [currentCategory, locale]);
+
   const handleNext = () => {
     if (isLastCategory) handleSubmit();
     else setCurrentCategory(prev => prev + 1);
