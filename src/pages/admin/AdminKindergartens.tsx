@@ -6,8 +6,9 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
-import { Building2, Plus, Trash2 } from "lucide-react";
+import { Building2, Plus, Trash2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface Kindergarten {
   id: string;
@@ -18,6 +19,7 @@ interface Kindergarten {
 const AdminKindergartens = () => {
   const { user } = useAuth();
   const { locale } = useI18n();
+  const navigate = useNavigate();
   const [kindergartens, setKindergartens] = useState<Kindergarten[]>([]);
   const [newName, setNewName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -83,18 +85,21 @@ const AdminKindergartens = () => {
 
         <div className="grid gap-2 sm:gap-3">
           {kindergartens.map((kg) => (
-            <Card key={kg.id}>
+            <Card key={kg.id} className="cursor-pointer hover:shadow-md transition-all" onClick={() => navigate(`/admin/kindergartens/${kg.id}`)}>
               <CardContent className="flex items-center justify-between p-3 sm:py-4 sm:px-6">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                   <div className="min-w-0">
                     <p className="font-semibold text-sm sm:text-base truncate">{kg.name}</p>
                     <p className="text-[10px] sm:text-xs text-muted-foreground">{new Date(kg.created_at).toLocaleDateString()}</p>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(kg.id)} className="text-destructive h-8 w-8 shrink-0">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleDelete(kg.id); }} className="text-destructive h-8 w-8">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+                </div>
               </CardContent>
             </Card>
           ))}

@@ -231,7 +231,7 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody>
                     {kgDetails.map((kg) => (
-                      <tr key={kg.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
+                      <tr key={kg.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => navigate(`/admin/kindergartens/${kg.id}`)}>
                         <td className="py-2.5 px-3 font-medium text-xs sm:text-sm">
                           <div className="flex items-center gap-2">
                             <Building2 className="h-3.5 w-3.5 text-primary shrink-0" />
