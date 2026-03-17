@@ -6,8 +6,9 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/i18n";
-import { Building2, Plus, Trash2 } from "lucide-react";
+import { Building2, Plus, Trash2, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface Kindergarten {
   id: string;
