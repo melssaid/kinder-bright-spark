@@ -33,17 +33,17 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="flex items-center justify-center gap-4">
-          <img src={logo} alt="Kinder BH" className="h-20 w-20 sm:h-24 sm:w-24 object-contain" />
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Kinder BH</h1>
-            <p className="text-muted-foreground text-sm">{t("auth.subtitle")}</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-950 dark:via-purple-950 dark:to-pink-950 p-4">
+      <div className="w-full max-w-md space-y-6">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <img src={logo} alt="Kinder BH" className="h-32 w-32 sm:h-40 sm:w-40 object-contain animate-bounce-slow drop-shadow-xl" />
+          <div className="text-center">
+            <h1 className="text-3xl sm:text-4xl font-bold text-primary">Kinder BH</h1>
+            <p className="text-muted-foreground text-sm mt-1">{t("auth.subtitle")}</p>
           </div>
         </div>
 
-        <Card>
+        <Card className="shadow-2xl border-0 bg-white/80 dark:bg-card/80 backdrop-blur-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">{t("auth.login")}</CardTitle>
@@ -52,7 +52,7 @@ const AuthPage = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6 pb-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label>{t("auth.email")}</Label>
@@ -62,7 +62,7 @@ const AuthPage = () => {
                 <Label>{t("auth.password")}</Label>
                 <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} dir="ltr" />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full shadow-md" disabled={loading}>
                 {loading && <Loader2 className="h-4 w-4 animate-spin me-2" />}
                 {t("auth.login")}
               </Button>
