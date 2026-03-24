@@ -33,17 +33,21 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="flex items-center justify-center gap-4">
-          <img src={logo} alt="Kinder BH" className="h-20 w-20 sm:h-24 sm:w-24 object-contain" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-blue-950 dark:to-indigo-950 p-4">
+      <div className="w-full max-w-md space-y-6">
+        <div className="flex flex-col items-center justify-center gap-3 text-center">
+          <div className="auth-logo-bounce rounded-full bg-white/80 dark:bg-white/10 p-4 shadow-xl ring-4 ring-primary/20">
+            <img src={logo} alt="Kinder BH" className="h-32 w-32 sm:h-40 sm:w-40 object-contain" />
+          </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Kinder BH</h1>
-            <p className="text-muted-foreground text-sm">{t("auth.subtitle")}</p>
+            <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
+              Kinder BH
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">{t("auth.subtitle")}</p>
           </div>
         </div>
 
-        <Card>
+        <Card className="shadow-2xl border-0 bg-white/90 dark:bg-slate-900/80 backdrop-blur-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">{t("auth.login")}</CardTitle>
@@ -52,7 +56,7 @@ const AuthPage = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6 pb-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label>{t("auth.email")}</Label>
@@ -62,7 +66,7 @@ const AuthPage = () => {
                 <Label>{t("auth.password")}</Label>
                 <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} dir="ltr" />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full shadow-md" disabled={loading}>
                 {loading && <Loader2 className="h-4 w-4 animate-spin me-2" />}
                 {t("auth.login")}
               </Button>

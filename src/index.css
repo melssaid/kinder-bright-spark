@@ -139,3 +139,13 @@
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* Auth page logo animation */
+@keyframes auth-logo-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.auth-logo-bounce {
+  animation: auth-logo-bounce 3s ease-in-out infinite;
+}
