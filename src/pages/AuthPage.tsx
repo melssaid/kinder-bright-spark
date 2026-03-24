@@ -33,11 +33,11 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="flex items-center justify-center gap-4">
-          <img src={logo} alt="Kinder BH" className="h-20 w-20 sm:h-24 sm:w-24 object-contain" />
-          <div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-100 via-rose-50 to-yellow-100 p-4">
+      <div className="w-full max-w-md space-y-6">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <img src={logo} alt="Kinder BH" className="h-32 w-32 sm:h-40 sm:w-40 object-contain drop-shadow-md" />
+          <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-bold">Kinder BH</h1>
             <p className="text-muted-foreground text-sm">{t("auth.subtitle")}</p>
           </div>
