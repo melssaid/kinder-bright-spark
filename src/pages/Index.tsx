@@ -99,17 +99,19 @@ const Index = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {[
-            { icon: Users, value: students.length, label: isAr ? "طلاب" : "Students", color: "text-primary", action: () => navigate("/students") },
-            { icon: Brain, value: analyzedSurveys.length, label: isAr ? "تحليلات" : "Analyses", color: "text-success", action: () => navigate("/reports") },
-            { icon: TrendingUp, value: needsSurvey, label: isAr ? "بانتظار" : "Pending", color: "text-warning", action: () => navigate("/students") },
+            { icon: Users, value: students.length, label: isAr ? "طلاب" : "Students", iconBg: "from-primary/20 to-primary/5", iconColor: "text-primary", borderColor: "hover:border-primary/30", action: () => navigate("/students") },
+            { icon: Brain, value: analyzedSurveys.length, label: isAr ? "تحليلات" : "Analyses", iconBg: "from-success/20 to-success/5", iconColor: "text-success", borderColor: "hover:border-success/30", action: () => navigate("/reports") },
+            { icon: TrendingUp, value: needsSurvey, label: isAr ? "بانتظار" : "Pending", iconBg: "from-warning/20 to-warning/5", iconColor: "text-warning", borderColor: "hover:border-warning/30", action: () => navigate("/students") },
           ].map((item, i) => (
-            <Card key={i} className="cursor-pointer hover:border-primary/30 transition-colors active:scale-[0.98]" onClick={item.action}>
-              <CardContent className="p-3 flex flex-col items-center text-center">
-                <item.icon className={`h-6 w-6 ${item.color} mb-1`} />
-                <p className="text-xl font-bold leading-none">{item.value}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{item.label}</p>
+            <Card key={i} className={`cursor-pointer ${item.borderColor} hover:shadow-md transition-all duration-200 active:scale-[0.97]`} onClick={item.action}>
+              <CardContent className="p-3 sm:p-4 flex flex-col items-center text-center gap-1.5">
+                <div className={`p-2 sm:p-2.5 rounded-xl bg-gradient-to-br ${item.iconBg}`}>
+                  <item.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${item.iconColor}`} />
+                </div>
+                <p className="text-xl sm:text-2xl font-bold leading-none">{item.value}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">{item.label}</p>
               </CardContent>
             </Card>
           ))}
@@ -156,7 +158,7 @@ const Index = () => {
                   transition={{ delay: i * 0.03 }}
                 >
                   <Card
-                    className="hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                    className="hover:shadow-lg hover:border-primary/25 transition-all duration-200 cursor-pointer active:scale-[0.99]"
                     onClick={() => navigate(`/students/${student.id}`)}
                   >
                     <CardContent className="p-3 sm:p-4">
