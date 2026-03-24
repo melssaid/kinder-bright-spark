@@ -46,7 +46,7 @@ const Index = () => {
     return (
       <DashboardLayout>
         <div className="min-h-[50vh] flex items-center justify-center">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+          <div className="animate-spin-slow h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
         </div>
       </DashboardLayout>
     );
@@ -105,7 +105,7 @@ const Index = () => {
             { icon: Brain, value: analyzedSurveys.length, label: isAr ? "تحليلات" : "Analyses", color: "text-success", action: () => navigate("/reports") },
             { icon: TrendingUp, value: needsSurvey, label: isAr ? "بانتظار" : "Pending", color: "text-warning", action: () => navigate("/students") },
           ].map((item, i) => (
-            <Card key={i} className="cursor-pointer hover:border-primary/30 transition-colors active:scale-[0.98]" onClick={item.action}>
+            <Card key={i} className="cursor-pointer hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 active:scale-[0.98]" onClick={item.action}>
               <CardContent className="p-3 flex flex-col items-center text-center">
                 <item.icon className={`h-6 w-6 ${item.color} mb-1`} />
                 <p className="text-xl font-bold leading-none">{item.value}</p>
@@ -156,7 +156,7 @@ const Index = () => {
                   transition={{ delay: i * 0.03 }}
                 >
                   <Card
-                    className="hover:shadow-md transition-all cursor-pointer active:scale-[0.99]"
+                    className="hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 cursor-pointer active:scale-[0.99]"
                     onClick={() => navigate(`/students/${student.id}`)}
                   >
                     <CardContent className="p-3 sm:p-4">
