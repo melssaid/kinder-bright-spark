@@ -41,7 +41,7 @@ export function BottomTabBar() {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-card border-t safe-area-bottom" dir={dir}>
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-card/95 backdrop-blur-md border-t border-border/60 shadow-elevated safe-area-bottom" dir={dir}>
       <div className="flex items-center justify-around h-16 px-1">
         {tabs.map((tab) => (
           <NavLink
@@ -49,14 +49,16 @@ export function BottomTabBar() {
             to={tab.to}
             end={tab.end}
             className={cn(
-              "flex flex-col items-center justify-center gap-0.5 flex-1 py-2 rounded-lg transition-colors min-w-0 relative",
-              isActive(tab.to, tab.end) ? "text-primary" : "text-muted-foreground"
+              "flex flex-col items-center justify-center gap-0.5 flex-1 py-2 rounded-xl transition-all duration-150 min-w-0 relative mx-0.5",
+              isActive(tab.to, tab.end)
+                ? "text-primary bg-primary/8"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
             )}
           >
-            <tab.icon className={cn("h-5 w-5", isActive(tab.to, tab.end) && "scale-110")} />
-            <span className="text-[10px] font-medium leading-tight truncate">{tab.label}</span>
+            <tab.icon className={cn("h-5 w-5 transition-transform duration-150", isActive(tab.to, tab.end) && "scale-110")} />
+            <span className={cn("text-[10px] font-semibold leading-tight truncate transition-colors duration-150", isActive(tab.to, tab.end) ? "text-primary" : "text-muted-foreground")}>{tab.label}</span>
             {isActive(tab.to, tab.end) && (
-              <div className="absolute bottom-1 w-6 h-0.5 rounded-full bg-primary" />
+              <div className="absolute bottom-1 w-5 h-0.5 rounded-full bg-primary animate-scale-in" />
             )}
           </NavLink>
         ))}

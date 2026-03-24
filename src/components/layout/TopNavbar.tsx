@@ -53,30 +53,30 @@ export function TopNavbar() {
     : null;
 
   return (
-    <header className="sticky top-0 z-50 bg-card border-b" dir={dir}>
+    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border/60 shadow-card" dir={dir}>
       <div className="flex items-center justify-between px-3 sm:px-6 h-14">
         <div className="flex items-center gap-2 shrink-0">
-          <img src={logo} alt="Kinder BH" className="h-8 w-8 sm:h-9 sm:w-9 object-contain" />
+          <img src={logo} alt="Kinder BH" className="h-8 w-8 sm:h-9 sm:w-9 object-contain drop-shadow-sm" />
           <h1 className="text-base sm:text-lg font-bold text-foreground font-[Quicksand] hidden sm:block">Kinder BH</h1>
           {roleLabel && (
-            <Badge variant="outline" className="hidden lg:flex items-center gap-1 text-[10px]">
+            <Badge variant="outline" className="hidden lg:flex items-center gap-1 text-[10px] border-primary/30 text-primary bg-primary/5">
               {isAdmin ? <Shield className="h-3 w-3" /> : <Building2 className="h-3 w-3" />}
               <span className="truncate max-w-[120px]">{roleLabel}</span>
             </Badge>
           )}
         </div>
 
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-0.5">
           {navLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               end={link.end}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150",
                 isActive(link.to, link.end)
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  ? "bg-primary/10 text-primary shadow-inner-soft"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
               )}
             >
               <link.icon className="h-4 w-4" />
@@ -85,16 +85,16 @@ export function TopNavbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-1.5">
-          <Button variant="ghost" size="sm" onClick={() => setLocale(locale === "en" ? "ar" : "en")} className="h-8 w-8 p-0">
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={() => setLocale(locale === "en" ? "ar" : "en")} className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary">
             <Globe className="h-4 w-4" />
           </Button>
           <NavLink to="/settings">
-            <Button variant="ghost" size="sm" className={cn("h-8 w-8 p-0", isActive("/settings") && "text-primary")}>
+            <Button variant="ghost" size="sm" className={cn("h-8 w-8 p-0 hover:bg-primary/10", isActive("/settings") && "text-primary bg-primary/10")}>
               <Settings className="h-4 w-4" />
             </Button>
           </NavLink>
-          <Button variant="ghost" size="sm" onClick={signOut} className="h-8 w-8 p-0 text-destructive">
+          <Button variant="ghost" size="sm" onClick={signOut} className="h-8 w-8 p-0 hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
             <LogOut className="h-4 w-4" />
           </Button>
         </div>
