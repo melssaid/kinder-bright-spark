@@ -53,60 +53,95 @@ const AdminKindergartens = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold">{locale === "ar" ? "إدارة الروضات" : "Manage Kindergartens"}</h1>
-          <p className="text-sm text-muted-foreground">{locale === "ar" ? "إضافة وإدارة الروضات المسجلة" : "Add and manage registered kindergartens"}</p>
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 max-w-3xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-sm shrink-0">
+            <Building2 className="h-7 w-7 sm:h-9 sm:w-9 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold">{locale === "ar" ? "إدارة الروضات" : "Manage Kindergartens"}</h1>
+            <p className="text-sm text-muted-foreground">{locale === "ar" ? "إضافة وإدارة الروضات المسجلة" : "Add and manage registered kindergartens"}</p>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader className="pb-3 px-3 sm:px-6">
-            <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+        {/* Add form */}
+        <Card className="border-primary/20 shadow-sm bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader className="pb-3 px-4 sm:px-6">
+            <CardTitle className="text-sm sm:text-base flex items-center gap-2 text-primary">
               <Plus className="h-4 w-4" />
               {locale === "ar" ? "إضافة روضة جديدة" : "Add New Kindergarten"}
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-3 sm:px-6">
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             <div className="flex gap-2">
               <Input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder={locale === "ar" ? "اسم الروضة..." : "Kindergarten name..."}
                 onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-                className="text-sm"
+                className="text-sm h-10 border-primary/20 focus-visible:ring-primary/40"
               />
-              <Button onClick={handleAdd} disabled={loading || !newName.trim()} size="sm" className="shrink-0">
-                <Plus className="h-4 w-4 me-1" />
+              <Button
+                onClick={handleAdd}
+                disabled={loading || !newName.trim()}
+                className="shrink-0 h-10 gap-1.5 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-sm"
+              >
+                <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">{locale === "ar" ? "إضافة" : "Add"}</span>
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid gap-2 sm:gap-3">
-          {kindergartens.map((kg) => (
-            <Card key={kg.id} className="cursor-pointer hover:shadow-md transition-all" onClick={() => navigate(`/admin/kindergartens/${kg.id}`)}>
-              <CardContent className="flex items-center justify-between p-3 sm:py-4 sm:px-6">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+        {/* Kindergarten list */}
+        <div className="grid gap-3">
+          {kindergartens.map((kg, i) => (
+            <Card
+              key={kg.id}
+              className="cursor-pointer group hover:shadow-lg hover:border-primary/30 transition-all duration-200 active:scale-[0.99]"
+              onClick={() => navigate(`/admin/kindergartens/${kg.id}`)}
+            >
+              <CardContent className="flex items-center justify-between p-4 sm:py-5 sm:px-6">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                  <div className="p-2.5 sm:p-3 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15 group-hover:from-primary/25 group-hover:to-primary/10 transition-colors shrink-0">
+                    <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                  </div>
                   <div className="min-w-0">
                     <p className="font-semibold text-sm sm:text-base truncate">{kg.name}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground">{new Date(kg.created_at).toLocaleDateString()}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                      {locale === "ar" ? "تأسست" : "Est."} {new Date(kg.created_at).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleDelete(kg.id); }} className="text-destructive h-8 w-8">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => { e.stopPropagation(); handleDelete(kg.id); }}
+                    className="text-destructive/60 hover:text-destructive hover:bg-destructive/10 h-8 w-8 transition-colors"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+                  <ChevronRight className="h-5 w-5 text-muted-foreground/50 group-hover:text-primary/70 transition-colors rtl:rotate-180" />
                 </div>
               </CardContent>
             </Card>
           ))}
           {kindergartens.length === 0 && (
-            <p className="text-center text-muted-foreground py-8 text-sm">
-              {locale === "ar" ? "لا توجد روضات مسجلة بعد" : "No kindergartens registered yet"}
-            </p>
+            <Card className="border-dashed border-2">
+              <CardContent className="py-12 text-center space-y-3">
+                <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center">
+                  <Building2 className="h-8 w-8 text-primary/60" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {locale === "ar" ? "لا توجد روضات مسجلة بعد" : "No kindergartens registered yet"}
+                </p>
+                <p className="text-xs text-muted-foreground/70">
+                  {locale === "ar" ? "أضف روضتك الأولى باستخدام النموذج أعلاه" : "Add your first kindergarten using the form above"}
+                </p>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
